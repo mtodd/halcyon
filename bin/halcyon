@@ -20,7 +20,7 @@ options = {
 }
 
 opts = OptionParser.new("", 24, '  ') do |opts|
-  opts.banner = "Usage: halcyon [options] [config_file.yaml]"
+  opts.banner = "Usage: halcyon [options] [app]"
   
   opts.separator ""
   opts.separator "Options:"
@@ -34,6 +34,10 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   
   opts.on("-r", "--require LIBRARY", "require the library, before executing your script") do |library|
     require library
+  end
+  
+  opts.on("-c", "--config PATH", "configuration stored in PATH") do |conf|
+    options[:config_file] = conf
   end
   
   opts.on("-s", "--server SERVER", "serve using SERVER (default: #{options[:server]})") do |serv|
@@ -70,6 +74,7 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   opts.parse! ARGV
 end
 
-options[:config_file] = ARGV.shift unless ARGV[0].nil?
+fail("Halcyon needs an app to run. Try: halcyon -h") if ARGV.empty? 
+options[:app] = ARGV.shift
 
 puts options.inspect
