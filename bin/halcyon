@@ -1,0 +1,75 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+
+module Halcyon
+  class Server
+    VERSION = [0,0,1]
+    def self.version
+      VERSION.join('.')
+    end
+  end
+end
+
+options = {
+  :environment => 'development',
+  :port => 9266,
+  :host => 'localhost',
+  :server => 'mongrel',
+  :log_file => '/tmp/halcyon.log'
+}
+
+opts = OptionParser.new("", 24, '  ') do |opts|
+  opts.banner = "Usage: halcyon [options] [config_file.yaml]"
+  
+  opts.separator ""
+  opts.separator "Options:"
+  
+  opts.on("-d", "--debug", "set debugging flags (set $DEBUG to true)") { $DEBUG = true }
+  opts.on("-w", "--warn", "turn warnings on for your script") { $-w = true }
+  
+  opts.on("-I", "--include PATH", "specify $LOAD_PATH (may be used more than once)") do |path|
+    $LOAD_PATH.unshift(*path.split(":"))
+  end
+  
+  opts.on("-r", "--require LIBRARY", "require the library, before executing your script") do |library|
+    require library
+  end
+  
+  opts.on("-s", "--server SERVER", "serve using SERVER (default: #{options[:server]})") do |serv|
+    options[:server] = serv
+  end
+  
+  opts.on("-o", "--host HOST", "listen on HOST (default: #{options[:host]})") do |host|
+    options[:host] = host
+  end
+  
+  opts.on("-p", "--port PORT", "use PORT (default: #{options[:port]})") do |port|
+    options[:port] = port
+  end
+  
+  opts.on("-l", "--logfile PATH", "log access to PATH (default: #{options[:log_file]})") do |log_file|
+    options[:log_file] = log_file
+  end
+  
+  opts.on("-e", "--env ENVIRONMENT", "use ENVIRONMENT for defaults (default: #{options[:environment]})") do |env|
+    options[:environment] = env
+  end
+  
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+  
+  opts.on_tail("-v", "--version", "Show version") do
+    # require 'halcyon'
+    puts "Halcyon #{Halcyon::Server.version}"
+    exit
+  end
+  
+  opts.parse! ARGV
+end
+
+options[:config_file] = ARGV.shift unless ARGV[0].nil?
+
+puts options.inspect
