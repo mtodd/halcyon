@@ -1,15 +1,22 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env ruby -wKU
+#--
+#  Created by Matt Todd on 2007-10-25.
+#  Copyright (c) 2007. All rights reserved.
+#++
 
-require 'optparse'
+# Blatantly stolen from Chris Neukirchen's rackup utility for running Rack
+# apps. (Forgive me, it just made too much sense to use your Rack bootstrap
+# code for my Rack bootstrap.)
 
-module Halcyon
-  class Server
-    VERSION = [0,0,1]
-    def self.version
-      VERSION.join('.')
-    end
-  end
-end
+#--
+# dependencies
+#++
+
+%w(optparse).each{|dep|require dep}
+
+#--
+# default options
+#++
 
 options = {
   :environment => 'development',
@@ -19,8 +26,15 @@ options = {
   :log_file => '/tmp/halcyon.log'
 }
 
+#--
+# parse options
+#++
+
 opts = OptionParser.new("", 24, '  ') do |opts|
-  opts.banner = "Usage: halcyon [options] [app]"
+  opts.banner << "Halcyon, JSON Server Framework\n"
+  opts.banner << "http://halcyon.rubyforge.org/\n"
+  opts.banner << "\n"
+  opts.banner << "Usage: halcyon [options] appname"
   
   opts.separator ""
   opts.separator "Options:"
@@ -71,10 +85,66 @@ opts = OptionParser.new("", 24, '  ') do |opts|
     exit
   end
   
-  opts.parse! ARGV
+  begin
+    opts.parse! ARGV
+  rescue OptionParser::InvalidOption => e
+    abort "You used an unsupported option. Try: halcyon -h"
+  end
 end
 
-fail("Halcyon needs an app to run. Try: halcyon -h") if ARGV.empty? 
+abort "Halcyon needs an app to run. Try: halcyon -h" if ARGV.empty? 
 options[:app] = ARGV.shift
 
-puts options.inspect
+#--
+# load dependencies
+#++
+
+warn "So... something funny happens here... RubyGems shits bricks and Mongrel starts complaining about Win32... wtf?"
+
+%w(rubygems rack).each{|dep|require dep}
+# $:.unshift '/Users/mtodd/Projects/Active/halcyon/trunk/lib/' if $DEBUG
+# %w(halcyon/server).each {|dep| require dep}
+
+#--
+# load app
+#++
+
+if !File.exists?("#{options[:app]}.rb")
+  abort "Halcyon did not find the app #{options[:app]}. Check your path and try again."
+end
+
+require options[:app]
+app = Object.const_get(File.basename(options[:app]).capitalize.gsub(/_([a-z])/){|m|m[1].chr.capitalize})
+
+#--
+# prepare server
+#++
+
+require options[:server]
+server = Rack::Handler.const_get(options[:server].capitalize)
+
+#--
+# prepare app environment
+#++
+
+case options[:environment]
+when "development"
+  app = Rack::Builder.new {
+    use Rack::CommonLogger, STDERR  unless server.name =~ /CGI/
+    use Rack::ShowExceptions
+    use Rack::Reloader
+    use Rack::Lint
+    run app.new
+  }.to_app
+when "deployment"
+  app = Rack::Builder.new {
+    use Rack::CommonLogger, STDERR  unless server.name =~ /CGI/
+    run app.new
+  }.to_app
+end
+
+#--
+# start server
+#++
+
+server.run app.new(options), :Port => options[:port]

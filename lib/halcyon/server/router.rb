@@ -3,13 +3,13 @@
 #  Copyright (c) 2007. All rights reserved.
 #++
 
-$:.unshift File.dirname(__FILE__)
+Struct.new(:body, :params).new('', env)
 
 #--
 # dependencies
 #++
 
-%w(../halcyon rubygems rack json).each {|dep| require dep}
+%w(rubygems rack json).each {|dep| require dep}
 
 #--
 # module
@@ -17,7 +17,7 @@ $:.unshift File.dirname(__FILE__)
 
 module Halcyon
   class Server
-    VERSION = [0,0,12]
+    VERSION = [0,1,12]
     def self.version
       VERSION.join('.')
     end
@@ -25,3 +25,4 @@ module Halcyon
 end
 
 %w(server/base server/token).each {|dep| require dep}
+
