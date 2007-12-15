@@ -19,8 +19,8 @@
 #++
 
 options = {
-  :environment => 'development',
-  :port => 9266,
+  :environment => 'none',
+  :port => 9267,
   :host => 'localhost',
   :server => 'mongrel',
   :log_file => '/tmp/halcyon.log'
@@ -39,11 +39,11 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   opts.separator ""
   opts.separator "Options:"
   
-  opts.on("-d", "--debug", "set debugging flags (set $DEBUG to true)") { $DEBUG = true }
+  opts.on("-d", "--debug", "set debugging flags (set $debug to true)") { $debug = true }
   opts.on("-w", "--warn", "turn warnings on for your script") { $-w = true }
   
   opts.on("-I", "--include PATH", "specify $LOAD_PATH (may be used more than once)") do |path|
-    $LOAD_PATH.unshift(*path.split(":"))
+    $:.unshift(*path.split(":"))
   end
   
   opts.on("-r", "--require LIBRARY", "require the library, before executing your script") do |library|
@@ -99,11 +99,10 @@ options[:app] = ARGV.shift
 # load dependencies
 #++
 
-warn "So... something funny happens here... RubyGems shits bricks and Mongrel starts complaining about Win32... wtf?"
-
 %w(rubygems rack).each{|dep|require dep}
-# $:.unshift '/Users/mtodd/Projects/Active/halcyon/trunk/lib/' if $DEBUG
-# %w(halcyon/server).each {|dep| require dep}
+
+$:.unshift '/Users/mtodd/Sites/halcyon/trunk/lib/'
+%w(halcyon/server).each {|dep|require dep}
 
 #--
 # load app
@@ -134,17 +133,19 @@ when "development"
     use Rack::ShowExceptions
     use Rack::Reloader
     use Rack::Lint
-    run app.new
+    run app.new(options)
   }.to_app
 when "deployment"
   app = Rack::Builder.new {
     use Rack::CommonLogger, STDERR  unless server.name =~ /CGI/
-    run app.new
+    run app.new(options)
   }.to_app
+else
+  app = app.new(options)
 end
 
 #--
 # start server
 #++
 
-server.run app.new(options), :Port => options[:port]
+server.run app, :Port => options[:port]

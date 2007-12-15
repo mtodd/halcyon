@@ -10,7 +10,7 @@ $:.unshift File.dirname(__FILE__)
 # dependencies
 #++
 
-%w(support/hashext).each {|dep| require dep}
+%w(support/hashext).each {|dep|require dep}
 
 class Hash
   include HashExt::Keys

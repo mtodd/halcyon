@@ -3,13 +3,14 @@
 #  Copyright (c) 2007. All rights reserved.
 #++
 
+$:.unshift File.dirname(File.join('..', __FILE__))
 $:.unshift File.dirname(__FILE__)
 
 #--
 # dependencies
 #++
 
-%w(../halcyon rubygems rack json).each {|dep| require dep}
+%w(halcyon rubygems rack json).each {|dep|require dep}
 
 #--
 # module
@@ -24,4 +25,8 @@ module Halcyon
   end
 end
 
-%w(server/base server/token).each {|dep| require dep}
+#--
+# module components
+#++
+
+%w(server/base server/router).each {|dep|require dep}
