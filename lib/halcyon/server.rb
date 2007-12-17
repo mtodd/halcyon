@@ -28,7 +28,7 @@ module Halcyon
   # The server also expects to accept application/json and be originated
   # from the local host (though this can be overridden).
   class Server
-    VERSION.replace [0,0,22]
+    VERSION.replace [0,3,7]
     def self.version
       VERSION.join('.')
     end

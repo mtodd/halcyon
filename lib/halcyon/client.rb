@@ -21,7 +21,7 @@ module Halcyon
   # The Client library will provide a simple way to package up a client lib
   # to simplify communicating with the accompanying Halcyon server app.
   class Client
-    VERSION.replace [0,0,1]
+    VERSION.replace [0,2,12]
     def self.version
       VERSION.join('.')
     end
