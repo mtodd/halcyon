@@ -18,8 +18,13 @@ $:.unshift File.dirname(__FILE__)
 
 module Halcyon
   
-  # The Client library will provide a simple way to package up a client lib
-  # to simplify communicating with the accompanying Halcyon server app.
+  # The Client library provides a simple way to package up a client lib to
+  # simplify communicating with the accompanying Halcyon server app.
+  # 
+  # = Usage
+  # 
+  # For documentation on using Halcyon, check out the Halcyon::Server::Base and
+  # Halcyon::Client::Base classes which contain much more usage documentation.
   class Client
     VERSION.replace [0,2,12]
     def self.version

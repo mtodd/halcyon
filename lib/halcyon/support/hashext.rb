@@ -1,6 +1,6 @@
 # Pulled out from http://dev.rubyonrails.org/browser/trunk/activesupport/lib/active_support/core_ext/hash/keys.rb
 module HashExt #:nodoc:
-  module Keys
+  module Keys #:nodoc:
     # Return a new hash with all keys converted to strings.
     def stringify_keys
       inject({}) do |options, (key, value)|

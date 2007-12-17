@@ -126,8 +126,14 @@ module Halcyon
         
         ACCEPTABLE_REMOTES.replace([@env["REMOTE_ADDR"]]) if $debug
         
+        # pre run hook
+        before_run(Time.now - @start_time) if respond_to? :before_run
+        
         # dispatch
         @res.write(run(Router.route(env)).to_json)
+        
+        # post run hook
+        after_run(Time.now - @start_time) if respond_to? :after_run
         
         puts "Served #{env['REQUEST_URI']} in #{(Time.now - @start_time)}" if $debug
         
@@ -209,18 +215,26 @@ module Halcyon
         params = route.reject{|key, val| [:action, :module].include? key}
         params.merge!(query_params)
         
+        # pre call hook
+        before_call(route, params) if respond_to? :before_call
+        
         # handle module actions differently than non-module actions
         if route[:module].nil?
           # call action
-          send(route[:action], params)
+          res = send(route[:action], params)
         else
           # call module action
           mod = self.dup
           mod.instance_eval(&(@@modules[route[:module].to_sym]))
-          mod.send(route[:action], params)
+          res = mod.send(route[:action], params)
         end
+        
+        # after call hook
+        after_call if respond_to? :after_call
+        
+        res
       rescue Exceptions::Base => e
-        puts @env.inspect # if $debug
+        # puts @env.inspect if $debug
         # handles all content error exceptions
         @res.status = e.status
         {:status => e.status, :body => e.error}
@@ -233,13 +247,13 @@ module Halcyon
       # Called when the Handler gets started and stores the configuration
       # options used to start the server.
       def initialize(options = {})
-        # debuf mode handling
+        # debug mode handling
         if $debug
           puts "Entering debugging mode..."
           @logger = Logger.new(STDOUT)
           ACCEPTABLE_REQUESTS.replace([
-            ["HTTP_USER_AGENT", /.*/, Halcyon::Exceptions.lookup(406)],
-            ["CONTENT_TYPE", /.*/, Halcyon::Exceptions.lookup(415)]
+            ["HTTP_USER_AGENT", /.*/, 406, 'Not Acceptable'],
+            ["HTTP_USER_AGENT", /.*/, 415, 'Unsupported Media Type'] # content type isn't set when navigating via browser
           ])
         end
         

@@ -44,6 +44,8 @@ spec = Gem::Specification.new do |s|
   s.bindir = "bin"
   s.require_path = "lib"
   s.add_dependency('rack', '>=0.2.0')
+  s.add_dependency('json', '>=1.1.1')
+  s.add_dependency('merb', '>=0.4.1')
   s.required_ruby_version = '>= 1.8.6'
   s.files = (project[:rdoc_files] + %w[Rakefile] + Dir["{spec,lib}/**/*"]).uniq
 end
@@ -118,7 +120,7 @@ desc "Generate RDoc documentation"
 Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.options << '--line-numbers' << '--inline-source' <<
     '--main' << 'README' <<
-    '--title' << 'Rack Documentation' <<
+    '--title' << 'Halcyon Documentation' <<
     '--charset' << 'utf-8'
   rdoc.rdoc_dir = "doc"
   rdoc.rdoc_files.include 'README'

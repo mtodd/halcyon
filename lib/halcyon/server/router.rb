@@ -52,7 +52,11 @@ module Halcyon
     # 
     # The mechanics of the router are solely from the efforts of the Merb
     # community. This functionality is completely ripped right out of Merb
-    # and makes it functional.
+    # and makes it functional. All credit to them, and be sure to check out
+    # their great framework: if Halcyon isn't quite what you need, maybe Merb
+    # is.
+    # 
+    # http://merbivore.com/
     class Router < Merb::Router
       
       # Retrieves the last value from the +route+ call in Halcyon::Server::Base

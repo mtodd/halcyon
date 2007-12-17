@@ -8,7 +8,7 @@
 #++
 
 module Halcyon
-  module Exceptions
+  module Exceptions #:nodoc:
     HTTP_ERROR_CODES = {
       403 => "Forbidden",
       404 => "Not Found",

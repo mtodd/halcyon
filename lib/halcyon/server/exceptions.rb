@@ -44,7 +44,7 @@ module Halcyon
         #++
         
         def self.lookup(status)
-          self.const_lookup(Halcyon::Exceptions::HTTP_ERROR_CODES[status].gsub(/ /,'').to_sym)
+          self.const_get(Halcyon::Exceptions::HTTP_ERROR_CODES[status].gsub(/ /,'').to_sym)
         end
         
       end

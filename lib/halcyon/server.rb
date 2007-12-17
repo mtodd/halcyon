@@ -18,15 +18,22 @@ $:.unshift File.dirname(__FILE__)
 
 module Halcyon
   
+  # = Server Communication and Protocol
+  # 
   # Server tries to comply with appropriate HTTP response codes, as found at
   # <http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html>. However, all
   # responses are JSON encoded as the server expects a JSON parser on the
   # client side since the server should not be processing requests directly
   # through the browser. The server expects the User-Agent to be one of:
-  # +"User-Agent" => "JSON/1.1.1 Compatible (en-US) Halcyon/0.0.12 Client/0.0.1"+
-  # +"User-Agent" => "JSON/1.1.1 Compatible"+
+  #   +"User-Agent" => "JSON/1.1.1 Compatible (en-US) Halcyon/0.0.12 Client/0.0.1"+
+  #   +"User-Agent" => "JSON/1.1.1 Compatible"+
   # The server also expects to accept application/json and be originated
   # from the local host (though this can be overridden).
+  # 
+  # = Usage
+  # 
+  # For documentation on using Halcyon, check out the Halcyon::Server::Base and
+  # Halcyon::Client::Base classes which contain much more usage documentation.
   class Server
     VERSION.replace [0,3,7]
     def self.version
