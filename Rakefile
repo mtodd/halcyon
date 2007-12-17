@@ -1,7 +1,7 @@
 # Rakefile for Rack.  -*-ruby-*-
 require 'rake/rdoctask'
 require 'rake/testtask'
-
+require 'lib/halcyon'
 
 desc "Run all the tests"
 task :default => [:test]
@@ -14,36 +14,6 @@ desc "Make an archive as .tar.gz"
 task :dist => :fulltest do
   sh "export DARCS_REPO=#{File.expand_path "."}; " +
      "darcs dist -d rack-#{get_darcs_tree_version}"
-end
-
-# Helper to retrieve the "revision number" of the darcs tree.
-def get_darcs_tree_version
-  unless File.directory? "_darcs"
-    $: << "lib"
-    require 'rack'
-    return Rack.version
-  end
-
-  changes = `darcs changes`
-  count = 0
-  tag = "0.0"
-
-  changes.each("\n\n") { |change|
-    head, title, desc = change.split("\n", 3)
-
-    if title =~ /^  \*/
-      # Normal change.
-      count += 1
-    elsif title =~ /tagged (.*)/
-      # Tag.  We look for these.
-      tag = $1
-      break
-    else
-      warn "Unparsable change: #{change}"
-    end
-  }
-
-  tag + "." + count.to_s
 end
 
 def manifest
@@ -59,29 +29,13 @@ end
 
 desc "Generate a ChangeLog"
 task :changelog do
-  sh "darcs changes --repo=#{ENV["DARCS_REPO"] || "."} >ChangeLog"
-end
-
-
-desc "Generate RDox"
-task "RDOX" do
-  sh "specrb -Ilib:test -a --rdox >RDOX"
-end
-
-desc "Generate Rack Specification"
-task "SPEC" do
-  File.open("SPEC", "wb") { |file|
-    IO.foreach("lib/rack/lint.rb") { |line|
-      if line =~ /## (.*)/
-        file.puts $1
-      end
-    }
-  }
+  sh "svn log >ChangeLog"
 end
 
 desc "Run all the fast tests"
 task :test do
-  sh "specrb -Ilib:test -w #{ENV['TEST'] || '-a'} #{ENV['TESTOPTS'] || '-t "^(?!Rack::Handler|Rack::Adapter)"'}"
+  sh "specrb -Ilib:test -w #{ENV['TEST'] || '-a'} #{ENV['TESTOPTS']}"
+  # sh "specrb -Ilib:test -w #{ENV['TEST'] || '-a'} #{ENV['TESTOPTS'] || '-t "^(?!Rack::Handler|Rack::Adapter)"'}"
 end
 
 desc "Run all the tests"
@@ -102,33 +56,31 @@ rescue LoadError
   # Too bad.
 else
   spec = Gem::Specification.new do |s|
-    s.name            = "rack"
-    s.version         = get_darcs_tree_version
+    s.name            = "halcyon"
+    s.version         = Halcyon.version
     s.platform        = Gem::Platform::RUBY
-    s.summary         = "a modular Ruby webserver interface"
+    s.summary         = "JSON Web Server Framework"
 
     s.description = <<-EOF
-Rack provides minimal, modular and adaptable interface for developing
-web applications in Ruby.  By wrapping HTTP requests and responses in
-the simplest way possible, it unifies and distills the API for web
-servers, web frameworks, and software in between (the so-called
-middleware) into a single method call.
+A JSON Web Server Framework designed to provide for simple applications
+dealing solely with JSON requests and responses from AJAX client
+applications or for lightweight server-side message transport.
 
-Also see http://rack.rubyforge.org.
+Also see http://halcyon.rubyforge.org.
     EOF
 
-    s.files           = manifest + %w(SPEC RDOX)
+    s.files           = manifest + %w()
     s.bindir          = 'bin'
-    s.executables     << 'rackup'
+    s.executables     << 'halcyon'
     s.require_path    = 'lib'
     s.has_rdoc        = true
-    s.extra_rdoc_files = ['README', 'SPEC', 'RDOX', 'KNOWN-ISSUES']
+    s.extra_rdoc_files = ['README']
     s.test_files      = Dir['test/{test,spec}_*.rb']
 
-    s.author          = 'Christian Neukirchen'
-    s.email           = 'chneukirchen@gmail.com'
-    s.homepage        = 'http://rack.rubyforge.org'
-    s.rubyforge_project = 'rack'
+    s.author          = 'Matt Todd'
+    s.email           = 'chiology@gmail.com'
+    s.homepage        = 'http://halcyon.rubyforge.org'
+    s.rubyforge_project = 'halcyon'
   end
 
   Rake::GemPackageTask.new(spec) do |p|
@@ -146,18 +98,15 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
     '--charset' << 'utf-8'
   rdoc.rdoc_dir = "doc"
   rdoc.rdoc_files.include 'README'
-  rdoc.rdoc_files.include 'KNOWN-ISSUES'
-  rdoc.rdoc_files.include 'SPEC'
-  rdoc.rdoc_files.include 'RDOX'
   rdoc.rdoc_files.include('lib/rack.rb')
   rdoc.rdoc_files.include('lib/rack/*.rb')
   rdoc.rdoc_files.include('lib/rack/*/*.rb')
 end
-task :rdoc => ["SPEC", "RDOX"]
+# task :rdoc => ["SPEC", "RDOX"]
 
 task :pushsite => [:rdoc] do
-  sh "rsync -avz doc/ chneukirchen@rack.rubyforge.org:/var/www/gforge-projects/rack/doc/"
-  sh "rsync -avz site/ chneukirchen@rack.rubyforge.org:/var/www/gforge-projects/rack/"
+  sh "rsync -avz doc/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/doc/"
+  sh "rsync -avz site/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/"
 end
 
 begin

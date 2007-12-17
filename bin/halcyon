@@ -18,6 +18,7 @@
 # default options
 #++
 
+$debug = false
 options = {
   :environment => 'none',
   :port => 9267,

@@ -10,7 +10,7 @@ $:.unshift File.dirname(__FILE__)
 # dependencies
 #++
 
-%w(support/hashext).each {|dep|require dep}
+%w(halcyon/support/hashext).each {|dep|require dep}
 
 class Hash
   include HashExt::Keys
@@ -21,9 +21,17 @@ end
 #++
 
 module Halcyon
-  VERSION = [0,0,12]
+  VERSION = [0,0,22]
   def self.version
     VERSION.join('.')
   end
-end
+  
+  #--
+  # module dependencies
+  #++
+  
+  autoload :Exceptions, 'halcyon/exceptions'
+  autoload :Server, 'halcyon/server'
+  autoload :Client, 'halcyon/client'
 
+end
