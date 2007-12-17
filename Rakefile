@@ -13,8 +13,8 @@ project = {
   :email => "chiology@gmail.com",
   :description => "A JSON App Server Framework",
   :homepath => 'http://halcyon.rubyforge.org',
-  :bin_files => %w(bin/halcyon),
-  :rdoc_files => %w[ lib ],
+  :bin_files => %w(halcyon),
+  :rdoc_files => %w(lib),
   :rdoc_opts => %w[
     --all
     --quiet
