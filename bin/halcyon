@@ -113,8 +113,12 @@ if !File.exists?("#{options[:app]}.rb")
   abort "Halcyon did not find the app #{options[:app]}. Check your path and try again."
 end
 
-require options[:app]
-app = Object.const_get(File.basename(options[:app]).capitalize.gsub(/_([a-z])/){|m|m[1].chr.capitalize})
+begin
+  require options[:app]
+  app = Object.const_get(File.basename(options[:app]).capitalize.gsub(/_([a-z])/){|m|m[1].chr.capitalize})
+rescue NameError => e
+  abort "Unable to load #{File.basename(options[:app]).capitalize.gsub(/_([a-z])/){|m|m[1].chr.capitalize}}. Please ensure your server is so named."
+end
 
 #--
 # prepare server
