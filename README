@@ -59,7 +59,7 @@ Now, pull up IRB and +require+ RubyGems and Halcyon (as halcon/client). Now
 run the following:
 
   >> require 'example/simple.client'
-  >> s = Simple.new
+  >> s = Simple.new('http:localhost:3800')
   >> s.greet("Matt")
   >> s.get("/hello/Matt")
   >> s.url_for('greet', :name => 'John')
@@ -80,9 +80,9 @@ Please mail bugs, suggestions and patches to <mailto:chiology@gmail.com>.
 
 You are also welcome to join the #halcyon channel on irc.freenode.net.
 
-Our website will be up and running soon (I hope), so keep an eye out on
-http://halcyon.rubyforge.org/. We will also have a mailing list in the future,
-but for now you can join us on IRC.
+Our website is up so stop by and check out what's going down. Our address is
+http://halcyon.rubyforge.org/. On there you will find information about our
+mailing list as well, so do stop by.
 
 == License and Copyright
 

@@ -21,8 +21,8 @@ project = {
     --op rdoc
     --line-numbers
     --inline-source
-    --title "Halcyon\ documentation"
-    --exclude "^(_darcs|spec|pkg)/"
+    --title "Halcyon\ Documentation"
+    --exclude "^(_darcs|spec|pkg|.svn)/"
   ]
 }
 

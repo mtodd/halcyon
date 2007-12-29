@@ -215,6 +215,14 @@ module Halcyon
       # JSON, and return it to the caller. This is a private method because the
       # user/developer should be quite satisfied with the +get+, +post+, +put+,
       # and +delete+ methods.
+      # 
+      # == Request Failures
+      # 
+      # If the server responds with any kind of failure (anything with a status
+      # that isn't 200), Halcyon will in turn raise the respective exception
+      # (defined in Halcyon::Exceptions) which all inherit from
+      # +Halcyon::Client::Exceptions::Base+. It is up to the client to handle
+      # these exceptions specifically.
       def request(req)
         # prepare and send HTTP request
         res = Net::HTTP.start(@uri.host, @uri.port) {|http|http.request(req)}
