@@ -21,7 +21,7 @@ end
 #++
 
 module Halcyon
-  VERSION = [0,3,11]
+  VERSION = [0,3,14]
   def self.version
     VERSION.join('.')
   end

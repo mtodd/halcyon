@@ -41,7 +41,6 @@ module Halcyon
   # For documentation on using Halcyon, check out the Halcyon::Server::Base and
   # Halcyon::Client::Base classes which contain much more usage documentation.
   class Server
-    VERSION.replace [0,3,11]
     def self.version
       VERSION.join('.')
     end

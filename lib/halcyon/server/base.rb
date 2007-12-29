@@ -86,7 +86,40 @@ module Halcyon
     # route actually matches, so it doesn't need any of the extra path to match
     # against.
     # 
-    # == 
+    # == The Filesystem
+    # 
+    # It's important to note that the +halcyon+ commandline tool expects the to
+    # find your server inheriting +Halcyon::Server::Base+ with the same exact
+    # name as its filename, though with special rules.
+    # 
+    # To clarify, when your server is stored in +app_server.rb+, it expects
+    # that your server's class name be +AppServer+ as it capitalizes each word
+    # and removes all underscores, etc.
+    # 
+    # Keep this in mind when naming your class and your file.
+    # 
+    # NOTE: This really isn't a necessary step if you write your own deployment
+    # script instead of using the +halcyon+ commandline tool (as it is simply
+    # a convenience tool). In such, feel free to name your server however you
+    # prefer and the file likewise.
+    # 
+    # == Running Your Server On Your Own
+    # 
+    # If you're wanting to run your server without the help of the +halcyon+
+    # commandline tool, you will simply need to initialize the server as you
+    # pass it to the Rack handler of choice along with any configuration
+    # options you desire.
+    # 
+    # The following should be enough:
+    # 
+    #   Rack::Handler::Mongrel.run YourAppName.new(options), :Port => 9267
+    # 
+    # Of course Halcyon already handles most of your dependencies for you, so
+    # don't worry about requiring Rack, et al. And again, the options are not
+    # mandatory as the default options are certainly acceptable.
+    # 
+    # NOTE: If you want to provide debugging information, just set +$debug+ to
+    # +true+ and you should receive all the debugging information available.
     class Base
       
       #--
@@ -115,6 +148,32 @@ module Halcyon
       # 
       # DO NOT try to call +to_json+ on the +body+ contents as this will cause
       # errors when trying to parse JSON.
+      # 
+      # == Requests and POST Data
+      # 
+      # Most of your requests will have all the data it needs inside of the
+      # +params+ you receive for your action, but for POST and PUT requests
+      # (you are being RESTful, right?) you will need to retrieve your data
+      # from the +POST+ property of the +@req+ request. Here's how:
+      # 
+      #   @req.POST['key'] => "value"
+      # 
+      # As you can see, keys specifically are strings and values as well. What
+      # this means is that your POST data that you send to the server needs to
+      # be careful to provide a flat Hash (if anything other than a Hash is
+      # passed, it is packed up into a hash similar to +{:body=>data}+) or at
+      # least send a complicated structure as a JSON object so that transport
+      # is clean. Resurrecting the object is still on your end for POST data
+      # (though this could change). Here's how you would reconstruct your
+      # special hash:
+      # 
+      #   value = JSON.parse(@req.POST['key'])
+      # 
+      # That will take care of reconstructing your Hash.
+      # 
+      # And that is essentially all you need to worry about for retreiving your
+      # POST contents. Sending POST contents should be documented well enough
+      # in Halcyon::Client::Base.
       def call(env)
         @start_time = Time.now if $debug
         

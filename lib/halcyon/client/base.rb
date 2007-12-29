@@ -188,7 +188,7 @@ module Halcyon
         req = Net::HTTP::Post.new(uri)
         req["Content-Type"] = CONTENT_TYPE
         req["User-Agent"] = USER_AGENT
-        req.body = data.to_json
+        req.body = format_body(data)
         request(req)
       end
       
@@ -205,7 +205,7 @@ module Halcyon
         req = Net::HTTP::Put.new(uri)
         req["Content-Type"] = CONTENT_TYPE
         req["User-Agent"] = USER_AGENT
-        req.body = data.to_json
+        req.body = format_body(data)
         request(req)
       end
       
@@ -239,6 +239,13 @@ module Halcyon
       rescue Halcyon::Client::Base::Exceptions::Base => e
         # log exception if logger is in place
         raise
+      end
+      
+      # Formats the data of a POST or PUT request (the body) into an acceptable
+      # format according to Net::HTTP for sending through as a Hash.
+      def format_body(data)
+        data = {:body => data} unless data.is_a? Hash
+        data.map{|key,value|"&#{key}=#{value}&"}.join
       end
       
     end
