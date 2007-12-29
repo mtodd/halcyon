@@ -100,9 +100,6 @@ options[:app] = ARGV.shift
 # load dependencies
 #++
 
-%w(rubygems rack).each{|dep|require dep}
-
-$:.unshift '/Users/mtodd/Sites/halcyon/trunk/lib/'
 %w(halcyon/server).each {|dep|require dep}
 
 #--
