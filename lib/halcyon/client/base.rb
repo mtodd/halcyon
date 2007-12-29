@@ -227,7 +227,8 @@ module Halcyon
         # parse response
         body
       rescue Halcyon::Client::Base::Exceptions::Base => e
-        {:status => e.status, :body => e.error}
+        # log exception if logger is in place
+        raise
       end
       
     end

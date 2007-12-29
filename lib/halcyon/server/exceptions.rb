@@ -16,7 +16,7 @@ module Halcyon
         # Base Halcyon Exception
         #++
         
-        class Base < Exception #:nodoc:
+        class Base < StandardError #:nodoc:
           attr_accessor :status, :error
           def initialize(status, error)
             @status = status
