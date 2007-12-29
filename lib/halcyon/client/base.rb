@@ -227,7 +227,7 @@ module Halcyon
         # parse response
         body
       rescue Halcyon::Client::Base::Exceptions::Base => e
-        puts "#{e.status}: #{e.error}"
+        {:status => e.status, :body => e.error}
       end
       
     end

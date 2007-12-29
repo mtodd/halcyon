@@ -10,7 +10,13 @@ $:.unshift File.dirname(__FILE__)
 # dependencies
 #++
 
-%w(halcyon rubygems json).each {|dep|require dep}
+%w(rubygems halcyon).each {|dep|require dep}
+begin
+  require 'json'
+rescue LoadError => e
+  puts 'Using the Pure Ruby JSON...' if $debug
+  require 'json/pure'
+end
 
 #--
 # module
@@ -36,8 +42,9 @@ module Halcyon
     #++
     
     autoload :Base, 'halcyon/client/base'
-    autoload :Exceptions, 'halcyon/client/exceptions'
     autoload :Router, 'halcyon/client/router'
     
   end
 end
+
+%w(halcyon/client/exceptions).each {|dep|require dep}

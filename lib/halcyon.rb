@@ -42,13 +42,7 @@ module Halcyon
   def introduction
     abort "READ THE DAMNED RDOCS FOO"
   end
-
-  #--
-  # module dependencies
-  #++
   
-  autoload :Exceptions, 'halcyon/exceptions'
-  autoload :Server, 'halcyon/server'
-  autoload :Client, 'halcyon/client'
-
 end
+
+%w(exceptions).each {|dep|require dep}
