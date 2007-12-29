@@ -218,13 +218,15 @@ module Halcyon
       def request(req)
         # prepare and send HTTP request
         res = Net::HTTP.start(@uri.host, @uri.port) {|http|http.request(req)}
+        
+        # parse response
         body = JSON.parse(res.body)
         body.symbolize_keys! if body.respond_to? :symbolize_keys!
         
         # handle non-successes
         raise Halcyon::Client::Base::Exceptions.lookup(body[:status]).new unless res.kind_of? Net::HTTPSuccess
         
-        # parse response
+        # return response
         body
       rescue Halcyon::Client::Base::Exceptions::Base => e
         # log exception if logger is in place
