@@ -21,7 +21,7 @@ end
 #++
 
 module Halcyon
-  VERSION = [0,3,7]
+  VERSION = [0,3,1]
   def self.version
     VERSION.join('.')
   end
@@ -45,4 +45,4 @@ module Halcyon
   
 end
 
-%w(exceptions).each {|dep|require dep}
+%w(halcyon/exceptions).each {|dep|require dep}
