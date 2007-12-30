@@ -31,7 +31,7 @@ module Halcyon
         Halcyon::Exceptions::HTTP_ERROR_CODES.to_a.each do |http_error|
           status, body = http_error
           class_eval(
-            "class #{body.gsub(/ /,'')} < Base\n"+
+            "class #{body.gsub(/( |\-)/,'')} < Base\n"+
             "  def initialize(s=#{status}, e='#{body}')\n"+
             "    super s, e\n"+
             "  end\n"+
@@ -44,7 +44,7 @@ module Halcyon
         #++
         
         def self.lookup(status)
-          self.const_get(Halcyon::Exceptions::HTTP_ERROR_CODES[status].gsub(/ /,'').to_sym)
+          self.const_get(Halcyon::Exceptions::HTTP_ERROR_CODES[status].gsub(/( |\-)/,''))
         end
         
       end

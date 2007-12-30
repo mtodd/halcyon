@@ -12,20 +12,14 @@
 # dependencies
 #++
 
-%w(optparse).each{|dep|require dep}
+%w(halcyon/server optparse).each{|dep|require dep}
 
 #--
 # default options
 #++
 
 $debug = false
-options = {
-  :environment => 'none',
-  :port => 9267,
-  :host => 'localhost',
-  :server => 'mongrel',
-  :log_file => '/tmp/halcyon.log'
-}
+options = Halcyon::Server::DEFAULT_OPTIONS
 
 #--
 # parse options
@@ -40,7 +34,8 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   opts.separator ""
   opts.separator "Options:"
   
-  opts.on("-d", "--debug", "set debugging flags (set $debug to true)") { $debug = true }
+  opts.on("-d", "--debug", "set debugging flag (set $debug to true)") { $debug = true }
+  opts.on("-D", "--Debug", "enable verbose debugging (set $debug and $DEBUG to true)") { $debug = true; $DEBUG = true }
   opts.on("-w", "--warn", "turn warnings on for your script") { $-w = true }
   
   opts.on("-I", "--include PATH", "specify $LOAD_PATH (may be used more than once)") do |path|
@@ -71,6 +66,10 @@ opts = OptionParser.new("", 24, '  ') do |opts|
     options[:log_file] = log_file
   end
   
+  opts.on("-P", "--pidfile PATH", "save PID to PATH (default: #{options[:pid_file]})") do |log_file|
+    options[:pid_file] = log_file
+  end
+  
   opts.on("-e", "--env ENVIRONMENT", "use ENVIRONMENT for defaults (default: #{options[:environment]})") do |env|
     options[:environment] = env
   end
@@ -97,12 +96,6 @@ abort "Halcyon needs an app to run. Try: halcyon -h" if ARGV.empty?
 options[:app] = ARGV.shift
 
 #--
-# load dependencies
-#++
-
-%w(halcyon/server).each {|dep|require dep}
-
-#--
 # load app
 #++
 
@@ -120,9 +113,19 @@ end
 #--
 # prepare server
 #++
-
-require options[:server]
-server = Rack::Handler.const_get(options[:server].capitalize)
+begin
+  server = Rack::Handler.const_get(options[:server].capitalize)
+rescue NameError
+  servers = {
+    'cgi'     => 'CGI',
+    'fastcgi' => 'FastCGI',
+    'lsws'    => 'LSWS',
+    'mongrel' => 'Mongrel',
+    'webrick' => 'WEBrick'
+  }
+  abort "Unsupported server (missing Rack Handler). Did you mean to specify #{options[:server]}?" unless servers.key? options[:server]
+  server = Rack::Handler.const_get(servers[options[:server]])
+end
 
 #--
 # prepare app environment

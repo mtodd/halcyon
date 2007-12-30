@@ -23,7 +23,14 @@ project = {
     --inline-source
     --title "Halcyon\ Documentation"
     --exclude "^(_darcs|spec|pkg|.svn)/"
-  ]
+  ],
+  :dependencies => {
+    'json_pure' => '>=1.1.1',
+    'rack' => '>=0.2.0',
+    'merb' => '>=0.4.1'
+  },
+  :requirements => 'install the json gem to get faster JSON parsing',
+  :ruby_version_required => '>=1.8.6'
 }
 
 BASEDIR = File.expand_path(File.dirname(__FILE__))
@@ -43,10 +50,11 @@ spec = Gem::Specification.new do |s|
   s.executables = project[:bin_files]
   s.bindir = "bin"
   s.require_path = "lib"
-  s.add_dependency('rack', '>=0.2.0')
-  s.add_dependency('json', '>=1.1.1')
-  s.add_dependency('merb', '>=0.4.1')
-  s.required_ruby_version = '>= 1.8.6'
+  project[:dependencies].each{|dep|
+    s.add_dependency(dep[0], dep[1])
+  }
+  s.requirements << project[:requirements]
+  s.required_ruby_version = project[:ruby_version_required]
   s.files = (project[:rdoc_files] + %w[Rakefile] + Dir["{spec,lib}/**/*"]).uniq
 end
 

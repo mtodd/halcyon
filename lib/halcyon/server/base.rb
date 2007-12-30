@@ -16,8 +16,21 @@
 module Halcyon
   class Server
     
-    DEFAULT_OPTIONS = {}
+    DEFAULT_OPTIONS = {
+      :environment => 'none',
+      :port => 9267,
+      :host => 'localhost',
+      :server => 'mongrel',
+      :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
+      :log_file => '/var/log/halcyon.{app}.log',
+      :log_level => Logger::INFO,
+      :log_format => "%Y-%m-%d %H:%M:%S",
+      # handled internally
+      :acceptable_requests => [],
+      :acceptable_remotes => []
+    }
     ACCEPTABLE_REQUESTS = [
+      # ENV var to check, Regexp the value should match, the status code to return in case of failure, the message with the code
       ["HTTP_USER_AGENT", /JSON\/1\.1\.\d+ Compatible( \(en-US\) Halcyon\/(\d+\.\d+\.\d+) Client\/(\d+\.\d+\.\d+))?/, 406, 'Not Acceptable'],
       ["CONTENT_TYPE", /application\/json/, 415, 'Unsupported Media Type']
     ]
@@ -149,6 +162,14 @@ module Halcyon
       # DO NOT try to call +to_json+ on the +body+ contents as this will cause
       # errors when trying to parse JSON.
       # 
+      # == Request and Response
+      # 
+      # If you need access to the Request and Response, the instance variables
+      # +@req+ and +@res+ will be sufficient for you.
+      # 
+      # If you need specific documentation for these objects, check the
+      # corresponding docs in the Rack documentation.
+      # 
       # == Requests and POST Data
       # 
       # Most of your requests will have all the data it needs inside of the
@@ -174,8 +195,18 @@ module Halcyon
       # And that is essentially all you need to worry about for retreiving your
       # POST contents. Sending POST contents should be documented well enough
       # in Halcyon::Client::Base.
+      # 
+      # == Logging
+      # 
+      # Logging can be done by logging to +@logger+ when inside the scope of
+      # application instance (inside of your instance methods and modules).
+      # 
+      # The +@env+ instance variable has been modified to include a
+      # +halcyon.logger+ property including the given logger. Use this for
+      # logging if you need to step outside of the scope of the current
+      # application instance (just be sure to pass @env along with you).
       def call(env)
-        @start_time = Time.now if $debug
+        @time_started = Time.now
         
         # collect env information, create request and response objects, prep for dispatch
         # puts env.inspect if $debug # request information (huge)
@@ -183,18 +214,32 @@ module Halcyon
         @res = Rack::Response.new
         @req = Rack::Request.new(env)
         
-        ACCEPTABLE_REMOTES.replace([@env["REMOTE_ADDR"]]) if $debug
+        # add the logger to the @env instance variable for global access if for
+        # some reason the environment needs to be passed outside of the
+        # instance
+        @env['halcyon.logger'] = @logger
+        
+        # set the acceptable remotes to include the remote IP if debugging is enabled
+        @config[:acceptable_remotes] << @env["REMOTE_ADDR"] if $debug
         
         # pre run hook
-        before_run(Time.now - @start_time) if respond_to? :before_run
+        before_run(Time.now - @time_started) if respond_to? :before_run
+        
+        # prepare route and provide it for callers
+        route = Router.route(@env)
+        @env['halcyon.route'] = route
         
         # dispatch
-        @res.write(run(Router.route(env)).to_json)
+        @res.write(run(route).to_json)
         
         # post run hook
-        after_run(Time.now - @start_time) if respond_to? :after_run
+        after_run(Time.now - @time_started) if respond_to? :after_run
         
-        puts "Served #{env['REQUEST_URI']} in #{(Time.now - @start_time)}" if $debug
+        @time_finished = Time.now - @time_started
+        
+        # logs access in the following format: [200] / => index (0.0029s;343.79req/s)
+        req_time, req_per_sec = ((@time_finished*1e4).round.to_f/1e4), (((1.0/@time_finished)*1e2).round.to_f/1e2)
+        @logger.info "[#{@res.status}] #{@env['REQUEST_URI']} => #{route[:module].to_s}#{((route[:module].nil?) ? "" : "::")}#{route[:action]} (#{req_time}s;#{req_per_sec}req/s)"
         
         # finish request
         @res.finish
@@ -265,10 +310,10 @@ module Halcyon
       # (or one of its inheriters) instead of handling them manually.
       def run(route)
         # make sure the request meets our expectations
-        ACCEPTABLE_REQUESTS.each do |req|
+        @config[:acceptable_requests].each do |req|
           raise Exceptions::Base.new(req[2], req[3]) unless @env[req[0]] =~ req[1]
         end
-        raise Exceptions::Forbidden.new unless ACCEPTABLE_REMOTES.member? @env["REMOTE_ADDR"]
+        raise Exceptions::Forbidden.new unless @config[:acceptable_remotes].member? @env["REMOTE_ADDR"]
         
         # pull params
         params = route.reject{|key, val| [:action, :module].include? key}
@@ -305,24 +350,161 @@ module Halcyon
       
       # Called when the Handler gets started and stores the configuration
       # options used to start the server.
+      # 
+      # Feel free to define initialize for your app (which is only called once
+      # per server instance), just be sure to call +super+.
+      # 
+      # == PID File
+      # 
+      # A PID file is created when the server is first initialized with the
+      # current process ID. Where it is located depends on the default option,
+      # the config file, the commandline option, and the debug status,
+      # increasing in precedence in that order.
+      # 
+      # By default, the PID file is placed in +/var/run/+ and is named
+      # +halcyon.{server}.{app}.{port}.pid+ where +{server}+ is replaced by the
+      # running server, +{app}+ is the app name (suffixed with +#debug+ if
+      # running in debug mode), and +{port}+ being the server port (if there
+      # are multiple servers running, this helps clarify).
+      # 
+      # There is an option to numerically label your server  via the +{n}+
+      # value, but this is deprecated and will be removed soon. Using the
+      # +{port}+ option makes much more sense and creates much more meaning.
       def initialize(options = {})
-        # debug mode handling
-        if $debug
-          puts "Entering debugging mode..."
-          @logger = Logger.new(STDOUT)
-          ACCEPTABLE_REQUESTS.replace([
-            ["HTTP_USER_AGENT", /.*/, 406, 'Not Acceptable'],
-            ["HTTP_USER_AGENT", /.*/, 415, 'Unsupported Media Type'] # content type isn't set when navigating via browser
-          ])
-        end
-        
         # save configuration options
         @config = DEFAULT_OPTIONS.merge(options)
         
-        # setup logging
-        @logger ||= Logger.new(@config[:log_file])
+        # apply name options to log_file and pid_file configs
+        apply_log_and_pid_file_name_options
         
-        puts "Started. Awaiting input. Listening on #{@config[:port]}..." if $debug
+        # debug mode handling
+        enable_debugging if $debug
+        
+        # setup logging
+        setup_logging unless $debug
+        
+        # setup request filtering
+        setup_request_filters unless $debug
+        
+        # create PID file
+        @pid = File.new(@config[:pid_file].gsub('{n}', server_cluster_number), "w", 0644)
+        @pid << $$; @pid.close
+        
+        # log existence and ready status
+        @logger.info "PID file created. PID is #{$$}."
+        @logger.info "Started. Awaiting connectivity. Listening on #{@config[:port]}..."
+        
+        # trap signals to die (when killed by the user) gracefully
+        finalize =  Proc.new do
+          @logger.info "Shutting down #{$$}."
+          @logger.close
+          File.delete(@pid.path)
+          exit
+        end
+        # http://en.wikipedia.org/wiki/Signal_%28computing%29
+        %w(INT KILL TERM QUIT HUP).each{|sig|trap(sig, finalize)}
+        
+        # listen for USR1 signals and toggle debugging accordingly
+        trap("USR1") do
+          if $debug
+            disable_debugging
+          else
+            enable_debugging
+          end
+        end
+      end
+      
+      # Retreives the server cluster sequence number for the PID file.
+      # 
+      # This is deprecated and will be removed soon, probably for the 0.4.0
+      # release. Use of the +{port}+ value is much more appropriate and
+      # meaningful.
+      def server_cluster_number
+        # counts the number of PID files already existing.
+        server_count = Dir[@config[:pid_file].gsub('{n}','*')].length
+        # since the counting starts at 0, if the file with the count exists,
+        # then one of the lesser number servers isn't running, so check each
+        # PID file until the one not running is found.
+        # if no files exist, then 0 will be the count, which won't exist, so
+        # it will be the default number.
+        while File.exist?(@config[:pid_file].gsub('{n}',server_count.to_s))
+          server_count -= 1
+        end
+        # return that number.
+        server_count.to_s
+      end
+      
+      # If the server receives a SIGUSR1 signal it will toggle debugging. This
+      # method is used to setup logging and the request handling methods for
+      # debugging.
+      def enable_debugging
+        $debug = true
+        # setup logger to STDOUT and log entering debugging mode
+        @logger = Logger.new(STDOUT)
+        @logger.progname = "#{self.class}#debug"
+        @logger.level = Logger::DEBUG
+        @logger.datetime_format = @config[:log_format]
+        @logger.info "Entering debugging mode..."
+        
+        # set the PID file name to /tmp/ unless PID file already exists
+        @config[:pid_file] = '/tmp/halcyon.{server}.{app}.{port}.pid' unless @pid
+        apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
+        
+        # modify acceptable request's profiles
+        @config[:acceptable_requests] = [
+          ["HTTP_USER_AGENT", /.*/, 406, 'Not Acceptable'],
+          ["HTTP_USER_AGENT", /.*/, 415, 'Unsupported Media Type'] # content type isn't set when navigating via browser
+        ]
+        @logger.debug "ACCEPTABLE_REQUESTS modified to accept all User Agents (browsers)"
+      end
+      
+      # Disables all of the affects of debugging mode and returns logging and
+      # request filtering back to normal.
+      # 
+      # Refer to +enable_debugging+ for more information.
+      def disable_debugging
+        # disable logging and log leaving debugging mode
+        $debug = false
+        @logger.info "Leaving debugging mode."
+        
+        # setup normal logging
+        setup_logging
+        
+        # reenable request filtering
+        setup_request_filters
+      end
+      
+      # Sets up logging based on the configuration options in +@config+.
+      # 
+      # Extracted from +initialize+ to reduce repetition.
+      def setup_logging
+        @logger = Logger.new(@config[:log_file])
+        @logger.progname = self.class
+        @logger.level = @config[:log_level]
+        @logger.datetime_format = @config[:log_format]
+      end
+      
+      # Sets up request filters based on User-Agent, Content-Type, and Remote
+      # IP/address values.
+      # 
+      # Extracted from +initialize+ to reduce repetition.
+      def setup_request_filters
+        @config[:acceptable_requests] = ACCEPTABLE_REQUESTS
+        @config[:acceptable_remotes] = ACCEPTABLE_REMOTES
+      end
+      
+      # Searches through the PID file name and the Log file name stored in the
+      # +@config+ variable for +{server}+, +{app}+, and +{port}+ values and
+      # sets them accordingly.
+      def apply_log_and_pid_file_name_options
+        # :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
+        @config[:pid_file].gsub!('{server}', @config[:server])
+        @config[:pid_file].gsub!('{port}', @config[:port].to_s)
+        @config[:pid_file].gsub!('{app}', File.basename(@config[:app]))
+        # :log_file => '/var/log/halcyon.{app}.log',
+        @config[:log_file].gsub!('{server}', @config[:server])
+        @config[:log_file].gsub!('{port}', @config[:port].to_s)
+        @config[:log_file].gsub!('{app}', File.basename(@config[:app]))
       end
       
       # = Routing

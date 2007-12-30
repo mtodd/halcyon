@@ -12,9 +12,9 @@ $:.unshift File.dirname(__FILE__)
 
 %w(rubygems halcyon).each {|dep|require dep}
 begin
-  require 'json'
+  require 'json/ext'
 rescue LoadError => e
-  puts 'Using the Pure Ruby JSON...' if $debug
+  warn 'Using the Pure Ruby JSON... install the json gem to get faster JSON parsing.'
   require 'json/pure'
 end
 

@@ -34,4 +34,4 @@ class Simple < Halcyon::Server::Base
     raise Exceptions::NotFound.new(404, 'Not Found; You did not find what you were expecting because it is not here. What are you looking for?')
   end
 end
-Rack::Handler::Mongrel.run Xy.new, :Port => 3801 if __FILE__ == $0
+Rack::Handler::Mongrel.run Simple.new, :Port => 3801 if __FILE__ == $0

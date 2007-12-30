@@ -12,9 +12,9 @@ $:.unshift File.dirname(__FILE__)
 
 %w(rubygems halcyon rack).each {|dep|require dep}
 begin
-  require 'json'
+  require 'json/ext'
 rescue LoadError => e
-  puts 'Using the Pure Ruby JSON...' if $debug
+  warn 'Using the Pure Ruby JSON... install the json gem to get faster JSON parsing.'
   require 'json/pure'
 end
 
@@ -56,4 +56,7 @@ module Halcyon
   
 end
 
+# Loads the Exceptions class first which sets up all the dynamically generated
+# exceptions used by the system. Must occur before Base is loaded since Base
+# depends on it.
 %w(halcyon/server/exceptions).each {|dep|require dep}

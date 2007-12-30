@@ -75,7 +75,8 @@ module Halcyon
       # params list defined in the +to+ routing definition, opting for the
       # default route if no match is made.
       def self.route(env)
-        uri = env['REQUEST_URI']
+        # pull out the path requested (WEBrick keeps the host and port and protocol in REQUEST_URI)
+        uri = URI.parse(env['REQUEST_URI']).path
         
         # prepare request
         path = (uri ? uri.split('?').first : '').sub(/\/+/, '/')
@@ -88,6 +89,7 @@ module Halcyon
         # make sure a route is returned even if no match is found
         if route[0].nil?
           #return default route
+          env['halcyon.logger'].debug "No route found. Using default."
           @@default_route
         else
           # params (including action and module if set) for the matching route
