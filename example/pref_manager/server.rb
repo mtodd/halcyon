@@ -1,16 +1,26 @@
 #!/usr/bin/env ruby -wKU
 
-%w(halcyon/server pstore).each{|dep|require dep}
+%w(halcyon/server yaml/store).each{|dep|require dep}
 
 # Handles the persistence of preferences.
 class Pref
   
   attr_accessor :prefs
   
+  # Sets up the database
+  def self.load_db(db)
+    @db = YAML::Store.new(db)
+  end
+  
+  # Retrieves the database
+  def self.get_db
+    @db
+  end
+  
   # Connects to the datastore and loads up the preferences
   def initialize(user)
     @user = user
-    @@prefs ||= PStore.new("prefs.db.pstore")
+    @@prefs ||= self.class.get_db
     @@prefs.transaction(true) do
       @prefs = @@prefs.fetch(@user, {})
     end
@@ -48,6 +58,14 @@ class Server < Halcyon::Server::Base
     r.match('/u/:user/prefs').to(:action => 'prefs')
   end
   
+  def initialize options = {}
+    # let Halcyon do its thing and set up @config
+    super options
+    
+    # app setup
+    Pref.load_db(@config[:manager][:db])
+  end
+  
   # Retreives all of the preferences for a given user
   def prefs(params)
     ok Pref.new(params[:user]).prefs
@@ -63,25 +81,25 @@ class Server < Halcyon::Server::Base
     # dispatch
     case method
     when :get
-      puts "read #{pref} for #{user.name}" if $debug
+      @logger.debug "read #{pref} for #{user.name}"
       ok :user => user.name, :pref => pref, :value => value
     when :post
-      puts "update #{pref} for #{user.name}" if $debug
+      @logger.debug "update #{pref} for #{user.name}"
       value = user[pref] = @req.POST['value']
       user.save
       ok :user => user.name, :pref => pref, :value => value
     when :put
-      puts "create #{pref} for #{user.name}" if $debug
+      @logger.debug "create #{pref} for #{user.name}"
       value = user[pref] = @req.POST['value']
       user.save
       ok :user => user.name, :pref => pref, :value => value
     when :delete
-      puts "delete #{pref} for #{user.name}" if $debug
+      @logger.debug "delete #{pref} for #{user.name}"
       value = user[pref] = nil
       user.save
       ok :user => user.name, :pref => pref, :value => value
     else
-      puts "Weird request made with an unknown request method: #{method}" if $debug
+      @logger.debug "Weird request made with an unknown request method: #{method}"
       raise Exceptions.lookup(406) # Not Acceptable
     end
   end

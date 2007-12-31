@@ -1,0 +1,25 @@
+# Base config (standard options)
+host: localhost
+port: 4447
+server: mongrel
+pid_file: /tmp/pref_manager.{port}.pid
+log_file: /tmp/pref_manager.log
+log_level: warn
+environment: none
+
+# App specific configurations
+# can be anything in any structure, but good practice would probably stick
+# any app-specific configuration options into a sub-hash...
+manager:
+  db: /tmp/prefs.db.yml
+  some_key: some value
+  other_key: other value
+  num: 12
+  ary:
+    - 1
+    - 2
+    - yes
+    - hooray?
+  hsh:
+    ooh: baby
+# this would be accessible as @config[:manager][:some_key], etc

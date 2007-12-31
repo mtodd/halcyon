@@ -23,8 +23,8 @@ module Halcyon
       :server => 'mongrel',
       :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
       :log_file => '/var/log/halcyon.{app}.log',
-      :log_level => Logger::INFO,
-      :log_format => "%Y-%m-%d %H:%M:%S",
+      :log_level => 'info',
+      :log_format => proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"},
       # handled internally
       :acceptable_requests => [],
       :acceptable_remotes => []
@@ -34,7 +34,7 @@ module Halcyon
       ["HTTP_USER_AGENT", /JSON\/1\.1\.\d+ Compatible( \(en-US\) Halcyon\/(\d+\.\d+\.\d+) Client\/(\d+\.\d+\.\d+))?/, 406, 'Not Acceptable'],
       ["CONTENT_TYPE", /application\/json/, 415, 'Unsupported Media Type']
     ]
-    ACCEPTABLE_REMOTES = ['localhost', '127.0.0.1']
+    ACCEPTABLE_REMOTES = ['localhost', '127.0.0.1', '0.0.0.0']
     
     # = Building Halcyon Server Apps
     # 
@@ -388,7 +388,7 @@ module Halcyon
         
         # create PID file
         @pid = File.new(@config[:pid_file].gsub('{n}', server_cluster_number), "w", 0644)
-        @pid << $$; @pid.close
+        @pid << "#{$$}\n"; @pid.close
         
         # log existence and ready status
         @logger.info "PID file created. PID is #{$$}."
@@ -420,6 +420,15 @@ module Halcyon
       # release. Use of the +{port}+ value is much more appropriate and
       # meaningful.
       def server_cluster_number
+        # if there are no +{n}+ references in the PID file name, then simply
+        # return 0 as the cluster number. (This is the preferred behavior and
+        # this test allows the method to fail fast. +{n}+ is deprecated and
+        # will be removed before 0.4.0 is released.)
+        return 0.to_s if @config[:pid_file]['{n}'].nil?
+        
+        # warn users that they're using a deprecated convention.
+        warn "Your PID file name contains '{n}' (#{@config[:pid_file]}). This is deprecatd and will be removed by the 0.4.0 release. Use '{port}' instead."
+        
         # counts the number of PID files already existing.
         server_count = Dir[@config[:pid_file].gsub('{n}','*')].length
         # since the counting starts at 0, if the file with the count exists,
@@ -443,11 +452,11 @@ module Halcyon
         @logger = Logger.new(STDOUT)
         @logger.progname = "#{self.class}#debug"
         @logger.level = Logger::DEBUG
-        @logger.datetime_format = @config[:log_format]
+        @logger.formatter = @config[:log_format]
         @logger.info "Entering debugging mode..."
         
         # set the PID file name to /tmp/ unless PID file already exists
-        @config[:pid_file] = '/tmp/halcyon.{server}.{app}.{port}.pid' unless @pid
+        @config[:pid_file] = '/tmp/halcyon.{server}.{app}.{port}.pid' unless @pid.is_a? File
         apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
         
         # modify acceptable request's profiles
@@ -474,14 +483,49 @@ module Halcyon
         setup_request_filters
       end
       
-      # Sets up logging based on the configuration options in +@config+.
+      # Sets up logging based on the configuration options in +@config+, which
+      # is set (in order of lowest to highest precedence) in the default
+      # options, in the configuration file provided, on the commandline, and
+      # debug mode options.
       # 
-      # Extracted from +initialize+ to reduce repetition.
+      # == Levels
+      # 
+      # The accepted level values are as follows:
+      # 
+      #   debug
+      #   info
+      #   warn
+      #   error
+      #   fatal
+      #   unknown
+      # 
+      # These are the exact way you can refer to the logger level you'd like to
+      # log at from all points of option specification (listed above in order
+      # of ascending precedence).
+      # 
+      # If a bogus value is entered, a warning will be issued and the value
+      # will be defaulted to 'debug'. (So don't mess up.)
       def setup_logging
+        # get the logging level based on the name supplied
+        level = {
+          'debug' => Logger::DEBUG,
+          'info'  => Logger::INFO,
+          'warn'  => Logger::WARN,
+          'error' => Logger::ERROR,
+          'fatal' => Logger::FATAL,
+          'unknown' => Logger::UNKNOWN # wtf?
+        }[@config[:log_level]]
+        if level.nil?
+          warn "Logging level specified not acceptable. Defaulting to 'debug'. Check the documentation for the acceptable values."
+          @config[:log_level] = 'debug'
+          level = Logger::DEBUG
+        end
+        
+        # setup the logger
         @logger = Logger.new(@config[:log_file])
         @logger.progname = self.class
-        @logger.level = @config[:log_level]
-        @logger.datetime_format = @config[:log_format]
+        @logger.level = level
+        @logger.formatter = @config[:log_format]
       end
       
       # Sets up request filters based on User-Agent, Content-Type, and Remote
@@ -497,11 +541,11 @@ module Halcyon
       # +@config+ variable for +{server}+, +{app}+, and +{port}+ values and
       # sets them accordingly.
       def apply_log_and_pid_file_name_options
-        # :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
+        # DEFAULT :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
         @config[:pid_file].gsub!('{server}', @config[:server])
         @config[:pid_file].gsub!('{port}', @config[:port].to_s)
         @config[:pid_file].gsub!('{app}', File.basename(@config[:app]))
-        # :log_file => '/var/log/halcyon.{app}.log',
+        # DEFAULT :log_file => '/var/log/halcyon.{app}.log',
         @config[:log_file].gsub!('{server}', @config[:server])
         @config[:log_file].gsub!('{port}', @config[:port].to_s)
         @config[:log_file].gsub!('{app}', File.basename(@config[:app]))
@@ -619,7 +663,9 @@ module Halcyon
       
       # Returns the URI requested
       def uri
-        @env['REQUEST_URI']
+        # special parsing is done to remove the protocol, host, and port that
+        # some Handlers leave in there. (Fixes inconsistencies.)
+        URI.parse(@env['REQUEST_URI']).path
       end
       
       # Returns the Request Method as a lowercase symbol

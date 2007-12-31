@@ -141,3 +141,8 @@ task :pushsite => [:rdoc] do
   sh "rsync -avz doc/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/doc/"
   sh "rsync -avz site/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/"
 end
+
+desc "find . -name \"*.rb\" | xargs wc -l | grep total"
+task :loc do
+  sh "find . -name \"*.rb\" | xargs wc -l | grep total"
+end

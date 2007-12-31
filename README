@@ -42,7 +42,7 @@ http://localhost:3800/ and see what happens. Take a look at the source and try
 to access the other routes and see how things work. Notice the response in the
 browser.
 
-Once you've familiarized yourself with that, kill the server (Ctl+Z) and start
+Once you've familiarized yourself with that, kill the server (Ctl+C) and start
 it again without the debugging switch: -d. (+halcyon -h+ for usage help.)
 
   $ halcyon -p 3800 example/simple

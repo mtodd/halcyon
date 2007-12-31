@@ -12,7 +12,7 @@
 # dependencies
 #++
 
-%w(halcyon/server optparse).each{|dep|require dep}
+%w(rubygems halcyon/server optparse).each{|dep|require dep}
 
 #--
 # default options
@@ -38,7 +38,7 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   opts.on("-D", "--Debug", "enable verbose debugging (set $debug and $DEBUG to true)") { $debug = true; $DEBUG = true }
   opts.on("-w", "--warn", "turn warnings on for your script") { $-w = true }
   
-  opts.on("-I", "--include PATH", "specify $LOAD_PATH (may be used more than once)") do |path|
+  opts.on("-I", "--include PATH", "specify $LOAD_PATH (multiples OK)") do |path|
     $:.unshift(*path.split(":"))
   end
   
@@ -46,8 +46,33 @@ opts = OptionParser.new("", 24, '  ') do |opts|
     require library
   end
   
-  opts.on("-c", "--config PATH", "configuration stored in PATH") do |conf|
-    options[:config_file] = conf
+  opts.on("-c", "--config PATH", "load configuration (YAML) from PATH") do |conf_file|
+    if File.exist?(conf_file)
+      require 'yaml'
+      conf = YAML.load_file(conf_file)
+      case conf
+      when String
+        # config file given was just the commandline options
+        ARGV.replace(conf.split)
+        opts.parse! ARGV
+      when Hash
+        conf.symbolize_keys!
+        options = options.merge(conf)
+      when Array
+        # TODO (MT) support multiple servers (or at least specifying which
+        # server's configuration to load)
+        warn "Your configuration file is setup for multiple servers. This is not a supported feature yet."
+        warn "However, we've pulled the first server entry as this server's configuration."
+        # an array of server configurations
+        # default to the first entry since multiple server configurations isn't
+        # precisely worked out yet.
+        options = options.merge(conf[0])
+      else
+        abort "Config file in an unsupported format. Config files must be YAML or the commandline flags"
+      end
+    else
+      abort "Config file failed to load. #{conf_file} was not found. Correct the path and try again."
+    end
   end
   
   opts.on("-s", "--server SERVER", "serve using SERVER (default: #{options[:server]})") do |serv|
@@ -64,6 +89,10 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   
   opts.on("-l", "--logfile PATH", "log access to PATH (default: #{options[:log_file]})") do |log_file|
     options[:log_file] = log_file
+  end
+  
+  opts.on("-L", "--loglevel LEVEL", "log level (default: #{options[:log_level]})") do |log_file|
+    options[:log_level] = log_file
   end
   
   opts.on("-P", "--pidfile PATH", "save PID to PATH (default: #{options[:pid_file]})") do |log_file|
