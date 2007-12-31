@@ -338,7 +338,7 @@ module Halcyon
         
         res
       rescue Exceptions::Base => e
-        # puts @env.inspect if $debug
+        @logger.warn e.error
         # handles all content error exceptions
         @res.status = e.status
         {:status => e.status, :body => e.error}
@@ -465,6 +465,8 @@ module Halcyon
           ["HTTP_USER_AGENT", /.*/, 415, 'Unsupported Media Type'] # content type isn't set when navigating via browser
         ]
         @logger.debug "ACCEPTABLE_REQUESTS modified to accept all User Agents (browsers)"
+      rescue Errno::EACCES
+      	abort "Can't access #{@config[:pid_file]}, try 'sudo #{$0}'"
       end
       
       # Disables all of the affects of debugging mode and returns logging and
@@ -526,6 +528,8 @@ module Halcyon
         @logger.progname = self.class
         @logger.level = level
         @logger.formatter = @config[:log_format]
+      rescue Errno::EACCES
+      	abort "Can't access #{@config[:log_file]}, try 'sudo #{$0}'"
       end
       
       # Sets up request filters based on User-Agent, Content-Type, and Remote

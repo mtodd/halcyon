@@ -27,7 +27,7 @@ class Pref
     @@manager ||= PrefManager.new("http://localhost:#{$port}")
     @user = user
     @pref = pref
-    @value = @@manager.read(@user, @pref)
+    @value = @@manager.read(@user, @pref)[:value]
   end
   def self.find(user, pref)
     self.new(user, pref)

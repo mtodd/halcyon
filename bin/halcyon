@@ -29,7 +29,9 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   opts.banner << "Halcyon, JSON Server Framework\n"
   opts.banner << "http://halcyon.rubyforge.org/\n"
   opts.banner << "\n"
-  opts.banner << "Usage: halcyon [options] appname"
+  opts.banner << "Usage: halcyon [options] appname\n"
+  opts.banner << "\n"
+  opts.banner << "Put -c or --config first otherwise it will overwrite higher precedence options."
   
   opts.separator ""
   opts.separator "Options:"
@@ -49,7 +51,18 @@ opts = OptionParser.new("", 24, '  ') do |opts|
   opts.on("-c", "--config PATH", "load configuration (YAML) from PATH") do |conf_file|
     if File.exist?(conf_file)
       require 'yaml'
-      conf = YAML.load_file(conf_file)
+      
+      # load the config file
+      begin
+        conf = YAML.load_file(conf_file)
+      rescue Errno::EACCES
+        abort("Can't access #{conf_file}, try 'sudo #{$0}'")
+      end
+      
+      # store config file path so SIGHUP and SIGUSR2 will reload the config in case it changes
+      options[:config_file] = conf_file
+      
+      # parse config
       case conf
       when String
         # config file given was just the commandline options
