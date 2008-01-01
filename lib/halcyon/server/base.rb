@@ -338,7 +338,7 @@ module Halcyon
         
         res
       rescue Exceptions::Base => e
-        @logger.warn e.error
+        @logger.warn "#{uri} => #{e.error}"
         # handles all content error exceptions
         @res.status = e.status
         {:status => e.status, :body => e.error}
