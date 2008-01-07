@@ -76,7 +76,8 @@ module Halcyon
       # default route if no match is made.
       def self.route(env)
         # pull out the path requested (WEBrick keeps the host and port and protocol in REQUEST_URI)
-        uri = URI.parse(env['REQUEST_URI']).path
+        # PATH_INFO is failover if REQUEST_URI is blank (like what Rack::MockRequest does)
+        uri = URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path
         
         # prepare request
         path = (uri ? uri.split('?').first : '').sub(/\/+/, '/')
@@ -89,7 +90,7 @@ module Halcyon
         # make sure a route is returned even if no match is found
         if route[0].nil?
           #return default route
-          env['halcyon.logger'].debug "No route found. Using default."
+          env['halcyon.logger'].debug "No route found. Using default." if env['halcyon.logger'].is_a? Logger
           @@default_route
         else
           # params (including action and module if set) for the matching route

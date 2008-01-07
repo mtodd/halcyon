@@ -19,6 +19,7 @@
 #++
 
 $debug = false
+$test = false
 options = Halcyon::Server::DEFAULT_OPTIONS
 
 #--

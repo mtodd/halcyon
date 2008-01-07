@@ -221,8 +221,8 @@ module Halcyon
       # If the server responds with any kind of failure (anything with a status
       # that isn't 200), Halcyon will in turn raise the respective exception
       # (defined in Halcyon::Exceptions) which all inherit from
-      # +Halcyon::Client::Exceptions::Base+. It is up to the client to handle
-      # these exceptions specifically.
+      # +Halcyon::Exceptions::Base+. It is up to the client to handle these
+      # exceptions specifically.
       def request(req)
         # prepare and send HTTP request
         res = Net::HTTP.start(@uri.host, @uri.port) {|http|http.request(req)}
@@ -236,7 +236,7 @@ module Halcyon
         
         # return response
         body
-      rescue Halcyon::Client::Base::Exceptions::Base => e
+      rescue Halcyon::Exceptions::Base => e
         # log exception if logger is in place
         raise
       end

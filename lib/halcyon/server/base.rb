@@ -219,9 +219,6 @@ module Halcyon
         # instance
         @env['halcyon.logger'] = @logger
         
-        # set the acceptable remotes to include the remote IP if debugging is enabled
-        @config[:acceptable_remotes] << @env["REMOTE_ADDR"] if $debug
-        
         # pre run hook
         before_run(Time.now - @time_started) if respond_to? :before_run
         
@@ -289,6 +286,11 @@ module Halcyon
       # primarily only speaking with other apps on the same machine, though
       # your specific requirements may differ and change that.
       # 
+      # When in debug mode or in testing mode, the request filtering test is
+      # not fired, so all requests from all User Agents and locations will
+      # succeed. This is important to know if you plan on testing this specific
+      # feature while in debugging or testing modes.
+      # 
       # == Hooks, Callbacks, and Authentication
       # 
       # There is no Authentication mechanism built in to Halcyon (for the time
@@ -310,10 +312,7 @@ module Halcyon
       # (or one of its inheriters) instead of handling them manually.
       def run(route)
         # make sure the request meets our expectations
-        @config[:acceptable_requests].each do |req|
-          raise Exceptions::Base.new(req[2], req[3]) unless @env[req[0]] =~ req[1]
-        end
-        raise Exceptions::Forbidden.new unless @config[:acceptable_remotes].member? @env["REMOTE_ADDR"]
+        acceptable_request! unless $debug || $test
         
         # pull params
         params = route.reject{|key, val| [:action, :module].include? key}
@@ -337,11 +336,19 @@ module Halcyon
         after_call if respond_to? :after_call
         
         res
-      rescue Exceptions::Base => e
+      rescue Halcyon::Exceptions::Base => e
         @logger.warn "#{uri} => #{e.error}"
         # handles all content error exceptions
         @res.status = e.status
         {:status => e.status, :body => e.error}
+      end
+      
+      # Tests for acceptable requests if +$debug+ and +$test+ are not set.
+      def acceptable_request!
+        @config[:acceptable_requests].each do |req|
+          raise Halcyon::Exceptions::Base.new(req[2], req[3]) unless @env[req[0]] =~ req[1]
+        end
+        raise Exceptions::Forbidden.new unless @config[:acceptable_remotes].member? @env["REMOTE_ADDR"]
       end
       
       #--
@@ -373,18 +380,20 @@ module Halcyon
       def initialize(options = {})
         # save configuration options
         @config = DEFAULT_OPTIONS.merge(options)
+        @config[:app] ||= self.class.to_s.downcase
         
         # apply name options to log_file and pid_file configs
         apply_log_and_pid_file_name_options
         
-        # debug mode handling
+        # debug and test mode handling
         enable_debugging if $debug
+        enable_testing if $test
         
         # setup logging
-        setup_logging unless $debug
+        setup_logging unless $debug || $test
         
         # setup request filtering
-        setup_request_filters unless $debug
+        setup_request_filters unless $debug || $test
         
         # create PID file
         @pid = File.new(@config[:pid_file].gsub('{n}', server_cluster_number), "w", 0644)
@@ -397,8 +406,7 @@ module Halcyon
         # trap signals to die (when killed by the user) gracefully
         finalize =  Proc.new do
           @logger.info "Shutting down #{$$}."
-          @logger.close
-          File.delete(@pid.path)
+          clean_up
           exit
         end
         # http://en.wikipedia.org/wiki/Signal_%28computing%29
@@ -412,6 +420,14 @@ module Halcyon
             enable_debugging
           end
         end
+      end
+      
+      # Closes the logger and deletes the PID file.
+      def clean_up
+        return if defined? @cleaned_up
+        @logger.close
+        File.delete(@pid.path) if File.exist?(@pid.path)
+        @cleaned_up = true
       end
       
       # Retreives the server cluster sequence number for the PID file.
@@ -448,23 +464,41 @@ module Halcyon
       # debugging.
       def enable_debugging
         $debug = true
+        
+        # set the PID file name to /tmp/ unless PID file already exists
+        @config[:pid_file] = '/tmp/halcyon.{server}.{app}.{port}.pid' unless defined? @pid
+        apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
+        
         # setup logger to STDOUT and log entering debugging mode
         @logger = Logger.new(STDOUT)
         @logger.progname = "#{self.class}#debug"
         @logger.level = Logger::DEBUG
         @logger.formatter = @config[:log_format]
         @logger.info "Entering debugging mode..."
-        
+      rescue Errno::EACCES
+      	abort "Can't access #{@config[:pid_file]}, try 'sudo #{$0}'"
+      end
+      
+      # This method is used to setup logging and the request handling methods
+      # for debugging.
+      def enable_testing
         # set the PID file name to /tmp/ unless PID file already exists
-        @config[:pid_file] = '/tmp/halcyon.{server}.{app}.{port}.pid' unless @pid.is_a? File
+        @config[:pid_file] = '/tmp/halcyon.testing.{app}.{port}.pid' unless defined? @pid
+        @config[:log_file] = '/tmp/halcyon.testing.{app}.log'
         apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
         
-        # modify acceptable request's profiles
-        @config[:acceptable_requests] = [
-          ["HTTP_USER_AGENT", /.*/, 406, 'Not Acceptable'],
-          ["HTTP_USER_AGENT", /.*/, 415, 'Unsupported Media Type'] # content type isn't set when navigating via browser
-        ]
-        @logger.debug "ACCEPTABLE_REQUESTS modified to accept all User Agents (browsers)"
+        # setup logger and log entering testing mode
+        @logger = Logger.new(@config[:log_file])
+        @logger.progname = "#{self.class}#test"
+        @logger.level = Logger::DEBUG
+        @logger.formatter = @config[:log_format]
+        @logger.info "Entering testing mode..."
+        
+        # make sure we clean up after ourselves since we're in testing mode
+        at_exit {
+          clean_up
+          File.delete(@config[:log_file]) if File.exist?(@config[:log_file])
+        }
       rescue Errno::EACCES
       	abort "Can't access #{@config[:pid_file]}, try 'sudo #{$0}'"
       end
@@ -669,7 +703,7 @@ module Halcyon
       def uri
         # special parsing is done to remove the protocol, host, and port that
         # some Handlers leave in there. (Fixes inconsistencies.)
-        URI.parse(@env['REQUEST_URI']).path
+        URI.parse(@env['REQUEST_URI'] || @env['PATH_INFO']).path
       end
       
       # Returns the Request Method as a lowercase symbol

@@ -13,25 +13,13 @@ module Halcyon
       module Exceptions #:nodoc:
         
         #--
-        # Base Halcyon Exception
-        #++
-        
-        class Base < StandardError #:nodoc:
-          attr_accessor :status, :error
-          def initialize(status, error)
-            @status = status
-            @error = error
-          end
-        end
-        
-        #--
         # Exception classes
         #++
         
         Halcyon::Exceptions::HTTP_ERROR_CODES.to_a.each do |http_error|
           status, body = http_error
           class_eval(
-            "class #{body.gsub(/( |\-)/,'')} < Base\n"+
+            "class #{body.gsub(/( |\-)/,'')} < Halcyon::Exceptions::Base\n"+
             "  def initialize(s=#{status}, e='#{body}')\n"+
             "    super s, e\n"+
             "  end\n"+

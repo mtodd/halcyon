@@ -21,7 +21,7 @@ end
 #++
 
 module Halcyon
-  VERSION = [0,3,18]
+  VERSION = [0,3,22]
   def self.version
     VERSION.join('.')
   end
@@ -40,7 +40,7 @@ module Halcyon
   # For documentation on using Halcyon, check out the Halcyon::Server::Base and
   # Halcyon::Client::Base classes which contain much more usage documentation.
   def introduction
-    abort "READ THE DAMNED RDOCS FOO"
+    abort "READ THE DAMNED RDOCS!"
   end
   
 end

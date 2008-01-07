@@ -9,6 +9,23 @@
 
 module Halcyon
   module Exceptions #:nodoc:
+    
+    #--
+    # Base Halcyon Exception
+    #++
+    
+    class Base < StandardError #:nodoc:
+      attr_accessor :status, :error
+      def initialize(status, error)
+        @status = status
+        @error = error
+      end
+    end
+    
+    #--
+    # HTTP Error Codes and Errors
+    #++
+    
     HTTP_ERROR_CODES = {
       400  => 'Bad Request',
       401  => 'Unauthorized',

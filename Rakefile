@@ -75,42 +75,39 @@ task :uninstall => [:clean] do
   sh %{sudo gem uninstall #{project[:name]}}
 end
 
-task 'run-spec' do
-  require 'spec'
-  $:.unshift(File.dirname(__FILE__))
-  stdout = []
-  class << stdout
-    def print(*e) concat(e); Kernel.print(*e); end
-    def puts(*e) concat(e); Kernel.puts(*e); end
-    def flush; end
+namespace 'spec' do
+  desc "generate spec"
+  task :gen do
+    sh "spec -c -rlib/halcyon -rspec/spec_helper spec/**/* --format s:spec/SPEC --format h:spec/SPEC.html"
   end
-  stderr = []
-  class << stderr
-    alias print <<
-    def print(*e) concat(e); Kernel.print(*e); end
-    def puts(*e) concat(e); Kernel.puts(*e); end
-    def flush; end
+  
+  desc "run rspec"
+  task :run do
+    sh "spec -c -rlib/halcyon -rtest/spec_helper test/**/*"
   end
-  ::Spec::Runner::CommandLine.run(['spec'], stderr, stdout, false, true)
-  exit_status = stdout.last.strip[/(\d+) failures?/, 1].to_i
-  at_exit{
-    exit(exit_status == 0 ? 0 : 1)
-  }
+  
+  desc "run rspec verbosely"
+  task :verb do
+    sh "spec -c -rlib/halcyon -rtest/spec_helper test/**/* --format s"
+  end
 end
-
-desc "run rspec"
-task :spec do
-  run = Rake::Task['run-spec']
-  run.execute
-end
-
-task :default => :spec
 
 desc "Do predistribution stuff"
-task :predist => [:chmod, :changelog, :rdoc]
+task :predist => [:chmod, :changelog, :manifest, :rdoc]
 
 def manifest
-  `darcs query manifest`.split("\n").map { |f| f.gsub(/\A\.\//, '') }
+  require 'find'
+  paths = []
+  manifest = File.new('MANIFEST', 'w+')
+  Find.find('.') do |path|
+    path.gsub!(/\A\.\//, '')
+    next if path =~ /(\.svn|doc|pkg|^\.|MANIFEST)/
+    paths << path
+  end
+  paths.sort.each do |path|
+    manifest.puts path
+  end
+  manifest.close
 end
 
 desc "Make binaries executable"
@@ -119,9 +116,14 @@ task :chmod do
   Dir["test/cgi/test*"].each { |binary| File.chmod(0775, binary) }
 end
 
-desc "Generate a ChangeLog"
+desc "Generate a MANIFEST"
+task :manifest do
+  manifest
+end
+
+desc "Generate a CHANGELOG"
 task :changelog do
-  sh "svn log >ChangeLog"
+  sh "svn log > CHANGELOG"
 end
 
 desc "Generate RDoc documentation"
@@ -146,3 +148,5 @@ desc "find . -name \"*.rb\" | xargs wc -l | grep total"
 task :loc do
   sh "find . -name \"*.rb\" | xargs wc -l | grep total"
 end
+
+task :default => Rake::Task['spec:run']
