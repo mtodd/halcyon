@@ -83,12 +83,12 @@ namespace 'spec' do
   
   desc "run rspec"
   task :run do
-    sh "spec -c -rlib/halcyon -rtest/spec_helper test/**/*"
+    sh "spec -c -rlib/halcyon -rspec/spec_helper spec/**/*"
   end
   
   desc "run rspec verbosely"
   task :verb do
-    sh "spec -c -rlib/halcyon -rtest/spec_helper test/**/* --format s"
+    sh "spec -c -rlib/halcyon -rspec/spec_helper spec/**/* --format s"
   end
 end
 
