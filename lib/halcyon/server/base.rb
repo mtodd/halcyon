@@ -399,8 +399,13 @@ module Halcyon
         @pid = File.new(@config[:pid_file].gsub('{n}', server_cluster_number), "w", 0644)
         @pid << "#{$$}\n"; @pid.close
         
-        # log existence and ready status
+        # log existence
         @logger.info "PID file created. PID is #{$$}."
+        
+        # call startup callback if defined
+        startup if respond_to? :startup
+        
+        # log ready state
         @logger.info "Started. Awaiting connectivity. Listening on #{@config[:port]}..."
         
         # trap signals to die (when killed by the user) gracefully
@@ -424,7 +429,13 @@ module Halcyon
       
       # Closes the logger and deletes the PID file.
       def clean_up
+        # don't try to clean up what's cleaned up already
         return if defined? @cleaned_up
+        
+        # run shutdown hook if defined
+        shutdown if respond_to? :shutdown
+        
+        # close logger, delete PID file, flag clean state
         @logger.close
         File.delete(@pid.path) if File.exist?(@pid.path)
         @cleaned_up = true
