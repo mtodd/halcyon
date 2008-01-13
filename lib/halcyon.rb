@@ -10,18 +10,14 @@ $:.unshift File.dirname(__FILE__)
 # dependencies
 #++
 
-%w(halcyon/support/hashext).each {|dep|require dep}
-
-class Hash
-  include HashExt::Keys
-end
+%w(rubygems merb/core_ext).each {|dep|require dep}
 
 #--
 # module
 #++
 
 module Halcyon
-  VERSION = [0,3,23]
+  VERSION = [0,3,24]
   def self.version
     VERSION.join('.')
   end
