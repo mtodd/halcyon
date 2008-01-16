@@ -17,7 +17,7 @@ $:.unshift File.dirname(__FILE__)
 #++
 
 module Halcyon
-  VERSION = [0,3,24]
+  VERSION = [0,3,26]
   def self.version
     VERSION.join('.')
   end
@@ -37,6 +37,16 @@ module Halcyon
   # Halcyon::Client::Base classes which contain much more usage documentation.
   def introduction
     abort "READ THE DAMNED RDOCS!"
+  end
+  
+  #--
+  # Module Autoloading
+  #++
+  
+  class Server
+    module Auth
+      autoload :Basic, 'halcyon/server/auth/basic'
+    end
   end
   
 end

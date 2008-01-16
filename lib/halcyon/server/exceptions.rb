@@ -21,7 +21,7 @@ module Halcyon
           class_eval(
             "class #{body.gsub(/( |\-)/,'')} < Halcyon::Exceptions::Base\n"+
             "  def initialize(s=#{status}, e='#{body}')\n"+
-            "    super s, e\n"+
+            "    super\n"+
             "  end\n"+
             "end"
           );

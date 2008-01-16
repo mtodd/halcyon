@@ -19,6 +19,7 @@ module Halcyon
       def initialize(status, error)
         @status = status
         @error = error
+        super "[#{@status}] #{@error}"
       end
     end
     

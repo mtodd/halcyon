@@ -176,37 +176,29 @@ module Halcyon
       #++
       
       # Performs a GET request on the URI specified.
-      def get(uri)
+      def get(uri, headers={})
         req = Net::HTTP::Get.new(uri)
-        req["Content-Type"] = CONTENT_TYPE
-        req["User-Agent"] = USER_AGENT
-        request(req)
+        request(req, headers)
       end
       
       # Performs a POST request on the URI specified.
-      def post(uri, data)
+      def post(uri, data, headers={})
         req = Net::HTTP::Post.new(uri)
-        req["Content-Type"] = CONTENT_TYPE
-        req["User-Agent"] = USER_AGENT
         req.body = format_body(data)
-        request(req)
+        request(req, headers)
       end
       
       # Performs a DELETE request on the URI specified.
-      def delete(uri)
+      def delete(uri, headers={})
         req = Net::HTTP::Delete.new(uri)
-        req["Content-Type"] = CONTENT_TYPE
-        req["User-Agent"] = USER_AGENT
-        request(req)
+        request(req, headers)
       end
       
       # Performs a PUT request on the URI specified.
-      def put(uri, data)
+      def put(uri, data, headers={})
         req = Net::HTTP::Put.new(uri)
-        req["Content-Type"] = CONTENT_TYPE
-        req["User-Agent"] = USER_AGENT
         req.body = format_body(data)
-        request(req)
+        request(req, headers)
       end
       
     private
@@ -223,7 +215,20 @@ module Halcyon
       # (defined in Halcyon::Exceptions) which all inherit from
       # +Halcyon::Exceptions::Base+. It is up to the client to handle these
       # exceptions specifically.
-      def request(req)
+      def request(req, headers={})
+        # define essential headers for Halcyon::Server's picky requirements
+        req["Content-Type"] = CONTENT_TYPE
+        req["User-Agent"] = USER_AGENT
+        
+        # apply provided headers
+        headers.each do |pair|
+          header, value = pair
+          req[header] = value
+        end
+        
+        # provide hook for modifying the headers
+        req = headers(req) if respond_to? :headers
+        
         # prepare and send HTTP request
         res = Net::HTTP.start(@uri.host, @uri.port) {|http|http.request(req)}
         
