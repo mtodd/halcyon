@@ -8,7 +8,7 @@
 #++
 
 begin
-  %w(rubygems merb/core_ext merb/router).each {|dep|require dep}
+  %w(rubygems merb/core_ext merb/router uri).each {|dep|require dep}
 rescue LoadError => e
   abort "Merb must be installed for Routing to function. Please install Merb."
 end
