@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 
-%w(halcyon/client).each{|dep|require dep}
+%w(rubygems halcyon/client).each{|dep|require dep}
 
 $port = 4447 if $0 == __FILE__
 
@@ -61,7 +61,7 @@ if $0 == __FILE__
   delivery_types = [:digest,:full,:none]
   users.each do |user|
     pref = Pref.find(user,'email')
-    p.set delivery_types[rand(delivery_types.length)]
-    p.save
+    pref.set delivery_types[rand(delivery_types.length)]
+    pref.save
   end
 end

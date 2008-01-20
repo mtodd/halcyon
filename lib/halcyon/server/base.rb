@@ -17,6 +17,7 @@ module Halcyon
   class Server
     
     DEFAULT_OPTIONS = {
+      :root => Dir.pwd,
       :environment => 'none',
       :port => 9267,
       :host => 'localhost',

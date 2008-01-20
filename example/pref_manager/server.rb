@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby -wKU
 
-%w(halcyon/server yaml/store).each{|dep|require dep}
+%w(rubygems halcyon/server yaml/store).each{|dep|require dep}
 
 # Handles the persistence of preferences.
 class Pref
