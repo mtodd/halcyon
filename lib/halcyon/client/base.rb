@@ -234,7 +234,7 @@ module Halcyon
         
         # parse response
         body = JSON.parse(res.body)
-        body.symbolize_keys! if body.respond_to? :symbolize_keys!
+        body.symbolize_keys!
         
         # handle non-successes
         raise Halcyon::Client::Base::Exceptions.lookup(body[:status]).new unless res.kind_of? Net::HTTPSuccess
@@ -250,7 +250,9 @@ module Halcyon
       # format according to Net::HTTP for sending through as a Hash.
       def format_body(data)
         data = {:body => data} unless data.is_a? Hash
-        data.map{|key,value|"&#{key}=#{value}&"}.join
+        data.symbolize_keys!
+        # uses the Merb Hash#to_params method defined in merb/core_ext.
+        data.to_params
       end
       
     end

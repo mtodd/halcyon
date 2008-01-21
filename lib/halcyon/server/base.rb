@@ -21,7 +21,7 @@ module Halcyon
       :environment => 'none',
       :port => 9267,
       :host => 'localhost',
-      :server => 'mongrel',
+      :server => Gem.searcher.find('thin').nil? ? 'mongrel' : 'thin',
       :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
       :log_file => '/var/log/halcyon.{app}.log',
       :log_level => 'info',
@@ -540,12 +540,12 @@ module Halcyon
       # 
       # The accepted level values are as follows:
       # 
-      #   debug
-      #   info
-      #   warn
-      #   error
-      #   fatal
-      #   unknown
+      # * debug
+      # * info
+      # * warn
+      # * error
+      # * fatal
+      # * unknown
       # 
       # These are the exact way you can refer to the logger level you'd like to
       # log at from all points of option specification (listed above in order
@@ -708,7 +708,7 @@ module Halcyon
       
       # Returns the params following the ? in a given URL as a hash
       def query_params
-        @env['QUERY_STRING'].split(/&/).inject({}){|h,kp| k,v = kp.split(/=/); h[k] = v; h}
+        @env['QUERY_STRING'].split(/&/).inject({}){|h,kp| k,v = kp.split(/=/); h[k] = v; h}.symbolize_keys!
       end
       
       # Returns the URI requested
@@ -718,9 +718,39 @@ module Halcyon
         URI.parse(@env['REQUEST_URI'] || @env['PATH_INFO']).path
       end
       
-      # Returns the Request Method as a lowercase symbol
+      # Returns the Request Method as a lowercase symbol.
+      # 
+      # One useful situation for this method would be similar to this:
+      # 
+      #   case method
+      #   when :get
+      #     # perform reading operations
+      #   when :post
+      #     # perform updating operations
+      #   when :put
+      #     # perform creating operations
+      #   when :delete
+      #     # perform deleting options
+      #   end
+      # 
+      # It can also be used in many other cases, like throwing an exception if
+      # an action is called with an unexpected method.
       def method
         @env['REQUEST_METHOD'].downcase.to_sym
+      end
+      
+      # Returns the POST data hash, making the keys symbols first.
+      # 
+      # Use like <tt>post[:post_param]</tt>.
+      def post
+        @req.POST.symbolize_keys!
+      end
+      
+      # Returns the GET data hash, making the keys symbols first.
+      # 
+      # Use like <tt>get[:get_param]</tt>.
+      def get
+        @req.GET.symbolize_keys!
       end
       
     end

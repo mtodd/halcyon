@@ -1,10 +1,10 @@
-context "Halcyon::Server Errors" do
+describe "Halcyon::Server Errors" do
   
-  before(:each) do
+  before do
     @app = Specr.new :port => 4000
   end
   
-  specify "should provide shorthand methods for errors which should throw an appropriate exception" do
+  it "should provide shorthand methods for errors which should throw an appropriate exception" do
     begin
       @app.not_found
     rescue Halcyon::Exceptions::Base => e
@@ -20,7 +20,7 @@ context "Halcyon::Server Errors" do
     end
   end
   
-  specify "supports numerous standard HTTP request error exceptions with lookup by status code" do
+  it "supports numerous standard HTTP request error exceptions with lookup by status code" do
     begin
       Halcyon::Server::Base::Exceptions::NotFound.new
     rescue Halcyon::Exceptions::Base => e
@@ -44,7 +44,7 @@ context "Halcyon::Server Errors" do
     end
   end
   
-  specify "should have a short inheritence chain to make catching generically simple" do
+  it "should have a short inheritence chain to make catching generically simple" do
     begin
       Halcyon::Server::Base::Exceptions::NotFound.new
     rescue Halcon::Exceptions::Base => e

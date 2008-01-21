@@ -43,18 +43,18 @@ describe "Halcyon::Server" do
     Rack::MockRequest.new(@app).get("/url/that/will/not/be/found/#{rand}")
     last_line = File.new(@app.instance_variable_get("@config")[:log_file]).readlines.last
     last_line.should =~ /INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \(\d+\) Specr#test :: \[404\] .* => not_found \(.+\)/
-    prev_line.should_not == last_line
+    prev_line.should.not == last_line
   end
   
   it "should create a PID file while running with the correct process ID" do
     pid_file = @app.instance_variable_get("@config")[:pid_file]
-    File.exist?(pid_file).should be_true
+    File.exist?(pid_file).should.be.true?
     File.open(pid_file){|file|file.read.should == "#{$$}\n"}
   end
   
   it "should parse URI query params correctly" do
     Rack::MockRequest.new(@app).get("/?query=value&lang=en-US")
-    @app.query_params.should == {'query' => 'value', 'lang' => 'en-US'}
+    @app.query_params.should == {:query => 'value', :lang => 'en-US'}
   end
   
   it "should parse the URI correctly" do
@@ -80,6 +80,14 @@ describe "Halcyon::Server" do
     
     Rack::MockRequest.new(@app).delete("/#{rand}")
     @app.method.should == :delete
+  end
+  
+  it "should provide convenient access to GET and POST data" do
+    Rack::MockRequest.new(@app).get("/#{rand}?foo=bar")
+    @app.get[:foo].should == 'bar'
+    
+    Rack::MockRequest.new(@app).post("/#{rand}", :input => {:foo => 'bar'}.to_params)
+    @app.post[:foo].should == 'bar'
   end
   
   it "should deny all unacceptable requests" do

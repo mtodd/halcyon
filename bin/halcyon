@@ -158,6 +158,10 @@ end
 # prepare server
 #++
 begin
+  # attempt to require the server
+  begin; require options[:server].capitalize; rescue LoadError; end
+  
+  # get the appropriate Rack Handler
   server = Rack::Handler.const_get(options[:server].capitalize)
 rescue NameError
   servers = {
@@ -165,7 +169,8 @@ rescue NameError
     'fastcgi' => 'FastCGI',
     'lsws'    => 'LSWS',
     'mongrel' => 'Mongrel',
-    'webrick' => 'WEBrick'
+    'webrick' => 'WEBrick',
+    'thin'    => 'Thin'
   }
   abort "Unsupported server (missing Rack Handler). Did you mean to specify #{options[:server]}?" unless servers.key? options[:server]
   server = Rack::Handler.const_get(servers[options[:server]])

@@ -78,17 +78,17 @@ end
 namespace 'spec' do
   desc "generate spec"
   task :gen do
-    sh "spec -c -rlib/halcyon -rspec/spec_helper spec/**/* --format s:spec/SPEC --format h:spec/SPEC.html"
+    sh "bacon -r~/lib/bacon/output -rlib/halcyon -rtest/spec_helper spec/**/* -s > spec/SPEC"
   end
   
   desc "run rspec"
   task :run do
-    sh "spec -c -rlib/halcyon -rspec/spec_helper spec/**/*"
+    sh "bacon -r~/lib/bacon/output -rlib/halcyon -rspec/spec_helper spec/**/* -o CTestUnit"
   end
   
   desc "run rspec verbosely"
   task :verb do
-    sh "spec -c -rlib/halcyon -rspec/spec_helper spec/**/* --format s"
+    sh "bacon -r~/lib/bacon/output -rlib/halcyon -rspec/spec_helper spec/**/* -o CSpecDox"
   end
 end
 
