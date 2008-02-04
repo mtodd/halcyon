@@ -67,8 +67,8 @@ module Halcyon
     #   end
     # 
     # Two routes are (effectively) defined here, the first being to watch for
-    # all requests in the format +/hello/:name+ where the word pattern is
-    # stored and transmitted as the appropriate keys in the params hash.
+    # all requests in the format <tt>/hello/:name</tt> where the word pattern
+    # is stored and transmitted as the appropriate keys in the params hash.
     # 
     # Once we've got our inputs specified, we can start to handle requests:
     # 
@@ -77,18 +77,18 @@ module Halcyon
     #       r.match('/hello/:name').to(:action => 'greet')
     #       {:action => 'not_found'} # default route
     #     end
-    #     def greet(p); {:status=>200, :body=>"Hi #{p[:name]}"}; end
+    #     def greet; {:status=>200, :body=>"Hi #{params[:name]}"}; end
     #   end
     # 
     # You will notice that we only define the method +greet+ and that it
     # returns a Hash object containing a +status+ code and +body+ content.
     # This is the most basic way to send data, but if all you're doing is
     # replying that the request was successful and you have data to return,
-    # the method +ok+ (an alias of +standard_response+) with the +body+ param
-    # as its sole parameter is sufficient.
+    # the method +ok+ (an alias of <tt>standard_response</tt>) with the +body+
+    # param as its sole parameter is sufficient.
     # 
     # 
-    #   def greet(p); ok("Hi #{p[:name]}"); end
+    #   def greet; ok("Hi #{params[:name]}"); end
     # 
     # You'll also notice that there's no method called +not_found+; this is
     # because it is already defined and behaves almost exactly like the +ok+
@@ -100,9 +100,13 @@ module Halcyon
     # route actually matches, so it doesn't need any of the extra path to match
     # against.
     # 
+    # Lastly, the use of +params+ inside the method is simply a method call
+    # to a hash of the parameters gleaned from the route, such as +:name+ or
+    # any other variables passed to it.
+    # 
     # == The Filesystem
     # 
-    # It's important to note that the +halcyon+ commandline tool expects the to
+    # It's important to note that the +halcyon+ commandline tool expects to
     # find your server inheriting +Halcyon::Server::Base+ with the same exact
     # name as its filename, though with special rules.
     # 
@@ -110,7 +114,8 @@ module Halcyon
     # that your server's class name be +AppServer+ as it capitalizes each word
     # and removes all underscores, etc.
     # 
-    # Keep this in mind when naming your class and your file.
+    # Keep this in mind when naming your class and your file, though this
+    # restriction is only temporary.
     # 
     # NOTE: This really isn't a necessary step if you write your own deployment
     # script instead of using the +halcyon+ commandline tool (as it is simply
@@ -176,11 +181,11 @@ module Halcyon
       # Most of your requests will have all the data it needs inside of the
       # +params+ you receive for your action, but for POST and PUT requests
       # (you are being RESTful, right?) you will need to retrieve your data
-      # from the +POST+ property of the +@req+ request. Here's how:
+      # from the method +post+. Here's how:
       # 
-      #   @req.POST['key'] => "value"
+      #   post[:key] => "value"
       # 
-      # As you can see, keys specifically are strings and values as well. What
+      # As you can see, keys specifically are symbols and values as well. What
       # this means is that your POST data that you send to the server needs to
       # be careful to provide a flat Hash (if anything other than a Hash is
       # passed, it is packed up into a hash similar to +{:body=>data}+) or at
@@ -189,7 +194,7 @@ module Halcyon
       # (though this could change). Here's how you would reconstruct your
       # special hash:
       # 
-      #   value = JSON.parse(@req.POST['key'])
+      #   value = JSON.parse(post[:key])
       # 
       # That will take care of reconstructing your Hash.
       # 
@@ -254,7 +259,7 @@ module Halcyon
       # that a proper JSON response may be rendered by +call+.
       # 
       # With this in mind, it is preferred that, for any errors that should
-      # result in a given HTTP Response code other than 200, an appropriate
+      # result in a given HTTP Response code other than 2xx, an appropriate
       # exception should be thrown which is then handled by this method's
       # rescue clause.
       # 
@@ -310,31 +315,36 @@ module Halcyon
       # requests.
       # 
       # It is preferred for these methods to throw Exceptions::Base exceptions
-      # (or one of its inheriters) instead of handling them manually.
+      # (or one of its inheriters) instead of handling them manually. This
+      # ensures that the actual action is not run when in fact it shouldn't,
+      # otherwise you could be allowing unauthenticated users privileged
+      # information or allowing them to perform destructive actions.
       def run(route)
         # make sure the request meets our expectations
         acceptable_request! unless $debug || $test
         
         # pull params
-        params = route.reject{|key, val| [:action, :module].include? key}
-        params.merge!(query_params)
+        @params = route.reject{|key, val| [:action, :module].include? key}
+        @params.merge!(query_params)
         
         # pre call hook
-        before_call(route, params) if respond_to? :before_call
+        before_call if respond_to? :before_call
         
         # handle module actions differently than non-module actions
         if route[:module].nil?
           # call action
-          res = send(route[:action], params)
+          res = send(route[:action])
         else
           # call module action
           mod = self.dup
           mod.instance_eval(&(@@modules[route[:module].to_sym]))
-          res = mod.send(route[:action], params)
+          res = mod.send(route[:action])
         end
         
         # after call hook
         after_call if respond_to? :after_call
+        
+        @params = {}
         
         res
       rescue Halcyon::Exceptions::Base => e
@@ -704,6 +714,11 @@ module Halcyon
       def not_found(body = 'Not Found')
         body = 'Not Found' if body.is_a?(Hash) && body.empty?
         raise Exceptions::NotFound.new(404, body)
+      end
+      
+      # Returns the params of the current request, set in the +run+ method.
+      def params
+        @params
       end
       
       # Returns the params following the ? in a given URL as a hash
