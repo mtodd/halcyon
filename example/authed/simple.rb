@@ -1,5 +1,8 @@
 %w(rubygems halcyon/server).each{|dep|require dep}
 class Simple < Halcyon::Server::Auth::Basic
+  basic_auth :only => [:greet] do |username, password|
+    [username, password] == ['rupert', 'secret']
+  end
   route do |r|
     r.match('/user/show/:id').to(:module => 'user', :action => 'show')
     r.match('/show/:id').to(:action => 'show')
@@ -9,32 +12,28 @@ class Simple < Halcyon::Server::Auth::Basic
     {:action => 'what_are_you_looking_for?'}
   end
   
-  def basic_authentication(username, password)
-    [username, password] == ['rupert', 'secret']
+  def greet
+    ok("Hello #{params[:name]}!")
   end
-  
-  def greet(params)
-    standard_response("Hello #{params[:name]}!")
+  def wink
+    ok("I'm winking at you right now.")
   end
-  def wink(params)
-    standard_response("I'm winking at you right now.")
-  end
-  def index(params)
+  def index
     {:status => 200, :body => 'Wish you were cooler.'}
   end
   
   user do
-    def show(params)
+    def show
       {:status => 200, :body => "You request: #{params[:id]}"}
     end
   end
   
-  def show(params)
+  def show
     {:status => 200, :body => "This method does not conflict with the show method in the user module."}
   end
   
   # custom 404 error handler
-  def what_are_you_looking_for?(params)
+  def what_are_you_looking_for?
     raise Exceptions::NotFound.new(404, 'Not Found; You did not find what you were expecting because it is not here. What are you looking for?')
   end
 end

@@ -58,21 +58,18 @@ class Server < Halcyon::Server::Base
     r.match('/u/:user/prefs').to(:action => 'prefs')
   end
   
-  def initialize options = {}
-    # let Halcyon do its thing and set up @config
-    super options
-    
+  def startup
     # app setup
     Pref.load_db(@config[:manager][:db])
   end
   
   # Retreives all of the preferences for a given user
-  def prefs(params)
+  def prefs
     ok Pref.new(params[:user]).prefs
   end
   
   # Handles preference CRUD
-  def pref(params)
+  def pref
     # get data
     user = Pref.new(params[:user])
     pref = params[:pref]
