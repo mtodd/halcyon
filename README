@@ -109,6 +109,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 * Bill Marquette, typo correction, reviewing examples
 * Elliott Cable, missing dependency, Thin testing
+* ramstedt, Mongrel on JRuby port numericality issue (#14)
 
 == Links
 

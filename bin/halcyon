@@ -202,4 +202,4 @@ end
 # start server
 #++
 
-server.run app, :Port => options[:port]
+server.run app, :Port => Integer(options[:port])
