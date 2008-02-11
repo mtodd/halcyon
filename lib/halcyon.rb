@@ -17,7 +17,7 @@ $:.unshift File.dirname(__FILE__)
 #++
 
 module Halcyon
-  VERSION = [0,3,29]
+  VERSION = [0,4,0]
   def self.version
     VERSION.join('.')
   end
