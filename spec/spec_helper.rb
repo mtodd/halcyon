@@ -10,11 +10,11 @@ class Specr < Halcyon::Server::Base
     r.match('/').to(:action => 'index', :arbitrary => 'random')
   end
   
-  def index(params)
+  def index
     ok('Found')
   end
   
-  def greeter(params)
+  def greeter
     ok("Hello #{params[:name]}")
   end
   
