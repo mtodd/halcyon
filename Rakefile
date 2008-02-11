@@ -37,6 +37,7 @@ BASEDIR = File.expand_path(File.dirname(__FILE__))
 
 spec = Gem::Specification.new do |s|
   s.name = project[:name]
+  s.rubyforge_project = project[:name]
   s.version = project[:version]
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = true
