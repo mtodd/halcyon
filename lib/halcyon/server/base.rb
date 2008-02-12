@@ -220,6 +220,9 @@ module Halcyon
         @res = Rack::Response.new
         @req = Rack::Request.new(env)
         
+        # set the User Agent (to be nice to anything to needs accurate information from it)
+        @res['User-Agent'] = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Server/#{Halcyon.version}"
+        
         # add the logger to the @env instance variable for global access if for
         # some reason the environment needs to be passed outside of the
         # instance
