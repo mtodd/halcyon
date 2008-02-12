@@ -396,25 +396,27 @@ module Halcyon
         @config = DEFAULT_OPTIONS.merge(options)
         @config[:app] ||= self.class.to_s.downcase
         
+        @logger = Logger.new(STDOUT)
+        
         # apply name options to log_file and pid_file configs
-        apply_log_and_pid_file_name_options
+        # apply_log_and_pid_file_name_options
         
         # debug and test mode handling
-        enable_debugging if $debug
-        enable_testing if $test
+        # enable_debugging if $debug
+        # enable_testing if $test
         
         # setup logging
-        setup_logging unless $debug || $test
+        # setup_logging unless $debug || $test
         
         # setup request filtering
-        setup_request_filters unless $debug || $test
+        # setup_request_filters unless $debug || $test
         
         # create PID file
-        @pid = File.new(@config[:pid_file].gsub('{n}', server_cluster_number), "w", 0644)
-        @pid << "#{$$}\n"; @pid.close
+        # @pid = File.new(@config[:pid_file].gsub('{n}', server_cluster_number), "w", 0644)
+        # @pid << "#{$$}\n"; @pid.close
         
         # log existence
-        @logger.info "PID file created. PID is #{$$}."
+        # @logger.info "PID file created. PID is #{$$}."
         
         # call startup callback if defined
         startup if respond_to? :startup
@@ -425,7 +427,7 @@ module Halcyon
         # trap signals to die (when killed by the user) gracefully
         finalize =  Proc.new do
           @logger.info "Shutting down #{$$}."
-          clean_up
+          # clean_up
           exit
         end
         # http://en.wikipedia.org/wiki/Signal_%28computing%29
@@ -434,184 +436,11 @@ module Halcyon
         # listen for USR1 signals and toggle debugging accordingly
         trap("USR1") do
           if $debug
-            disable_debugging
+            # disable_debugging
           else
-            enable_debugging
+            # enable_debugging
           end
         end
-      end
-      
-      # Closes the logger and deletes the PID file.
-      def clean_up
-        # don't try to clean up what's cleaned up already
-        return if defined? @cleaned_up
-        
-        # run shutdown hook if defined
-        shutdown if respond_to? :shutdown
-        
-        # close logger, delete PID file, flag clean state
-        @logger.close
-        File.delete(@pid.path) if File.exist?(@pid.path)
-        @cleaned_up = true
-      end
-      
-      # Retreives the server cluster sequence number for the PID file.
-      # 
-      # This is deprecated and will be removed soon, probably for the 0.4.0
-      # release. Use of the +{port}+ value is much more appropriate and
-      # meaningful.
-      def server_cluster_number
-        # if there are no +{n}+ references in the PID file name, then simply
-        # return 0 as the cluster number. (This is the preferred behavior and
-        # this test allows the method to fail fast. +{n}+ is deprecated and
-        # will be removed before 0.4.0 is released.)
-        return 0.to_s if @config[:pid_file]['{n}'].nil?
-        
-        # warn users that they're using a deprecated convention.
-        warn "Your PID file name contains '{n}' (#{@config[:pid_file]}). This is deprecatd and will be removed by the 0.4.0 release. Use '{port}' instead."
-        
-        # counts the number of PID files already existing.
-        server_count = Dir[@config[:pid_file].gsub('{n}','*')].length
-        # since the counting starts at 0, if the file with the count exists,
-        # then one of the lesser number servers isn't running, so check each
-        # PID file until the one not running is found.
-        # if no files exist, then 0 will be the count, which won't exist, so
-        # it will be the default number.
-        while File.exist?(@config[:pid_file].gsub('{n}',server_count.to_s))
-          server_count -= 1
-        end
-        # return that number.
-        server_count.to_s
-      end
-      
-      # If the server receives a SIGUSR1 signal it will toggle debugging. This
-      # method is used to setup logging and the request handling methods for
-      # debugging.
-      def enable_debugging
-        $debug = true
-        
-        # set the PID file name to /tmp/ unless PID file already exists
-        @config[:pid_file] = '/tmp/halcyon.{server}.{app}.{port}.pid' unless defined? @pid
-        apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
-        
-        # setup logger to STDOUT and log entering debugging mode
-        @logger = Logger.new(STDOUT)
-        @logger.progname = "#{self.class}#debug"
-        @logger.level = Logger::DEBUG
-        @logger.formatter = @config[:log_format]
-        @logger.info "Entering debugging mode..."
-      rescue Errno::EACCES
-      	abort "Can't access #{@config[:pid_file]}, try 'sudo #{$0}'"
-      end
-      
-      # This method is used to setup logging and the request handling methods
-      # for debugging.
-      def enable_testing
-        # set the PID file name to /tmp/ unless PID file already exists
-        @config[:pid_file] = '/tmp/halcyon.testing.{app}.{port}.pid' unless defined? @pid
-        @config[:log_file] = '/tmp/halcyon.testing.{app}.log'
-        apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
-        
-        # setup logger and log entering testing mode
-        @logger = Logger.new(@config[:log_file])
-        @logger.progname = "#{self.class}#test"
-        @logger.level = Logger::DEBUG
-        @logger.formatter = @config[:log_format]
-        @logger.info "Entering testing mode..."
-        
-        # make sure we clean up after ourselves since we're in testing mode
-        at_exit {
-          clean_up
-          File.delete(@config[:log_file]) if File.exist?(@config[:log_file])
-        }
-      rescue Errno::EACCES
-      	abort "Can't access #{@config[:pid_file]}, try 'sudo #{$0}'"
-      end
-      
-      # Disables all of the affects of debugging mode and returns logging and
-      # request filtering back to normal.
-      # 
-      # Refer to +enable_debugging+ for more information.
-      def disable_debugging
-        # disable logging and log leaving debugging mode
-        $debug = false
-        @logger.info "Leaving debugging mode."
-        
-        # setup normal logging
-        setup_logging
-        
-        # reenable request filtering
-        setup_request_filters
-      end
-      
-      # Sets up logging based on the configuration options in +@config+, which
-      # is set (in order of lowest to highest precedence) in the default
-      # options, in the configuration file provided, on the commandline, and
-      # debug mode options.
-      # 
-      # == Levels
-      # 
-      # The accepted level values are as follows:
-      # 
-      # * debug
-      # * info
-      # * warn
-      # * error
-      # * fatal
-      # * unknown
-      # 
-      # These are the exact way you can refer to the logger level you'd like to
-      # log at from all points of option specification (listed above in order
-      # of ascending precedence).
-      # 
-      # If a bogus value is entered, a warning will be issued and the value
-      # will be defaulted to 'debug'. (So don't mess up.)
-      def setup_logging
-        # get the logging level based on the name supplied
-        level = {
-          'debug' => Logger::DEBUG,
-          'info'  => Logger::INFO,
-          'warn'  => Logger::WARN,
-          'error' => Logger::ERROR,
-          'fatal' => Logger::FATAL,
-          'unknown' => Logger::UNKNOWN # wtf?
-        }[@config[:log_level]]
-        if level.nil?
-          warn "Logging level specified not acceptable. Defaulting to 'debug'. Check the documentation for the acceptable values."
-          @config[:log_level] = 'debug'
-          level = Logger::DEBUG
-        end
-        
-        # setup the logger
-        @logger = Logger.new(@config[:log_file])
-        @logger.progname = self.class
-        @logger.level = level
-        @logger.formatter = @config[:log_format]
-      rescue Errno::EACCES
-      	abort "Can't access #{@config[:log_file]}, try 'sudo #{$0}'"
-      end
-      
-      # Sets up request filters based on User-Agent, Content-Type, and Remote
-      # IP/address values.
-      # 
-      # Extracted from +initialize+ to reduce repetition.
-      def setup_request_filters
-        @config[:acceptable_requests] = ACCEPTABLE_REQUESTS
-        @config[:acceptable_remotes] = ACCEPTABLE_REMOTES
-      end
-      
-      # Searches through the PID file name and the Log file name stored in the
-      # +@config+ variable for +{server}+, +{app}+, and +{port}+ values and
-      # sets them accordingly.
-      def apply_log_and_pid_file_name_options
-        # DEFAULT :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
-        @config[:pid_file].gsub!('{server}', @config[:server])
-        @config[:pid_file].gsub!('{port}', @config[:port].to_s)
-        @config[:pid_file].gsub!('{app}', File.basename(@config[:app]))
-        # DEFAULT :log_file => '/var/log/halcyon.{app}.log',
-        @config[:log_file].gsub!('{server}', @config[:server])
-        @config[:log_file].gsub!('{port}', @config[:port].to_s)
-        @config[:log_file].gsub!('{app}', File.basename(@config[:app]))
       end
       
       # = Routing
