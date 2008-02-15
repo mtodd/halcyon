@@ -23,9 +23,11 @@ module Halcyon
       :host => 'localhost',
       :server => Gem.searcher.find('thin').nil? ? 'mongrel' : 'thin',
       :pid_file => '/var/run/halcyon.{server}.{app}.{port}.pid',
+      :logger => Logger.new(STDOUT),
       :log_file => '/var/log/halcyon.{app}.log',
       :log_level => 'info',
       :log_format => proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"},
+      :restrict_requests => false,
       # handled internally
       :acceptable_requests => [],
       :acceptable_remotes => []
@@ -324,7 +326,7 @@ module Halcyon
       # information or allowing them to perform destructive actions.
       def run(route)
         # make sure the request meets our expectations
-        acceptable_request! unless $debug || $test
+        acceptable_request! unless !@options[:restrict_requests] || $debug || $test
         
         # pull params
         @params = route.reject{|key, val| [:action, :module].include? key}
@@ -374,47 +376,16 @@ module Halcyon
       # 
       # Feel free to define initialize for your app (which is only called once
       # per server instance), just be sure to call +super+.
-      # 
-      # == PID File
-      # 
-      # A PID file is created when the server is first initialized with the
-      # current process ID. Where it is located depends on the default option,
-      # the config file, the commandline option, and the debug status,
-      # increasing in precedence in that order.
-      # 
-      # By default, the PID file is placed in +/var/run/+ and is named
-      # +halcyon.{server}.{app}.{port}.pid+ where +{server}+ is replaced by the
-      # running server, +{app}+ is the app name (suffixed with +#debug+ if
-      # running in debug mode), and +{port}+ being the server port (if there
-      # are multiple servers running, this helps clarify).
-      # 
-      # There is an option to numerically label your server  via the +{n}+
-      # value, but this is deprecated and will be removed soon. Using the
-      # +{port}+ option makes much more sense and creates much more meaning.
       def initialize(options = {})
         # save configuration options
         @config = DEFAULT_OPTIONS.merge(options)
         @config[:app] ||= self.class.to_s.downcase
         
-        # apply name options to log_file and pid_file configs
-        apply_log_and_pid_file_name_options
-        
-        # debug and test mode handling
-        enable_debugging if $debug
-        enable_testing if $test
-        
-        # setup logging
-        setup_logging unless $debug || $test
-        
-        # setup request filtering
-        setup_request_filters unless $debug || $test
-        
-        # create PID file
-        @pid = File.new(@config[:pid_file].gsub('{n}', server_cluster_number), "w", 0644)
-        @pid << "#{$$}\n"; @pid.close
-        
-        # log existence
-        @logger.info "PID file created. PID is #{$$}."
+        @logger = Logger.new(@options[:logger])
+        @logger.progname = "#{self.class}"
+        @logger.level = Logger.const_get(@options[:log_level].upcase.to_sym)
+        @logger.formatter = @config[:log_format]
+        @logger.info "Entering debugging mode..." if $debug
         
         # call startup callback if defined
         startup if respond_to? :startup
@@ -430,15 +401,6 @@ module Halcyon
         end
         # http://en.wikipedia.org/wiki/Signal_%28computing%29
         %w(INT KILL TERM QUIT HUP).each{|sig|trap(sig, finalize)}
-        
-        # listen for USR1 signals and toggle debugging accordingly
-        trap("USR1") do
-          if $debug
-            disable_debugging
-          else
-            enable_debugging
-          end
-        end
       end
       
       # Closes the logger and deletes the PID file.
@@ -451,97 +413,7 @@ module Halcyon
         
         # close logger, delete PID file, flag clean state
         @logger.close
-        File.delete(@pid.path) if File.exist?(@pid.path)
         @cleaned_up = true
-      end
-      
-      # Retreives the server cluster sequence number for the PID file.
-      # 
-      # This is deprecated and will be removed soon, probably for the 0.4.0
-      # release. Use of the +{port}+ value is much more appropriate and
-      # meaningful.
-      def server_cluster_number
-        # if there are no +{n}+ references in the PID file name, then simply
-        # return 0 as the cluster number. (This is the preferred behavior and
-        # this test allows the method to fail fast. +{n}+ is deprecated and
-        # will be removed before 0.4.0 is released.)
-        return 0.to_s if @config[:pid_file]['{n}'].nil?
-        
-        # warn users that they're using a deprecated convention.
-        warn "Your PID file name contains '{n}' (#{@config[:pid_file]}). This is deprecatd and will be removed by the 0.4.0 release. Use '{port}' instead."
-        
-        # counts the number of PID files already existing.
-        server_count = Dir[@config[:pid_file].gsub('{n}','*')].length
-        # since the counting starts at 0, if the file with the count exists,
-        # then one of the lesser number servers isn't running, so check each
-        # PID file until the one not running is found.
-        # if no files exist, then 0 will be the count, which won't exist, so
-        # it will be the default number.
-        while File.exist?(@config[:pid_file].gsub('{n}',server_count.to_s))
-          server_count -= 1
-        end
-        # return that number.
-        server_count.to_s
-      end
-      
-      # If the server receives a SIGUSR1 signal it will toggle debugging. This
-      # method is used to setup logging and the request handling methods for
-      # debugging.
-      def enable_debugging
-        $debug = true
-        
-        # set the PID file name to /tmp/ unless PID file already exists
-        @config[:pid_file] = '/tmp/halcyon.{server}.{app}.{port}.pid' unless defined? @pid
-        apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
-        
-        # setup logger to STDOUT and log entering debugging mode
-        @logger = Logger.new(STDOUT)
-        @logger.progname = "#{self.class}#debug"
-        @logger.level = Logger::DEBUG
-        @logger.formatter = @config[:log_format]
-        @logger.info "Entering debugging mode..."
-      rescue Errno::EACCES
-      	abort "Can't access #{@config[:pid_file]}, try 'sudo #{$0}'"
-      end
-      
-      # This method is used to setup logging and the request handling methods
-      # for debugging.
-      def enable_testing
-        # set the PID file name to /tmp/ unless PID file already exists
-        @config[:pid_file] = '/tmp/halcyon.testing.{app}.{port}.pid' unless defined? @pid
-        @config[:log_file] = '/tmp/halcyon.testing.{app}.log'
-        apply_log_and_pid_file_name_options # reapply for {server}, {app}, and {port} to be set
-        
-        # setup logger and log entering testing mode
-        @logger = Logger.new(@config[:log_file])
-        @logger.progname = "#{self.class}#test"
-        @logger.level = Logger::DEBUG
-        @logger.formatter = @config[:log_format]
-        @logger.info "Entering testing mode..."
-        
-        # make sure we clean up after ourselves since we're in testing mode
-        at_exit {
-          clean_up
-          File.delete(@config[:log_file]) if File.exist?(@config[:log_file])
-        }
-      rescue Errno::EACCES
-      	abort "Can't access #{@config[:pid_file]}, try 'sudo #{$0}'"
-      end
-      
-      # Disables all of the affects of debugging mode and returns logging and
-      # request filtering back to normal.
-      # 
-      # Refer to +enable_debugging+ for more information.
-      def disable_debugging
-        # disable logging and log leaving debugging mode
-        $debug = false
-        @logger.info "Leaving debugging mode."
-        
-        # setup normal logging
-        setup_logging
-        
-        # reenable request filtering
-        setup_request_filters
       end
       
       # Sets up logging based on the configuration options in +@config+, which
