@@ -17,26 +17,9 @@ $:.unshift File.dirname(__FILE__)
 #++
 
 module Halcyon
-  VERSION = [0,4,0]
+  VERSION = [0,4,1]
   def self.version
     VERSION.join('.')
-  end
-  
-  # = Introduction
-  # 
-  # Halcyon is a JSON Web Server Framework intended to be used for fast, small
-  # data transactions, like for AJAX-intensive sites or for special services like
-  # authentication centralized for numerous web apps in the same cluster.
-  # 
-  # The possibilities are pretty limitless: the goal of Halcyon was simply to be
-  # lightweight, fast, simple to implement and use, and able to be extended.
-  # 
-  # == Usage
-  # 
-  # For documentation on using Halcyon, check out the Halcyon::Server::Base and
-  # Halcyon::Client::Base classes which contain much more usage documentation.
-  def introduction
-    abort "READ THE DAMNED RDOCS!"
   end
   
   #--
@@ -47,6 +30,12 @@ module Halcyon
     module Auth
       autoload :Basic, 'halcyon/server/auth/basic'
     end
+  end
+  
+  class Application
+  end
+
+  class Client
   end
   
 end
