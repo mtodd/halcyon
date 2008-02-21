@@ -27,16 +27,14 @@ module Halcyon
       :log_level => 'info',
       :log_format => proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"},
       :logger => Logger.new(STDOUT),
-      # handled internally
-      :acceptable_requests => [],
-      :acceptable_remotes => []
+      :allow_from => :all
     }
+    
     ACCEPTABLE_REQUESTS = [
       # ENV var to check, Regexp the value should match, the status code to return in case of failure, the message with the code
       ["HTTP_USER_AGENT", /JSON\/1\.1\.\d+ Compatible( \(en-US\) Halcyon\/(\d+\.\d+\.\d+) Client\/(\d+\.\d+\.\d+))?/, 406, 'Not Acceptable'],
       ["CONTENT_TYPE", /application\/json/, 415, 'Unsupported Media Type']
     ]
-    ACCEPTABLE_REMOTES = ['localhost', '127.0.0.1', '0.0.0.0']
     
     class Base
       
@@ -53,7 +51,11 @@ module Halcyon
         @res = Rack::Response.new
         @req = Rack::Request.new(env)
         
+        # handle filtering unwanted requests
+        acceptable_request!
+        
         # set the User Agent (to be nice to anything to needs accurate information from it)
+        @res['Content-Type'] = "application/json"
         @res['User-Agent'] = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Server/#{Halcyon.version}"
         
         # add the logger to the @env instance variable for global access if for
@@ -119,12 +121,23 @@ module Halcyon
         {:status => e.status, :body => e.error}
       end
       
-      # Tests for acceptable requests if +$debug+ and +$test+ are not set.
+      # Filters unacceptable requests depending on the configuration of the
+      # <tt>:allow_from</tt> option.
+      # Acceptable values include:
+      # 
+      #   <tt>:all</tt>:: allow every request to go through
+      #   <tt>:halcyon_clients</tt>:: only allow Halcyon clients
+      #   <tt>:local</tt>:: do not allow for requests from an outside host
       def acceptable_request!
-        @config[:acceptable_requests].each do |req|
-          raise Halcyon::Exceptions::Base.new(req[2], req[3]) unless @env[req[0]] =~ req[1]
+        case @config[:allow_from]
+        when :all
+          # allow every request to go through
+        when :halcyon_clients
+          # only allow Halcyon clients
+        when :local
+          # do not allow for requests from an outside host
+          raise Exceptions::Forbidden.new unless ['localhost', '127.0.0.1', '0.0.0.0'].member? @env["REMOTE_ADDR"]
         end
-        raise Exceptions::Forbidden.new unless @config[:acceptable_remotes].member? @env["REMOTE_ADDR"]
       end
       
       #--
@@ -134,7 +147,7 @@ module Halcyon
       def initialize(options = {})
         # save configuration options
         @config = DEFAULT_OPTIONS.merge(options)
-        @config[:app] ||= self.class.to_s.downcase
+        @config[:app] ||= self.class.to_s
         
         @logger = @config[:logger]
 
@@ -144,7 +157,7 @@ module Halcyon
         startup if respond_to? :startup
         
         # log ready state
-        @logger.info "Started, listening on #{@config[:port]}."
+        @logger.info "Started. Listening on #{@config[:port]}."
         
         # trap signals to die (when killed by the user) gracefully
         finalize =  Proc.new do
