@@ -1,12 +1,13 @@
-require 'halcyon/server'
+require 'halcyon'
 require 'rack/mock'
 
 $test = true
 
-class Specr < Halcyon::Server::Base
+class Specr < Halcyon::Application
   
   route do |r|
     r.match('/hello/:name').to(:action => 'greeter')
+    r.match('/:action').to()
     r.match('/').to(:action => 'index', :arbitrary => 'random')
   end
   
@@ -16,6 +17,10 @@ class Specr < Halcyon::Server::Base
   
   def greeter
     ok("Hello #{params[:name]}")
+  end
+  
+  def failure
+    raise ArgumentError.new("Halcyon::Application::Testing::ArgumentErrorException")
   end
   
 end

@@ -1,20 +1,19 @@
-describe "Halcyon::Server" do
+describe "Halcyon::Application" do
   
   before do
-    @app = Specr.new :port => 4000
+    @log = ""
+    @app = Specr.new :port => 4000, :logger => Logger.new(StringIO.new(@log))
   end
   
   it "should dispatch methods according to their respective routes" do
     Rack::MockRequest.new(@app).get("/hello/Matt")
-    last_line = File.new(@app.instance_variable_get("@config")[:log_file]).readlines.last
-    last_line.should =~ /INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \(\d+\) Specr#test :: \[200\] .* => greeter \(.+\)/
+    @log.split("\n").last.should =~ /INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \(\d+\) Specr :: \[200\] \/hello\/Matt \(.+\)/
   end
   
   it "should provide various shorthand methods for simple responses but take custom response values" do
     response = {:status => 200, :body => 'OK'}
     @app.ok.should == response
     @app.success.should == response
-    @app.standard_response.should == response
     
     @app.ok('').should == {:status => 200, :body => ''}
     @app.ok(['OK', 'Sure Thang', 'Correcto']).should == {:status => 200, :body => ['OK', 'Sure Thang', 'Correcto']}
@@ -39,17 +38,7 @@ describe "Halcyon::Server" do
   end
   
   it "should log activity" do
-    prev_line = File.new(@app.instance_variable_get("@config")[:log_file]).readlines.last
-    Rack::MockRequest.new(@app).get("/url/that/will/not/be/found/#{rand}")
-    last_line = File.new(@app.instance_variable_get("@config")[:log_file]).readlines.last
-    last_line.should =~ /INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \(\d+\) Specr#test :: \[404\] .* => not_found \(.+\)/
-    prev_line.should.not == last_line
-  end
-  
-  it "should create a PID file while running with the correct process ID" do
-    pid_file = @app.instance_variable_get("@config")[:pid_file]
-    File.exist?(pid_file).should.be.true?
-    File.open(pid_file){|file|file.read.should == "#{$$}\n"}
+    @app.instance_variable_get("@logger").is_a?(Logger).should.be.true?
   end
   
   it "should parse URI query params correctly" do
@@ -90,16 +79,23 @@ describe "Halcyon::Server" do
     @app.post[:foo].should == 'bar'
   end
   
-  it "should deny all unacceptable requests" do
-    conf = @app.instance_variable_get("@config")
-    conf[:acceptable_requests] = Halcyon::Server::ACCEPTABLE_REQUESTS
-    
-    Rack::MockRequest.new(@app).get("/#{rand}")
-    @app.acceptable_request! rescue Halcyon::Exceptions::Base
+  it "should allow all requests by default" do
+    @app.instance_variable_get("@options")[:allow_from].should == :all
   end
   
   it "should record the correct environment details" do
-    @app.instance_eval { @config[:root].should == Dir.pwd }
+    @app.instance_eval { @options[:root].should == Dir.pwd }
+  end
+  
+  it "should handle exceptions gracefully" do
+    @app.instance_variable_get("@options")[:fail_hard] = true
+    should.raise(ArgumentError) { Rack::MockRequest.new(@app).get("/failure") }
+    @log.should.match(/Halcyon::Application::Testing::ArgumentErrorException/)
+    
+    @app.instance_variable_get("@options")[:fail_hard] = false
+    body = JSON.parse(Rack::MockRequest.new(@app).get("/failure").body)
+    body['status'].should == 500
+    body['body'].should == "Internal Server Error"
   end
   
 end

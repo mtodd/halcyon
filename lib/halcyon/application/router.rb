@@ -18,7 +18,7 @@ end
 #++
 
 module Halcyon
-  class Server
+  class Application
     
     # = Routing
     # 

@@ -1,7 +1,8 @@
 describe "Halcyon::Server Errors" do
   
   before do
-    @app = Specr.new :port => 4000
+    @log = ""
+    @app = Specr.new :port => 4000, :logger => Logger.new(StringIO.new(@log))
   end
   
   it "should provide shorthand methods for errors which should throw an appropriate exception" do

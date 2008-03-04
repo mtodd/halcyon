@@ -21,12 +21,12 @@ project = {
     --op rdoc
     --line-numbers
     --inline-source
-    --title "Halcyon\ Documentation"
+    --title "Halcyon\ API"
     --exclude "^(_darcs|spec|pkg|.svn)/"
   ],
   :dependencies => {
-    'json_pure' => '>=1.1.1',
-    'rack' => '>=0.2.0',
+    'json_pure' => '>=1.1.2',
+    'rack' => '>=0.3.0',
     'merb' => '>=0.4.1'
   },
   :requirements => 'install the json gem to get faster JSON parsing',

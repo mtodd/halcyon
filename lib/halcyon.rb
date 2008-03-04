@@ -6,7 +6,7 @@
 
 $:.unshift File.dirname(__FILE__)
 
-%w(rubygems merb/core_ext).each {|dep|require dep}
+%w(rubygems rack merb/core_ext merb/router json uri logger).each {|dep|require dep}
 
 module Halcyon
   
@@ -16,6 +16,8 @@ module Halcyon
   end
   
   autoload :Application, 'halcyon/application'
+  autoload :Server, 'halcyon/server'
+  autoload :Client, 'halcyon/client'
   
   class Server
     module Auth
