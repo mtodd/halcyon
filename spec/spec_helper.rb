@@ -11,6 +11,10 @@ class Specr < Halcyon::Application
     r.match('/').to(:action => 'index', :arbitrary => 'random')
   end
   
+  def startup
+    @started = true
+  end
+  
   def index
     ok('Found')
   end

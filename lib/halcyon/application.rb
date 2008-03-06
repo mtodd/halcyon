@@ -29,6 +29,8 @@ module Halcyon
       
       finalize =  Proc.new do
         @logger.info "Shutting down #{$$}."
+        shutdown if respond_to? :shutdown
+        @logger.info "Done."
         exit
       end
       %w(INT KILL TERM QUIT HUP).each{|sig|trap(sig, finalize)} # http://en.wikipedia.org/wiki/Signal_%28computing%29
@@ -64,7 +66,8 @@ module Halcyon
       timing[:finished] = Time.now
       timing[:total] = (((timing[:finished] - timing[:started])*1e4).round.to_f/1e4)
       timing[:per_sec] = (((1.0/(timing[:total]))*1e2).round.to_f/1e2)
-      @logger.info "[#{@response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)\n"
+      @logger.info "[#{@response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)"
+      @logger << "DEBUG Params: #{@params.inspect}\n\n"
       
       @response.finish
     end
@@ -72,8 +75,6 @@ module Halcyon
     def _dispatch(route)
       @params = route.reject{|key, val| [:action, :module].include? key}
       @params.merge!(query_params)
-      
-      @logger << "Params: #{@params.inspect}\n"
       
       # make sure that the right module/action is called based on the route
       case route[:module]

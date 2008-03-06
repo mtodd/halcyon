@@ -5,9 +5,13 @@ describe "Halcyon::Application" do
     @app = Specr.new :port => 4000, :logger => Logger.new(StringIO.new(@log))
   end
   
+  it "should run startup hook if defined" do
+    @app.instance_variable_get("@started").should.be.true?
+  end
+  
   it "should dispatch methods according to their respective routes" do
     Rack::MockRequest.new(@app).get("/hello/Matt")
-    @log.split("\n").last.should =~ /INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \(\d+\) Specr :: \[200\] \/hello\/Matt \(.+\)/
+    @log.should =~ /INFO \[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] \(\d+\) Specr :: \[200\] \/hello\/Matt \(.+\)/
   end
   
   it "should provide various shorthand methods for simple responses but take custom response values" do
@@ -26,9 +30,10 @@ describe "Halcyon::Application" do
   end
   
   it "should handle requests with param values in the URL" do
-    body = JSON.parse(Rack::MockRequest.new(@app).get("/hello/Matt").body)
+    body = JSON.parse(Rack::MockRequest.new(@app).get("/hello/Matt?test=value").body)
     body['status'].should == 200
     body['body'].should == "Hello Matt"
+    @app.params[:test].should == 'value'
   end
   
   it "should route unmatchable requests to the default route and return JSON with appropriate status" do

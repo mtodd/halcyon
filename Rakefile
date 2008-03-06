@@ -4,7 +4,7 @@ $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), "lib")))
 
 include FileUtils
 
-require 'lib/halcyon'
+require 'halcyon'
 
 project = {
   :name => "halcyon",

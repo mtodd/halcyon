@@ -16,15 +16,6 @@ module Halcyon
   end
   
   autoload :Application, 'halcyon/application'
-  autoload :Server, 'halcyon/server'
   autoload :Client, 'halcyon/client'
   
-  class Server
-    module Auth
-      autoload :Basic, 'halcyon/server/auth/basic'
-    end
-  end
-  
 end
-
-%w(halcyon/exceptions).each {|dep|require dep}
