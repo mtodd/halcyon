@@ -205,7 +205,7 @@ module Halcyon
       end
       
       def query_params
-        @env['QUERY_STRING'].split(/&/).inject({}){|h,kp| k,v = kp.split(/=/); h[k] = v; h}.symbolize_keys!
+        @env['QUERY_STRING'].split(/&/).inject({}){|h,kp| k,v = kp.split(/=/); h[k] = v; h}.to_mash
       end
       
       def uri
@@ -219,11 +219,11 @@ module Halcyon
       end
       
       def post
-        @req.POST.symbolize_keys!
+        @req.POST.to_mash
       end
       
       def get
-        @req.GET.symbolize_keys!
+        @req.GET.to_mash
       end
       
     end

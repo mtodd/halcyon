@@ -5,7 +5,7 @@ describe "Halcyon::Server::Router" do
     @app = Specr.new :port => 4000, :logger => Logger.new(StringIO.new(@log))
   end
   
-  it "should prepares routes correctly when written correctly" do
+  it "should prepare routes correctly when written correctly" do
     # routes have been defined for Specr
     Halcyon::Application::Router.routes.should.not == []
     Halcyon::Application::Router.routes.length.should > 0

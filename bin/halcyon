@@ -70,7 +70,7 @@ opts = OptionParser.new("", 24, '  ') do |opts|
         ARGV.replace(conf.split)
         opts.parse! ARGV
       when Hash
-        conf.symbolize_keys!
+        conf.to_mash
         options = options.merge(conf)
       when Array
         # TODO (MT) support multiple servers (or at least specifying which
