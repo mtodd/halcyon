@@ -48,7 +48,7 @@ describe "Halcyon::Application" do
   
   it "should parse URI query params correctly" do
     Rack::MockRequest.new(@app).get("/?query=value&lang=en-US")
-    @app.query_params.should == {:query => 'value', :lang => 'en-US'}
+    @app.query_params.should == {'query' => 'value', 'lang' => 'en-US'}
   end
   
   it "should parse the URI correctly" do
@@ -93,11 +93,6 @@ describe "Halcyon::Application" do
   end
   
   it "should handle exceptions gracefully" do
-    @app.instance_variable_get("@options")[:fail_hard] = true
-    should.raise(ArgumentError) { Rack::MockRequest.new(@app).get("/failure") }
-    @log.should.match(/Halcyon::Application::Testing::ArgumentErrorException/)
-    
-    @app.instance_variable_get("@options")[:fail_hard] = false
     body = JSON.parse(Rack::MockRequest.new(@app).get("/failure").body)
     body['status'].should == 500
     body['body'].should == "Internal Server Error"

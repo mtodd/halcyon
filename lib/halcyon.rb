@@ -15,6 +15,7 @@ module Halcyon
     VERSION.join('.')
   end
   
+  autoload :Runner, 'halcyon/runner'
   autoload :Application, 'halcyon/application'
   autoload :Client, 'halcyon/client'
   

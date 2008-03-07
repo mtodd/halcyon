@@ -45,5 +45,3 @@ module Halcyon
     
   end
 end
-
-%w(halcyon/client/exceptions).each {|dep|require dep}

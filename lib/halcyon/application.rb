@@ -25,15 +25,13 @@ module Halcyon
       
       startup if respond_to? :startup
       
-      @logger.info "Started. Listening on #{@options[:port]}."
+      @logger.info "Started. PID is #{$$}"
       
-      finalize =  Proc.new do
+      at_exit do
         @logger.info "Shutting down #{$$}."
         shutdown if respond_to? :shutdown
         @logger.info "Done."
-        exit
       end
-      %w(INT KILL TERM QUIT HUP).each{|sig|trap(sig, finalize)} # http://en.wikipedia.org/wiki/Signal_%28computing%29
       
       # clean after ourselves and get prepared to start serving things
       GC.start
@@ -56,8 +54,7 @@ module Halcyon
         response = _dispatch(@env['halcyon.route'])
       rescue Exception => e
         response = {:status => 500, :body => 'Internal Server Error'}
-        @logger.error "#{e.message}\n\t" << e.backtrace.join("\t")
-        raise if @options[:fail_hard] # consider #abort instead
+        @logger.error "#{e.message}\n\t" << e.backtrace.join("\n\t")
       end
       
       @response.status = response[:status]
@@ -123,7 +120,7 @@ module Halcyon
     end
     
     def params
-      @params
+      @params.to_mash
     end
     
     def post
