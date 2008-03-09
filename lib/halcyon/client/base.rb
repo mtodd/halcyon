@@ -14,62 +14,62 @@
 #++
 
 module Halcyon
+  
+  # = Building Custom Clients
+  # 
+  # Once your Halcyon JSON Server App starts to take shape, it may be useful
+  # to begin to write tests on expected functionality, and then to implement
+  # API calls with a designated Client lib for your Ruby or Rails apps, etc.
+  # The Base class provides a standard implementation and several options for
+  # wrapping up functionality of your app from the server side into the
+  # client side so that you may begin to use response data.
+  # 
+  # == Creating Your Client
+  # 
+  # Creating a simple client can be as simple as this:
+  # 
+  #   class Simple < Halcyon::Client::Base
+  #     def greet(name)
+  #       get("/hello/#{name}")
+  #     end
+  #   end
+  # 
+  # The only thing simply may be actually using the Simple client you just
+  # created.
+  # 
+  # But to actually get in and use the library, one has to take full
+  # advantage of the HTTP request methods, +get+, +post+, +put+, and
+  # +delete+. These methods simply return the JSON-parsed data from the
+  # server, effectively returning a hash with two key values, +status+ which
+  # contains the HTTP status code, and +body+ which contains the body of the
+  # content returned which can be any number of objects, including, but not
+  # limited to Hash, Array, Numeric, Nil, Boolean, String, etc.
+  # 
+  # You are not limited to what your methods can call: they are arbitrarily
+  # and solely up to your whims and needs. It is simply a matter of good
+  # design and performance when it comes to structuring and implementing
+  # client actions which can be complex or simple series of requests to the
+  # server.
+  # 
+  # == Acceptable Clients
+  # 
+  # The Halcyon Server is intended to be very picky with whom it will speak
+  # to, so it requires that we specifically mention that we speak only
+  # "application/html", that we're "JSON/1.1.1 Compatible", and that we're
+  # local to the server itself (in process, anyways). This ensures that it
+  # has to deal with as little noise as possible and focus it's attention on
+  # performing our requests.
+  # 
+  # This shouldn't affect usage when working with the Client or in production
+  # but might if you're trying to check things in your browser. Just make
+  # certain that the debug option is turned on (-d for the +halcyon+ command)
+  # when you start the server so that it knows to be a little more lenient
+  # about to whom it speaks.
   class Client
     
-    DEFAULT_OPTIONS = {}
     USER_AGENT = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon/#{Halcyon.version} Client/#{Halcyon::Client.version}"
     CONTENT_TYPE = 'application/json'
     
-    # = Building Custom Clients
-    # 
-    # Once your Halcyon JSON Server App starts to take shape, it may be useful
-    # to begin to write tests on expected functionality, and then to implement
-    # API calls with a designated Client lib for your Ruby or Rails apps, etc.
-    # The Base class provides a standard implementation and several options for
-    # wrapping up functionality of your app from the server side into the
-    # client side so that you may begin to use response data.
-    # 
-    # == Creating Your Client
-    # 
-    # Creating a simple client can be as simple as this:
-    # 
-    #   class Simple < Halcyon::Client::Base
-    #     def greet(name)
-    #       get("/hello/#{name}")
-    #     end
-    #   end
-    # 
-    # The only thing simply may be actually using the Simple client you just
-    # created.
-    # 
-    # But to actually get in and use the library, one has to take full
-    # advantage of the HTTP request methods, +get+, +post+, +put+, and
-    # +delete+. These methods simply return the JSON-parsed data from the
-    # server, effectively returning a hash with two key values, +status+ which
-    # contains the HTTP status code, and +body+ which contains the body of the
-    # content returned which can be any number of objects, including, but not
-    # limited to Hash, Array, Numeric, Nil, Boolean, String, etc.
-    # 
-    # You are not limited to what your methods can call: they are arbitrarily
-    # and solely up to your whims and needs. It is simply a matter of good
-    # design and performance when it comes to structuring and implementing
-    # client actions which can be complex or simple series of requests to the
-    # server.
-    # 
-    # == Acceptable Clients
-    # 
-    # The Halcyon Server is intended to be very picky with whom it will speak
-    # to, so it requires that we specifically mention that we speak only
-    # "application/html", that we're "JSON/1.1.1 Compatible", and that we're
-    # local to the server itself (in process, anyways). This ensures that it
-    # has to deal with as little noise as possible and focus it's attention on
-    # performing our requests.
-    # 
-    # This shouldn't affect usage when working with the Client or in production
-    # but might if you're trying to check things in your browser. Just make
-    # certain that the debug option is turned on (-d for the +halcyon+ command)
-    # when you start the server so that it knows to be a little more lenient
-    # about to whom it speaks.
     class Base
       
       #--

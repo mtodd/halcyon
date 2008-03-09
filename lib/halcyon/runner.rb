@@ -1,7 +1,8 @@
-# Modelled after Thin's Runner, found at
+# Partly modeled after Thin's Runner, found at
 # http://github.com/macournoyer/thin/tree/master/lib/thin/runner.rb
 
 module Halcyon
+  
   # = CLI Runner
   # Parse options and start serving the app
   class Runner
@@ -17,6 +18,7 @@ module Halcyon
       
       begin
         parser.parse! argv
+        send argv.shift.to_sym rescue abort "You must provide a command to run. Try: halcyon -h"
       rescue OptionParser::InvalidOption => e
         abort "You used an unsupported option. Try: halcyon -h"
       end
@@ -27,7 +29,7 @@ module Halcyon
         opts.banner << "Halcyon, JSON App Framework\n"
         opts.banner << "http://halcyon.rubyforge.org/\n"
         opts.banner << "\n"
-        opts.banner << "Usage: halcyon [options] appname\n"
+        opts.banner << "Usage: halcyon [command] [options]\n"
         opts.banner << "\n"
         opts.banner << "Put -c or --config first otherwise it will overwrite higher precedence options."
         

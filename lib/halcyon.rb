@@ -16,6 +16,7 @@ module Halcyon
   end
   
   autoload :Runner, 'halcyon/runner'
+  autoload :Exceptions, 'halcyon/exceptions'
   autoload :Application, 'halcyon/application'
   autoload :Client, 'halcyon/client'
   

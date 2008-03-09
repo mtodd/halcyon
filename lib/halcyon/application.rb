@@ -1,18 +1,19 @@
 module Halcyon
   
+  # The core of Halcyon on the server side is the Halcyon::Application class
+  # which handles dispatching requests and responding with appropriate messages
+  # to the client (which can be specified).
   class Application
+    include Exceptions
     
     autoload :Router, 'halcyon/application/router'
     
     DEFAULT_OPTIONS = {
       :root => Dir.pwd,
       :logger => Logger.new(STDOUT),
-      :log_file => '/var/log/halcyon.{app}.log',
       :log_level => 'info',
       :log_format => proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"},
-      :logger => Logger.new(STDOUT),
-      :allow_from => :all,
-      :fail_hard => false
+      :allow_from => :all
     }
     
     def initialize(options = {})
@@ -52,6 +53,9 @@ module Halcyon
         
         @env['halcyon.route'] = Router.route(@env)
         response = _dispatch(@env['halcyon.route'])
+      rescue Exceptions::Base => e
+        response = {:status => e.status, :body => e.body}
+        @logger.info e.message
       rescue Exception => e
         response = {:status => 500, :body => 'Internal Server Error'}
         @logger.error "#{e.message}\n\t" << e.backtrace.join("\n\t")
@@ -97,7 +101,7 @@ module Halcyon
     #   <tt>:halcyon_clients</tt>:: only allow Halcyon clients
     #   <tt>:local</tt>:: do not allow for requests from an outside host
     def acceptable_request!
-      case @options[:allow_from]
+      case @options[:allow_from].to_sym
       when :all
         # allow every request to go through
       when :halcyon_clients
