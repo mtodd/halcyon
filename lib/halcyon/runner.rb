@@ -10,8 +10,6 @@ module Halcyon
     # Make sure that the Halcyon.config hash is setup
     Halcyon.config ||= Mash.new(Halcyon::Application::DEFAULT_OPTIONS)
     
-    attr :options
-    
     def initialize(argv=ARGV)
       if Halcyon.config[:logger]
         Halcyon.logger = Halcyon.config[:logger]
@@ -43,6 +41,10 @@ module Halcyon
     
     def call(env)
       @app.call(env)
+    end
+    
+    def logger
+      Halcyon.logger
     end
     
     class << self

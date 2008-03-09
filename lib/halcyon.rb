@@ -15,7 +15,7 @@ module Halcyon
   autoload :Runner, 'halcyon/runner'
   autoload :Exceptions, 'halcyon/exceptions'
   autoload :Application, 'halcyon/application'
-  autoload :Controlle, 'halcyon/controller'
+  autoload :Controller, 'halcyon/controller'
   autoload :Client, 'halcyon/client'
   
   class << self

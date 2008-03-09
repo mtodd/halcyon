@@ -13,7 +13,6 @@ module Halcyon
     attr_accessor :env
     attr_accessor :session
     attr_accessor :cookies
-    attr_accessor :hooks
     
     DEFAULT_OPTIONS = {
       :root => Dir.pwd,
@@ -24,26 +23,25 @@ module Halcyon
     def initialize
       self.logger.info "Starting up..."
       
-      self.hooks = {}
+      self.hooks[:startup].call(Halcyon.config) if self.hooks[:startup]
+      self.class.instance_variables.reject{|v|v=="@hooks"}.each{|v|::Application.instance_variable_set(v, self.class.instance_variable_get(v))}
       
-      self.hooks[:startup].call unless self.hooks[:startup]
+      # clean after ourselves and get prepared to start serving things
+      GC.start
       
       self.logger.info "Started. PID is #{$$}"
       
       at_exit do
         self.logger.info "Shutting down #{$$}."
-        self.hooks[:shutdown].call unless self.hooks[:shutdown]
+        self.hooks[:shutdown].call(Halcyon.config) if self.hooks[:shutdown]
         self.logger.info "Done."
       end
-      
-      # clean after ourselves and get prepared to start serving things
-      GC.start
     end
     
     def call(env)
       timing = {:started => Time.now}
       
-      request = Rack::Response.new(env)
+      request = Rack::Request.new(env)
       response = Rack::Response.new
       
       response['Content-Type'] = "application/json" # "text/plain" for debugging maybe?
@@ -52,25 +50,26 @@ module Halcyon
       begin
         acceptable_request!
         
-        env['halcyon.route'] = Router.route(@env)
-        response = dispatch(env)
+        env['halcyon.route'] = Router.route(env)
+        result = dispatch(env)
       rescue Exceptions::Base => e
-        response = {:status => e.status, :body => e.body}
+        result = {:status => e.status, :body => e.body}
         self.logger.info e.message
       rescue Exception => e
-        response = {:status => 500, :body => 'Internal Server Error'}
+        result = {:status => 500, :body => 'Internal Server Error'}
         self.logger.error "#{e.message}\n\t" << e.backtrace.join("\n\t")
       end
       
-      response.status = response[:status]
-      response.write response.to_json
+      response.status = result[:status]
+      response.write result.to_json
       
       timing[:finished] = Time.now
       timing[:total] = (((timing[:finished] - timing[:started])*1e4).round.to_f/1e4)
       timing[:per_sec] = (((1.0/(timing[:total]))*1e2).round.to_f/1e2)
       
       self.logger.info "[#{response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)"
-      self.logger << "DEBUG Params: #{request.params.inspect}\n\n" if $debug
+      self.logger << "Session ID: #{self.session.id}\n"
+      self.logger << "Params: #{request.params.merge(env['halcyon.route']).inspect}\n\n"
       
       response.finish
     end
@@ -111,7 +110,21 @@ module Halcyon
       end
     end
     
+    def logger
+      Halcyon.logger
+    end
+    
+    def hooks
+      self.class.hooks
+    end
+    
     class << self
+      
+      attr_accessor :hooks
+      
+      def hooks
+        @hooks ||= {}
+      end
       
       def logger
         Halcyon.logger
@@ -129,7 +142,7 @@ module Halcyon
         self.hooks[:startup] = hook
       end
       
-      def shutdown
+      def shutdown &hook
         self.hooks[:shutdown] = hook
       end
       

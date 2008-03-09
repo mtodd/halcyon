@@ -27,7 +27,7 @@ module Halcyon
     end
     
     def params
-      self.request.params.to_mash
+      self.request.params.merge(self.env['halcyon.route']).to_mash
     end
     
     def post
