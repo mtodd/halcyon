@@ -7,118 +7,70 @@ module Halcyon
   # Parse options and start serving the app
   class Runner
     
+    # Make sure that the Halcyon.config hash is setup
+    Halcyon.config ||= Mash.new(Halcyon::Application::DEFAULT_OPTIONS)
+    
     attr :options
     
-    def initialize(argv)
-      @options = {
-        :root => Dir.pwd,
-        :logger => Logger.new(STDOUT),
-        :allow_from => :all
-      }
-      
-      begin
-        parser.parse! argv
-        send argv.shift.to_sym rescue abort "You must provide a command to run. Try: halcyon -h"
-      rescue OptionParser::InvalidOption => e
-        abort "You used an unsupported option. Try: halcyon -h"
+    def initialize(argv=ARGV)
+      if Halcyon.config[:logger]
+        Halcyon.logger = Halcyon.config[:logger]
+      else
+        Halcyon.logger = case Halcyon.config[:log_file]
+        when "nil", NilClass
+          Logger.new(STDOUT)
+        when String
+          Logger.new(Halcyon.config[:log_file])
+        else
+          Logger.new(STDOUT)
+        end
       end
+      Halcyon.logger.formatter = proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"}
+      Halcyon.logger.progname = Halcyon.root.split('/').last.camel_case
+      Halcyon.logger.level = Logger.const_get(Halcyon.config[:log_level].upcase)
+      
+      # Run initializer
+      require Halcyon.root/'config'/'initialize'
+      
+      # Setup autoloads for Controllers found in Halcyon.root/'app'
+      Dir.glob(Halcyon.root/'app'/'*').each do |controller|
+        require controller
+        self.logger.debug "#{File.basename(controller).camel_case.to_sym} Controller loaded!"
+      end
+      
+      @app = Halcyon::Application.new
     end
     
-    def parser
-      OptionParser.new("", 24, '  ') do |opts|
-        opts.banner << "Halcyon, JSON App Framework\n"
-        opts.banner << "http://halcyon.rubyforge.org/\n"
-        opts.banner << "\n"
-        opts.banner << "Usage: halcyon [command] [options]\n"
-        opts.banner << "\n"
-        opts.banner << "Put -c or --config first otherwise it will overwrite higher precedence options."
-        
-        opts.separator ""
-        opts.separator "Options:"
-        
-        opts.on("-d", "--debug", "set debugging flag (set $debug to true)") { $debug = true }
-        opts.on("-D", "--Debug", "enable verbose debugging (set $debug and $DEBUG to true)") { $debug = true; $DEBUG = true }
-        opts.on("-w", "--warn", "turn warnings on for your script") { $-w = true }
-        
-        opts.on("-I", "--include PATH", "specify $LOAD_PATH (multiples OK)") do |path|
-          $:.unshift(*path.split(":"))
-        end
-        
-        opts.on("-r", "--require LIBRARY", "require the library, before executing your script") do |library|
-          require library
-        end
-        
-        opts.on("-c", "--config PATH", "load configuration (YAML) from PATH") do |conf_file|
-          if File.exist?(conf_file)
-            require 'yaml'
-
-            # load the config file
-            begin
-              conf = YAML.load_file(conf_file)
-            rescue Errno::EACCES
-              abort("Can't access #{conf_file}, try 'sudo #{$0}'")
-            end
-
-            # store config file path so SIGHUP and SIGUSR2 will reload the config in case it changes
-            options[:config_file] = conf_file
-
-            # parse config
-            case conf
-            when String
-              # config file given was just the commandline options
-              ARGV.replace(conf.split)
-              opts.parse! ARGV
-            when Hash
-              conf.to_mash
-              options = options.merge(conf)
-            when Array
-              # TODO (MT) support multiple servers (or at least specifying which
-              # server's configuration to load)
-              warn "Your configuration file is setup for multiple servers. This is not a supported feature yet."
-              warn "However, we've pulled the first server entry as this server's configuration."
-              # an array of server configurations
-              # default to the first entry since multiple server configurations isn't
-              # precisely worked out yet.
-              options = options.merge(conf[0])
-            else
-              abort "Config file in an unsupported format. Config files must be YAML or the commandline flags"
-            end
-          else
-            abort "Config file failed to load. #{conf_file} was not found. Correct the path and try again."
+    def call(env)
+      @app.call(env)
+    end
+    
+    class << self
+      
+      def logger
+        Halcyon.logger
+      end
+      
+      def load_config file
+        if File.exist?(file)
+          require 'yaml'
+          
+          # load the config file
+          begin
+            Halcyon.config = Halcyon.config.merge YAML.load_file(file).to_mash
+          rescue Errno::EACCES
+            abort("Can't access #{file}, try 'sudo #{$0}'")
           end
-        end
-        
-        opts.on("-s", "--server SERVER", "serve using SERVER (default: #{options[:server]})") do |serv|
-          options[:server] = serv
-        end
-        
-        opts.on("-o", "--host HOST", "listen on HOST (default: #{options[:host]})") do |host|
-          options[:host] = host
-        end
-        
-        opts.on("-p", "--port PORT", "use PORT (default: #{options[:port]})") do |port|
-          options[:port] = port
-        end
-        
-        opts.on("-l", "--logfile PATH", "log access to PATH (default: #{options[:log_file]})") do |log_file|
-          options[:log_file] = log_file
-        end
-        
-        opts.on("-L", "--loglevel LEVEL", "log level (default: #{options[:log_level]})") do |log_file|
-          options[:log_level] = log_file
-        end
-        
-        opts.on_tail("-h", "--help", "Show this message") do
-          puts opts
-          exit
-        end
-        
-        opts.on_tail("-v", "--version", "Show version") do
-          # require 'halcyon'
-          puts "Halcyon #{Halcyon::Server.version}"
-          exit
+          
+          # store config file path so SIGHUP and SIGUSR2 will reload the config in case it changes
+          Halcyon.config[:config_file] = file
+          
+          Halcyon.config
+        else
+          abort "Config file failed to load. #{file} was not found. Correct the path and try again."
         end
       end
+      
     end
     
   end

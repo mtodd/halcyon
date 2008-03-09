@@ -11,13 +11,26 @@ $:.unshift File.dirname(__FILE__)
 module Halcyon
   
   VERSION = [0,5,0]
-  def self.version
-    VERSION.join('.')
-  end
   
   autoload :Runner, 'halcyon/runner'
   autoload :Exceptions, 'halcyon/exceptions'
   autoload :Application, 'halcyon/application'
+  autoload :Controlle, 'halcyon/controller'
   autoload :Client, 'halcyon/client'
+  
+  class << self
+    
+    attr_accessor :config
+    attr_accessor :logger
+    
+    def version
+      VERSION.join('.')
+    end
+    
+    def root
+      self.config[:root] || Dir.pwd rescue Dir.pwd
+    end
+    
+  end
   
 end

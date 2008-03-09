@@ -8,30 +8,32 @@ module Halcyon
     
     autoload :Router, 'halcyon/application/router'
     
+    attr_accessor :request
+    attr_accessor :response
+    attr_accessor :env
+    attr_accessor :session
+    attr_accessor :cookies
+    attr_accessor :hooks
+    
     DEFAULT_OPTIONS = {
       :root => Dir.pwd,
-      :logger => Logger.new(STDOUT),
       :log_level => 'info',
-      :log_format => proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"},
       :allow_from => :all
     }
     
-    def initialize(options = {})
-      @options = DEFAULT_OPTIONS.merge options
+    def initialize
+      self.logger.info "Starting up..."
       
-      @logger = @options[:logger]
-      @logger.progname = self.class.to_s
-      @logger.formatter = proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"}
-      @logger.info "Starting up..."
+      self.hooks = {}
       
-      startup if respond_to? :startup
+      self.hooks[:startup].call unless self.hooks[:startup]
       
-      @logger.info "Started. PID is #{$$}"
+      self.logger.info "Started. PID is #{$$}"
       
       at_exit do
-        @logger.info "Shutting down #{$$}."
-        shutdown if respond_to? :shutdown
-        @logger.info "Done."
+        self.logger.info "Shutting down #{$$}."
+        self.hooks[:shutdown].call unless self.hooks[:shutdown]
+        self.logger.info "Done."
       end
       
       # clean after ourselves and get prepared to start serving things
@@ -41,56 +43,50 @@ module Halcyon
     def call(env)
       timing = {:started => Time.now}
       
-      @env = env
-      @request = Rack::Request.new(@env)
-      @response = Rack::Response.new
+      request = Rack::Response.new(env)
+      response = Rack::Response.new
       
-      @response['Content-Type'] = "application/json" # "text/plain" for debugging maybe?
-      @response['User-Agent'] = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Application/#{Halcyon.version}"
+      response['Content-Type'] = "application/json" # "text/plain" for debugging maybe?
+      response['User-Agent'] = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Application/#{Halcyon.version}"
       
       begin
         acceptable_request!
         
-        @env['halcyon.route'] = Router.route(@env)
-        response = _dispatch(@env['halcyon.route'])
+        env['halcyon.route'] = Router.route(@env)
+        response = dispatch(env)
       rescue Exceptions::Base => e
         response = {:status => e.status, :body => e.body}
-        @logger.info e.message
+        self.logger.info e.message
       rescue Exception => e
         response = {:status => 500, :body => 'Internal Server Error'}
-        @logger.error "#{e.message}\n\t" << e.backtrace.join("\n\t")
+        self.logger.error "#{e.message}\n\t" << e.backtrace.join("\n\t")
       end
       
-      @response.status = response[:status]
-      @response.write response.to_json
+      response.status = response[:status]
+      response.write response.to_json
       
       timing[:finished] = Time.now
       timing[:total] = (((timing[:finished] - timing[:started])*1e4).round.to_f/1e4)
       timing[:per_sec] = (((1.0/(timing[:total]))*1e2).round.to_f/1e2)
-      @logger.info "[#{@response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)"
-      @logger << "DEBUG Params: #{@params.inspect}\n\n"
       
-      @response.finish
+      self.logger.info "[#{response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)"
+      self.logger << "DEBUG Params: #{request.params.inspect}\n\n" if $debug
+      
+      response.finish
     end
     
-    def _dispatch(route)
-      @params = route.reject{|key, val| [:action, :module].include? key}
-      @params.merge!(query_params)
-      
-      # make sure that the right module/action is called based on the route
-      case route[:module]
+    def dispatch(env)
+      route = env['halcyon.route']
+      # make sure that the right controller/action is called based on the route
+      controller = case route[:controller]
       when NilClass
-        # not a part of a module
-        send(route[:action].to_sym)
-      when Symbol
-        # module name specified
-        self.class.class_eval { include const_get(route[:module]) }
-        self.class.const_get(route[:module]).instance_method(route[:action].to_sym).bind(self).call
-        # TODO: figure out how to do this... the bound object has to be kind_of? the module where it was plucked from
+        # default to the Application controller
+        ::Application.new(env)
       when String
         # pulled from URL, so camelize (from merb/core_ext) and symbolize first
-        _dispatch(route.merge(:module => route[:module].camelize.to_sym))
+        Object.const_get(route[:controller].camel_case.to_sym).new(env)
       end
+      controller.send(route[:action].to_sym)
     end
     
     # Filters unacceptable requests depending on the configuration of the
@@ -101,7 +97,7 @@ module Halcyon
     #   <tt>:halcyon_clients</tt>:: only allow Halcyon clients
     #   <tt>:local</tt>:: do not allow for requests from an outside host
     def acceptable_request!
-      case @options[:allow_from].to_sym
+      case Halcyon.config[:allow_from].to_sym
       when :all
         # allow every request to go through
       when :halcyon_clients
@@ -111,51 +107,32 @@ module Halcyon
         # do not allow for requests from an outside host
         raise Exceptions::Forbidden.new unless ['localhost', '127.0.0.1', '0.0.0.0'].member? @env["REMOTE_ADDR"]
       else
-        warn "Unrecognized allow_from configuration value (#{@config[:allow_from].to_s}); use all, halcyon_clients, or local."
+        logger.warn "Unrecognized allow_from configuration value (#{@config[:allow_from].to_s}); use all, halcyon_clients, or local."
       end
     end
     
-    def self.route
-      if block_given?
-        Router.prepare do |router|
-          Router.default_to yield(router) || {:action => 'not_found'}
+    class << self
+      
+      def logger
+        Halcyon.logger
+      end
+      
+      def route
+        if block_given?
+          Router.prepare do |router|
+            Router.default_to yield(router) || {:controller => 'application', :action => 'not_found'}
+          end
         end
       end
-    end
-    
-    def params
-      @params.to_mash
-    end
-    
-    def post
-      @request.POST.to_mash
-    end
-    
-    def get
-      @request.GET.to_mash
-    end
-    
-    def query_params
-      @env['QUERY_STRING'].split(/&/).inject({}){|h,kp| k,v = kp.split(/=/); h[k] = v; h}.to_mash
-    end
-    
-    def uri
-      # special parsing is done to remove the protocol, host, and port that
-      # some Handlers leave in there. (Fixes inconsistencies.)
-      URI.parse(@env['REQUEST_URI'] || @env['PATH_INFO']).path
-    end
-    
-    def method
-      @env['REQUEST_METHOD'].downcase.to_sym
-    end
-    
-    def ok(msg='OK')
-      {:status => 200, :body => msg}
-    end
-    alias_method :success, :ok
-    
-    def not_found(msg='Not Found')
-      {:status => 404, :body => msg}
+      
+      def startup &hook
+        self.hooks[:startup] = hook
+      end
+      
+      def shutdown
+        self.hooks[:shutdown] = hook
+      end
+      
     end
     
   end
