@@ -1,0 +1,89 @@
+!!! 1.0 Strict
+%html{:xmlns => 'http://www.w3.org/1999/xhtml', :"xml:lang" => 'en', :lang => 'en'}
+  %head
+    %title Halcyon
+    %meta{:name => 'content-type', :content => 'text/html;charset=utf-8'}
+    %meta{:name => 'author', :content => 'Igor Pengivrag (www.colorlightstudio.com)'}
+    %meta{:name => 'description', :content => 'Halcyon, Ruby JSON App Framework'}
+    %meta{:name => 'keywords', :content => 'ruby, json, framework, soa, http'}
+    %link{:rel => 'stylesheet', :type => 'text/css', :href => '/style.css', :media => 'screen'}
+    %link{:rel => 'stylesheet', :type => 'text/css', :href => 'stylesheets/styles.css', :media => 'screen'}
+  %body
+    #wrap
+      #top
+        %h2
+          %a{:href => '/', :title => 'Home'} Halcyon
+        #menu
+          %ul
+            %li
+              %a.current{:href => '/'} home
+            %li
+              %a.current{:href => '/doc/'} RDoc
+            %li
+              %a.current{:href => 'http://ohloh.net/projects/10313?p=Halcyon'} Ohloh
+            %li
+              %a.current{:href => 'http://github.com/mtodd/halcyon'} GitHub
+      #content
+        #left
+          %h2 Introduction
+          %p Halcyon is a JSON Web App Framework built on Rack for speed and light weight.
+          %p Halcyon has several aims and goals, including:
+          %ul
+            %li Be fast
+            %li Be small
+            %li Talk small
+            %li Be flexible
+            %li Be easy to implement
+          
+          %h2 Functionality &amp; Performance
+          %p With Mongrel leading the pack and Rack holding things up, JSON doing the fast talking and with plenty of room to spare, how could you not be interested, even about this new framework? Still not convinced? OK, fair enough, here's some code for you.
+          %code Coming soon...
+          %p You can then run it with
+          %code $ thin start -r runner.ru -p 4647
+          %p That's all it takes to open up the door to let you communicate with your applications that implement or use the simple client.
+          
+          %h2 Metrics
+          %p Ohloh's pretty cool and we use it to track the development metrics of Halcyon. Check out some of the more interesting details on our project page. You can find the link at the top of the page.
+          %p For your viewing pleasure, here are some of the Ohloh project factoids:
+          %script{:type => 'text/javascript', :src => 'http://www.ohloh.net/projects/10313/widgets/project_factoids'}
+        
+        #right
+          .box
+            %h2 About
+            %p Halcyon is a JSON Web App Framework built on Rack for speed and light weight.
+            
+            %h2 Recent Entries
+            #twitter_div
+              %ul#twitter_update_list
+            
+            %h2 Installation
+            %p Installation is easy, all you need is RubyGems and you're set. Just run the following:
+            %code $ sudo gem install halcyon
+            %p If you're interested in the most recent version, check out our GitHub page (link above). You can install the latest development version with these steps:
+            %code
+              $ git clone git://github.com/mtodd/halcyon.git
+              $ cd halcyon && rake install
+            %p This will get the latest version of Halcyon and run the install task.
+            %p
+              %strong Note:
+              Due to limitations, only json_pure is a dependency since it is supported on all platforms. However, for faster performance, make sure you run this command which will install the faster C extension of JSON:
+              %code $ sudo gem install json
+            
+            %h2 Community
+            %p Welcome to the infantile community, I really hope you do choose to stay with us for a while and help us get our feet on the ground.
+            %p There are several ways to participate: on IRC, you can find us at #halcyon on irc.freenode.net. Join us on our mailing list hosted by GOogle Groups. Regardless, you can always get a hold of Matt Todd via his email address.
+        
+        #clear
+    
+    #footer
+      %p Halcyon &copy; 2007-2008 Matt Todd. Design by Color Light Studio.
+    
+  %script{:type => 'text/javascript'}
+    var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+    document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+  %script{:type => 'text/javascript'}
+    var pageTracker = _gat._getTracker("UA-101852-3");
+    pageTracker._initData();
+    pageTracker._trackPageview();
+  %script{:type => 'text/javascript', :src => 'http://twitter.com/javascripts/blogger.js'}
+  %script{:type => 'text/javascript', :src => 'http://twitter.com/javascripts/statuses/user_timeline/halcyon_dev.json?callback=twitterCallback2&count=5'}
