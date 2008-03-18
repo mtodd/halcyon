@@ -27,6 +27,7 @@ module Halcyon
       self.class.instance_variables.reject{|v|v=="@hooks"}.each{|v|::Application.instance_variable_set(v, self.class.instance_variable_get(v))}
       
       # clean after ourselves and get prepared to start serving things
+      self.logger.debug "Starting GC."
       GC.start
       
       self.logger.info "Started. PID is #{$$}"
