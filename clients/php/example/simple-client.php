@@ -1,6 +1,6 @@
 <?php
 
-require('../lib/halcyon.php');
+require(dirname(__FILE__).'/../lib/halcyon.php');
 
 class Sparrow extends Halcyon {
   public function greet($name) {
