@@ -10,7 +10,7 @@ $:.unshift File.dirname(__FILE__)
 
 module Halcyon
   
-  VERSION = [0,5,0]
+  VERSION = [0,5,0] unless defined?(Halcyon::VERSION)
   
   autoload :Runner, 'halcyon/runner'
   autoload :Exceptions, 'halcyon/exceptions'
