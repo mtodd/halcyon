@@ -4,7 +4,10 @@ module Halcyon
   class Controller
     include Exceptions
     
-    attr_accessor :env, :request
+    attr_accessor :env
+    attr_accessor :request
+    attr_accessor :session
+    attr_accessor :cookies
     
     def initialize(env)
       @env = env
@@ -24,6 +27,10 @@ module Halcyon
         raise NotImplemented.new
       end
       
+    end
+    
+    def logger
+      Halcyon.logger
     end
     
     def params
@@ -60,6 +67,7 @@ module Halcyon
     def not_found(msg='Not Found')
       {:status => 404, :body => msg}
     end
+    alias_method :missing, :not_found
     
   end
   

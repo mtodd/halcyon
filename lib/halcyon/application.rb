@@ -8,11 +8,8 @@ module Halcyon
     
     autoload :Router, 'halcyon/application/router'
     
-    attr_accessor :request
-    attr_accessor :response
-    attr_accessor :env
+    attr_accessor :collection # collects values set in startup hook to set for controller
     attr_accessor :session
-    attr_accessor :cookies
     
     DEFAULT_OPTIONS = {
       :root => Dir.pwd,
@@ -23,8 +20,10 @@ module Halcyon
     def initialize
       self.logger.info "Starting up..."
       
+      self.collection = {}
+      
       self.hooks[:startup].call(Halcyon.config) if self.hooks[:startup]
-      self.class.instance_variables.reject{|v|v=="@hooks"}.each{|v|::Application.instance_variable_set(v, self.class.instance_variable_get(v))}
+      self.class.instance_variables.reject{|v| ['@hooks', '@inheritable_attributes'].include? v }.each{|v| self.collection[v] = self.class.instance_variable_get(v) }
       
       # clean after ourselves and get prepared to start serving things
       self.logger.debug "Starting GC."
@@ -49,7 +48,7 @@ module Halcyon
       response['User-Agent'] = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Application/#{Halcyon.version}"
       
       begin
-        acceptable_request!
+        acceptable_request! env
         
         env['halcyon.route'] = Router.route(env)
         result = dispatch(env)
@@ -86,6 +85,8 @@ module Halcyon
         # pulled from URL, so camelize (from merb/core_ext) and symbolize first
         Object.const_get(route[:controller].camel_case.to_sym).new(env)
       end
+      
+      self.collection.keys.each {|k| controller.instance_variable_set(k, self.collection[k]) }
       controller.send(route[:action].to_sym)
     end
     
@@ -96,18 +97,18 @@ module Halcyon
     #   <tt>:all</tt>:: allow every request to go through
     #   <tt>:halcyon_clients</tt>:: only allow Halcyon clients
     #   <tt>:local</tt>:: do not allow for requests from an outside host
-    def acceptable_request!
+    def acceptable_request!(env)
       case Halcyon.config[:allow_from].to_sym
       when :all
         # allow every request to go through
       when :halcyon_clients
         # only allow Halcyon clients
-        raise Exception::Forbidden.new unless @env['USER_AGENT'] =~ /JSON\/1\.1\.\d+ Compatible \(en-US\) Halcyon::Client\(\d+\.\d+\.\d+\)/
+        raise Exception::Forbidden.new unless env['USER_AGENT'] =~ /JSON\/1\.1\.\d+ Compatible \(en-US\) Halcyon::Client\(\d+\.\d+\.\d+\)/
       when :local
         # do not allow for requests from an outside host
-        raise Exceptions::Forbidden.new unless ['localhost', '127.0.0.1', '0.0.0.0'].member? @env["REMOTE_ADDR"]
+        raise Exceptions::Forbidden.new unless ['localhost', '127.0.0.1', '0.0.0.0'].member? env["REMOTE_ADDR"]
       else
-        logger.warn "Unrecognized allow_from configuration value (#{@config[:allow_from].to_s}); use all, halcyon_clients, or local."
+        logger.warn "Unrecognized allow_from configuration value (#{Halcyon.config[:allow_from].to_s}); use all, halcyon_clients, or local. Allowing all requests."
       end
     end
     
