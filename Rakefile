@@ -9,8 +9,8 @@ namespace(:site) do
   
   desc 'Update the website'
   task :update => ['haml:compile', 'sass:compile'] do
-    `rsync -avz ./compiled/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/test/ > /dev/null`
-    puts "* uploaded ./compiled/ to http://halcyon.rubyforge.org/test/"
+    `rsync -avz ./compiled/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/ > /dev/null`
+    puts "* uploaded ./compiled/ to http://halcyon.rubyforge.org/"
   end
   
 end
@@ -35,11 +35,12 @@ namespace(:sass) do
   
   desc 'Compile SASS templates to CSS'
   task :compile => [:mkdir, :clear] do
+    style = (ENV['SASS_STYLE'] || 'compressed').to_sym
     Dir['./source/stylesheets/*.sass'].each do |sass_filename|
       File.open(sass_filename, 'r') do |sass_file|
         css_filename = sass_filename.gsub('.sass', '.css').gsub('./source/', './compiled/')
         File.open(css_filename, 'w') do |css_file|
-          css_file << Sass::Engine.new(sass_file.read, :style => :compressed, :filename => sass_filename.to_s, :load_paths => ['.']).to_css
+          css_file << Sass::Engine.new(sass_file.read, :style => style, :filename => sass_filename.to_s, :load_paths => ['.']).to_css
           puts "* compiled #{File.basename(css_file.path)}"
         end
       end
