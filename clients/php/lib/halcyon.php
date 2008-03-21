@@ -9,7 +9,7 @@ class Halcyon {
   
   const VERSION = "0.1.0";
   
-  private $uri = array('host' => 'localhost', 'port' => 4647, 'scheme' => 'http');
+  private $uri = array('host' => 'localhost', 'port' => 4647, 'scheme' => 'http', 'original' => 'http://localhost:4647/');
   private $headers = array(
     'Content-Type' => 'application/json',
     'User-Agent' => 'JSON/1.2.1 Compatible (en-US) Halcyon::Client/0.5.0',
@@ -17,7 +17,7 @@ class Halcyon {
   );
   
   public function __construct($uri = null, $headers = null) {
-    if($uri) $this->uri = parse_url($uri);
+    if($uri) $this->uri = array_merge(parse_url($uri), array('original' => $uri));
     if(isset($headers)) {
       foreach($headers as $key => $value) {
         $this->header($key, $value);
@@ -41,7 +41,7 @@ class Halcyon {
       'method' => 'POST',
       'path' => $path,
       'body' => $data
-    ), $headers);
+    ), array_merge($headers, array('Content-type' => 'application/x-www-form-urlencoded', 'Content-length' => strlen(http_build_query($data)))));
   }
   
   protected function delete($path, $headers = array()) {
@@ -56,7 +56,7 @@ class Halcyon {
       'method' => 'PUT',
       'path' => $path,
       'body' => $data
-    ), $headers);
+    ), array_merge($headers, array('Content-type' => 'application/x-www-form-urlencoded', 'Content-length' => strlen(http_build_query($data)))));
   }
   
   private function request($request, $headers = array()) {
@@ -69,16 +69,16 @@ class Halcyon {
         $req .= "{$key}: {$value}\r\n";
       }
       $req .= "\r\n";
-      if($request['body']) $req .= http_build_query($request['body']) . "\r\n\r\n";
+      if($request['body']) $req .= http_build_query($request['body']);
       
       if(fwrite($connection, $req)) {
         $response = '';
         while(!feof($connection)) {
-          $response .= fgets($connection, 256); // throw new HalcyonError("Error receiving response."));
+          $response .= trim(fgets($connection, 4096))."\n"; // throw new HalcyonError("Error receiving response."));
         }
         fclose($connection); // throw new HalcyonError("Error closing connection.");
         
-        $response = end(split("\r\n\r\n", $response, 2));
+        $response = end(split("\n\n", $response, 2));
         
         return json_decode($response);
       } else {
