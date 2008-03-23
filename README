@@ -1,78 +1,38 @@
-= Halcyon JSON Server Framework
+= Halcyon JSON Application Framework
 
-A JSON Web Server Framework designed to provide for simple applications dealing
-solely with JSON requests and responses from AJAX client applications or for
-lightweight server-side message transport, particularly with authentication and
-the like.
+A JSON Web Application Framework for developing lightweight applications
+interfaced via JSON-encoded HTTP requests. This is ideal for back end
+applications serving functionality for other applications.
 
 == On Rack
 
 Halcyon is based off of Rack. Rejoice, Rack is amazing.
 
-== Quick start
+== Development
 
-There's not much to Halcyon. I've put a good deal of time into fleshing out the
-RDocs so check out the documentation and the example directory.
+Halcyon is currently undergoing major refactoring and restructuring. The API is
+subject to change up until the official 0.5.0 release.
 
-Halcyon is the sister project of Aurora SAS, a simple authentication server to
-manage authentication, session management, and user roles and permissions. It
-is still very early in development (as Halcyon was a prerequisite) but there
-should be some interesting code from that project to let you see just what
-Halcyon is capable. Stay tuned!
-
-== Installing with RubyGems
+== Installation
 
 A Gem of Halcyon is available.  You can install it with:
 
   $ sudo gem install halcyon
 
+Alternatively, you can install the latest development efforts from the git
+repository, located at http://github.com/mtodd/halcyon:
+
+  $ git clone git://github.com/mtodd/halcyon.git
+  $ cd halcyon; rake install
+
+Don't forget to install the JSON gem for improved performance:
+
+  $ sudo gem install json
+
 == Usage
 
-The +halcyon+ command will assist you for running the server. Just run:
-
-  $ halcyon -d -p 3800 example/simple
-
-You may need to +cd+ into the project directory, or, alternatively, you can
-+cp+ the files out into your +tmp+ folder and work from there. If you'd like
-to just +cd+, +gem which halcyon+ will tell you where to find the Gem
-directory.
-
-Once you've gotten the server running, pull open your browser, point it to
-http://localhost:3800/ and see what happens. Take a look at the source and try
-to access the other routes and see how things work. Notice the response in the
-browser.
-
-Once you've familiarized yourself with that, kill the server (Ctl+C) and start
-it again without the debugging switch: -d. (+halcyon -h+ for usage help.)
-
-  $ halcyon -p 3800 example/simple
-
-Now pull it up again in the browser. You'll notice right away that it blocks
-all access from any user agent that doesn't meet its requirements (but debug
-mode disabled that feature).
-
-The good news about that is that it reduces a lot of the garbage signals that
-a normal server might have to endure, but since we're working with specialized
-applications, it's perfectly reasonable to be very stingy about who we talk to.
-
-Now, pull up IRB and +require+ RubyGems and Halcyon (as halcon/client). Now
-run the following:
-
-  >> require 'example/simple.client'
-  >> s = Simple.new('http://localhost:3800')
-  >> s.greet("Matt")
-  >> s.get("/hello/Matt")
-  >> s.url_for('greet', :name => 'John')
-
-And that is some very simple stuff you can do with the Client library.
-
-The Client library is meant to be used in larger applications where a fraction
-of functionality requires smaller and faster updates or quicker responses in a
-lightweight protocol, perfect for sending authentication information (over
-secure channels, of course) or getting updates on various monitoring sources.
-
-Read more in the RDocs, there's a lot more there to find out. The best way to
-learn, though, is to play, and I like to play, so, go for it.
+Usage instructions will be updated when the application generation code is
+completed.
 
 == Contact
 
@@ -83,27 +43,6 @@ You are also welcome to join the #halcyon channel on irc.freenode.net.
 Our website is up so stop by and check out what's going down. Our address is
 http://halcyon.rubyforge.org/. On there you will find information about our
 mailing list as well, so do stop by.
-
-== License and Copyright
-
-Copyright (C) 2007 Matt Todd <http://purl.org/net/maraby>.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to
-deal in the Software without restriction, including without limitation the
-rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
-sell copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER 
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 == Thanks To
 
