@@ -60,7 +60,9 @@ class Halcyon {
   }
   
   private function request($request, $headers = array()) {
-    $connection = fsockopen($this->uri['host'], $this->uri['port']);
+    $host = $this->uri['host'];
+    if($this->uri['scheme'] == 'https') $host = "ssl://{$host}";
+    $connection = fsockopen($host, $this->uri['port']);
     if($connection) {
       // connected
       $req = "{$request['method']} {$request['path']} HTTP/1.1\r\n";
@@ -74,7 +76,7 @@ class Halcyon {
       if(fwrite($connection, $req)) {
         $response = '';
         while(!feof($connection)) {
-          $response .= trim(fgets($connection, 4096))."\n"; // throw new HalcyonError("Error receiving response."));
+          $response .= trim(@fgets($connection, 4096))."\n"; // throw new HalcyonError("Error receiving response."));
         }
         fclose($connection); // throw new HalcyonError("Error closing connection.");
         
