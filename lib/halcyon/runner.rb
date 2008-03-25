@@ -23,7 +23,7 @@ module Halcyon
           Logger.new(STDOUT)
         end
       end
-      Halcyon.logger.formatter = proc{|s,t,p,m|"#{s} [#{t.strftime("%Y-%m-%d %H:%M:%S")}] (#{$$}) #{p} :: #{m}\n"}
+      Halcyon.logger.formatter = proc{|s,t,p,m|"%5s [%s] (%s) %s :: %s\n" % [s, t.strftime("%Y-%m-%d %H:%M:%S"), $$, p, m]}
       Halcyon.logger.progname = Halcyon.root.split('/').last.camel_case
       Halcyon.logger.level = Logger.const_get(Halcyon.config[:log_level].upcase)
       

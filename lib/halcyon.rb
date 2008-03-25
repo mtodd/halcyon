@@ -6,7 +6,7 @@
 
 $:.unshift File.dirname(__FILE__)
 
-%w(rubygems rack merb/core_ext merb/router json uri logger).each {|dep|require dep}
+%w(rubygems rack merb-core/core_ext merb-core/dispatch/router json uri logger).each {|dep|require dep}
 
 module Halcyon
   

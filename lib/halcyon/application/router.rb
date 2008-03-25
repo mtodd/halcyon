@@ -8,7 +8,7 @@
 #++
 
 begin
-  %w(rubygems merb/core_ext merb/router uri).each {|dep|require dep}
+  %w(rubygems merb-core/core_ext merb-core/dispatch/router uri).each {|dep|require dep}
 rescue LoadError => e
   abort "Merb must be installed for Routing to function. Please install Merb."
 end
@@ -59,43 +59,44 @@ module Halcyon
     # http://merbivore.com/
     class Router < Merb::Router
       
-      # Retrieves the last value from the +route+ call in Halcyon::Server::Base
-      # and, if it's a Hash, sets it to +@@default_route+ to designate the
-      # failover route. If +route+ is not a Hash, though, the internal default
-      # should be used instead (as the last returned value is probably a Route
-      # object returned by the +r.match().to()+ call).
-      # 
-      # Used exclusively internally.
-      def self.default_to route
-        @@default_route = route.is_a?(Hash) ? route : {:action => 'not_found'}
-      end
-      
-      # Called internally by the Halcyon::Server::Base#call method to match
-      # the current request against the currently defined routes. Returns the
-      # params list defined in the +to+ routing definition, opting for the
-      # default route if no match is made.
-      def self.route(env)
-        # pull out the path requested (WEBrick keeps the host and port and protocol in REQUEST_URI)
-        # PATH_INFO is failover if REQUEST_URI is blank (like what Rack::MockRequest does)
-        uri = URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path
+      class << self
         
-        # prepare request
-        path = (uri ? uri.split('?').first : '').sub(/\/+/, '/')
-        path = path[0..-2] if (path[-1] == ?/) && path.size > 1
-        req = Struct.new(:path, :method).new(path, env['REQUEST_METHOD'].downcase.to_sym)
-        
-        # perform match
-        route = self.match(req, {})
-        
-        # make sure a route is returned even if no match is found
-        if route[0].nil?
-          #return default route
-          env['halcyon.logger'].debug "No route found. Using default." if env['halcyon.logger'].is_a? Logger
-          @@default_route
-        else
-          # params (including action and module if set) for the matching route
-          route[1]
+        def logger
+          Halcyon.logger
         end
+        
+        # Retrieves the last value from the +route+ call in Halcyon::Server::Base
+        # and, if it's a Hash, sets it to +@@default_route+ to designate the
+        # failover route. If +route+ is not a Hash, though, the internal default
+        # should be used instead (as the last returned value is probably a Route
+        # object returned by the +r.match().to()+ call).
+        # 
+        # Used exclusively internally.
+        def default_to route
+          @@default_route = route.is_a?(Hash) ? route : {:action => 'not_found'}
+        end
+        
+        # Called internally by the Halcyon::Server::Base#call method to match
+        # the current request against the currently defined routes. Returns the
+        # params list defined in the +to+ routing definition, opting for the
+        # default route if no match is made.
+        def route(request)
+          req = Struct.new(:path, :method, :params).new(request.path_info, request.request_method.downcase.to_sym, request.params)
+          
+          # perform match
+          route = self.match(req)
+          
+          # make sure a route is returned even if no match is found
+          if route[0].nil?
+            #return default route
+            self.logger.debug "No route found. Using default."
+            @@default_route
+          else
+            # params (including action and module if set) for the matching route
+            route[1]
+          end
+        end
+        
       end
       
     end

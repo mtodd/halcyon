@@ -50,7 +50,7 @@ module Halcyon
       begin
         acceptable_request! env
         
-        env['halcyon.route'] = Router.route(env)
+        env['halcyon.route'] = Router.route(request)
         result = dispatch(env)
       rescue Exceptions::Base => e
         result = {:status => e.status, :body => e.body}
