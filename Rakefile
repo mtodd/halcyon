@@ -27,7 +27,8 @@ project = {
   :dependencies => {
     'json_pure' => '>=1.1.2',
     'rack' => '>=0.3.0',
-    'merb' => '>=0.4.1'
+    'merb' => '>=0.4.1',
+    'rubigen' => '>=1.2.4'
   },
   :requirements => 'install the json gem to get faster JSON parsing',
   :ruby_version_required => '>=1.8.6'
@@ -56,7 +57,7 @@ spec = Gem::Specification.new do |s|
   }
   s.requirements << project[:requirements]
   s.required_ruby_version = project[:ruby_version_required]
-  s.files = (project[:rdoc_files] + %w[Rakefile] + Dir["{spec,lib}/**/*"]).uniq
+  s.files = (project[:rdoc_files] + %w[Rakefile README LICENSE AUTHORS] + Dir["{spec,lib,example,support,clients}/**/*"]).uniq
 end
 
 Rake::GemPackageTask.new(spec) do |p|

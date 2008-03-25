@@ -1,0 +1,3 @@
+log_file: # blank for STDOUT
+log_level: debug
+allow_from: all

@@ -1,0 +1,33 @@
+APPLICATION = "#{File.dirname(__FILE__)}"
+BASEDIR = File.expand_path(File.dirname(__FILE__))
+
+%w(rubygems rake rake/clean rake/rdoctask fileutils pp).each{|dep|require dep}
+
+include FileUtils
+
+task :default => Rake::Task['start']
+
+desc "Start the application"
+task :start do
+  puts "Not implemented yet."
+  puts "Run with: thin start -r runner.ru -p 4647"
+  puts "or with: rackup -p 4647 -s mongrel runner.ru"
+end
+
+desc "Make binaries executable"
+task :chmod do
+  Dir["bin/*"].each { |binary| File.chmod(0775, binary) }
+  Dir["test/cgi/test*"].each { |binary| File.chmod(0775, binary) }
+end
+
+desc "Generate RDoc documentation"
+Rake::RDocTask.new(:rdoc) do |rdoc|
+  rdoc.options << '--line-numbers' << '--inline-source' <<
+    '--main' << 'README' <<
+    '--title' << "#{APPLICATION} Documentation" <<
+    '--charset' << 'utf-8'
+  rdoc.rdoc_dir = "doc"
+  rdoc.rdoc_files.include('README')
+  rdoc.rdoc_files.include('app/*.rb')
+  rdoc.rdoc_files.include('lib/*.rb')
+end
