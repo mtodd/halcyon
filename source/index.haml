@@ -39,7 +39,7 @@
           %code
             %pre
               :preserve
-                class Queue < Application
+                class QueueController < Application
                   @queue = []
                   def enqueue
                     @queue << params[:body]
