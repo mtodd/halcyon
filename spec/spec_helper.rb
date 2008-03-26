@@ -1,30 +1,31 @@
-require 'halcyon'
+require File.join(File.dirname(__FILE__), '..', 'lib', 'halcyon')
 require 'rack/mock'
 
-$test = true
-
-class Specr < Halcyon::Application
+class Application < Halcyon::Controller; end
+class Primary < Application
   
-  route do |r|
-    r.match('/hello/:name').to(:action => 'greeter')
-    r.match('/:action').to()
-    r.match('/').to(:action => 'index', :arbitrary => 'random')
-  end
-  
-  def startup
-    @started = true
+  def greeter
+    ok("Hello #{params[:name]}")
   end
   
   def index
     ok('Found')
   end
   
-  def greeter
-    ok("Hello #{params[:name]}")
-  end
-  
   def failure
-    raise ArgumentError.new("Halcyon::Application::Testing::ArgumentErrorException")
+    raise NotFound.new
   end
   
+end
+
+class Halcyon::Application
+  route do |r|
+    r.match('/hello/:name').to(:controller => 'primary', :action => 'greeter')
+    r.match('/:action').to(:controller => 'primary')
+    r.match('/').to(:controller => 'primary', :action => 'index', :arbitrary => 'random')
+    {:action => 'failure'}
+  end
+  startup do |config|
+    $started = true
+  end
 end
