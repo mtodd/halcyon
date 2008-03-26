@@ -1,16 +1,30 @@
 # Partly modeled after Thin's Runner, found at
 # http://github.com/macournoyer/thin/tree/master/lib/thin/runner.rb
 
+require 'optparse'
+
 module Halcyon
   
   # = CLI Runner
   # Parse options and start serving the app
   class Runner
     
+    autoload :Commands, 'halcyon/runner/commands'
+    
     # Make sure that the Halcyon.config hash is setup
     Halcyon.config ||= Mash.new(Halcyon::Application::DEFAULT_OPTIONS)
     
-    def initialize(argv=ARGV)
+    class << self
+      
+      # Runs commands from the CLI; foregoes actually running the app
+      def run!(argv=ARGV)
+        Commands.send(argv.shift, argv)
+      end
+      
+    end
+    
+    # Sets up the application to run
+    def initialize
       if Halcyon.config[:logger]
         Halcyon.logger = Halcyon.config[:logger]
       else

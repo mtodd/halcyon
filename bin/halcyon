@@ -1,9 +1,4 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
-require 'rubigen'
-
-require 'rubigen/scripts/generate'
-RubiGen::Base.use_application_sources!
-RubiGen::Base.sources << RubiGen::PathSource.new(:custom, File.expand_path(File.join(File.dirname(__FILE__), '..', "support/generators")))
-RubiGen::Scripts::Generate.new.run(ARGV, :generator => 'halcyon')
+require File.join(File.dirname(__FILE__), '..', 'lib', 'halcyon')
+Halcyon::Runner.run! ARGV
