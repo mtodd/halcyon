@@ -41,13 +41,16 @@ module Halcyon
       Halcyon.logger.progname = Halcyon.root.split('/').last.camel_case
       Halcyon.logger.level = Logger.const_get(Halcyon.config[:log_level].upcase)
       
-      # Run initializer
-      require Halcyon.root/'config'/'initialize'
+      # Run initializers
+      Dir.glob([Halcyon.root/'config'/'initialize.rb', Halcyon.root/'config'/'initialize'/'*']).each do |initializer|
+        require initializer.tr('.rb', '')
+        self.logger.debug "Init: #{File.basename(initializer).tr('.rb','').camel_case}"
+      end
       
       # Setup autoloads for Controllers found in Halcyon.root/'app'
       Dir.glob(Halcyon.root/'app'/'*').each do |controller|
-        require controller
-        self.logger.debug "#{File.basename(controller).camel_case.to_sym} Controller loaded!"
+        require controller.tr('.rb', '')
+        self.logger.debug "Load: #{File.basename(controller).tr('.rb','').camel_case} Controller"
       end
       
       @app = Halcyon::Application.new

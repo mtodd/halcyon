@@ -1,4 +1,4 @@
-describe "Halcyon::Server::Router" do
+describe "Halcyon::Application::Router" do
   
   before do
     @log = ""
