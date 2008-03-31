@@ -40,7 +40,10 @@ module Halcyon
         # Start the Halcyon server up in interactive mode
         def console(argv)
           # Notify user of environment
-          puts "(Starting Halcyon server in console...)"
+          puts "(Starting Halcyon app in console...)"
+          
+          # Add ./lib to load path
+          $:.unshift(Halcyon.root/'lib')
           
           # prepare environment for IRB
           ARGV.clear
@@ -58,16 +61,41 @@ module Halcyon
           app = Halcyon::Runner.new
           response = nil
           
-          # Setup quick accessors
+          # Setup helper methods
+          Object.send(:define_method, :usage) do
+            msg = <<-"end;"
+              
+              These methods will provide you with most of the
+              functionality you will need to test your app.
+              
+              #app      The loaded application
+              #log      The contents of the log
+              #tail     The tail end of the log
+              #clear    Clears the log
+              #get      Sends a GET request to #app
+                        Ex: get '/controller/action'
+              #post     Sends a POST request to #app
+              #response Response of the last #get or #post request
+              
+              #get and #post both require path, #post requires
+              params, which can be an empty hash (a {}):
+              
+              Ex: get '/foo'
+                  post '/bar', {}
+              
+            end;
+            puts msg.gsub(/^[ ]{14}/, '')
+          end
           Object.send(:define_method, :app) { app }
           Object.send(:define_method, :log) { log }
           Object.send(:define_method, :tail) { puts log.split("\n").reverse[0..5].reverse.join("\n") }
           Object.send(:define_method, :clear) { log = '' }
-          Object.send(:define_method, :get) { |path| JSON.parse(Rack::MockRequest.new(app).get(path).body) }
-          Object.send(:define_method, :post) { |path| JSON.parse(Rack::MockRequest.new(app).post(path).body) }
+          Object.send(:define_method, :get) { |path| response = Rack::MockRequest.new(app).get(path); JSON.parse(response.body) }
+          Object.send(:define_method, :post) { |path, params| response = Rack::MockRequest.new(app).post(path, params); JSON.parse(response.body) }
+          Object.send(:define_method, :response) { response }
           
           # Let users know what methods and values are available
-          puts "#app is your application; #log is the log."
+          puts "Call #usage for usage details."
           
           # Start IRB session
           IRB.start
@@ -75,6 +103,7 @@ module Halcyon
           exit
         end
         alias_method :interactive, :console
+        alias_method :irb, :console
         
         # Generate a new Halcyon application
         def init(argv)
