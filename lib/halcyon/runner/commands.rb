@@ -37,6 +37,45 @@ module Halcyon
           exec command
         end
         
+        # Start the Halcyon server up in interactive mode
+        def console(argv)
+          # Notify user of environment
+          puts "(Starting Halcyon server in console...)"
+          
+          # prepare environment for IRB
+          ARGV.clear
+          require 'rack/mock'
+          require 'irb'
+          require 'irb/completion'
+          if File.exists? '.irbrc'
+            ENV['IRBRC'] = '.irbrc'
+          end
+          
+          # Set up the application
+          log = ''
+          Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
+          Halcyon.config['logger'] = Logger.new(StringIO.new(log))
+          app = Halcyon::Runner.new
+          response = nil
+          
+          # Setup quick accessors
+          Object.send(:define_method, :app) { app }
+          Object.send(:define_method, :log) { log }
+          Object.send(:define_method, :tail) { puts log.split("\n").reverse[0..5].reverse.join("\n") }
+          Object.send(:define_method, :clear) { log = '' }
+          Object.send(:define_method, :get) { |path| JSON.parse(Rack::MockRequest.new(app).get(path).body) }
+          Object.send(:define_method, :post) { |path| JSON.parse(Rack::MockRequest.new(app).post(path).body) }
+          
+          # Let users know what methods and values are available
+          puts "#app is your application; #log is the log."
+          
+          # Start IRB session
+          IRB.start
+          
+          exit
+        end
+        alias_method :interactive, :console
+        
         # Generate a new Halcyon application
         def init(argv)
           options = {
