@@ -1,5 +1,8 @@
 module Halcyon
   class Runner
+    
+    autoload :Helpers, 'halcyon/runner/helpers'
+    
     class Commands
       class << self
         
@@ -55,44 +58,16 @@ module Halcyon
           end
           
           # Set up the application
-          log = ''
-          Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
-          Halcyon.config['logger'] = Logger.new(StringIO.new(log))
-          app = Halcyon::Runner.new
-          response = nil
+          Object.instance_eval do
+            $log = ''
+            Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
+            Halcyon.config['logger'] = Logger.new(StringIO.new($log))
+            $app = Halcyon::Runner.new
+            $response = nil
+          end
           
           # Setup helper methods
-          Object.send(:define_method, :usage) do
-            msg = <<-"end;"
-              
-              These methods will provide you with most of the
-              functionality you will need to test your app.
-              
-              #app      The loaded application
-              #log      The contents of the log
-              #tail     The tail end of the log
-              #clear    Clears the log
-              #get      Sends a GET request to #app
-                        Ex: get '/controller/action'
-              #post     Sends a POST request to #app
-              #response Response of the last #get or #post request
-              
-              #get and #post both require path, #post requires
-              params, which can be an empty hash (a {}):
-              
-              Ex: get '/foo'
-                  post '/bar', {}
-              
-            end;
-            puts msg.gsub(/^[ ]{14}/, '')
-          end
-          Object.send(:define_method, :app) { app }
-          Object.send(:define_method, :log) { log }
-          Object.send(:define_method, :tail) { puts log.split("\n").reverse[0..5].reverse.join("\n") }
-          Object.send(:define_method, :clear) { log = '' }
-          Object.send(:define_method, :get) { |path| response = Rack::MockRequest.new(app).get(path); JSON.parse(response.body) }
-          Object.send(:define_method, :post) { |path, params| response = Rack::MockRequest.new(app).post(path, params); JSON.parse(response.body) }
-          Object.send(:define_method, :response) { response }
+          Object.send(:include, Halcyon::Runner::Helpers::CommandHelper)
           
           # Let users know what methods and values are available
           puts "Call #usage for usage details."
@@ -104,6 +79,7 @@ module Halcyon
         end
         alias_method :interactive, :console
         alias_method :irb, :console
+        alias_method :"-i", :console
         
         # Generate a new Halcyon application
         def init(argv)
