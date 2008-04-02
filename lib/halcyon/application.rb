@@ -13,9 +13,12 @@ module Halcyon
     
     DEFAULT_OPTIONS = {
       :root => Dir.pwd,
-      :log_level => 'info',
+      :logging => {
+        :type => 'Logger',
+        :level => 'info'
+      },
       :allow_from => :all
-    }
+    }.to_mash
     
     def initialize
       self.logger.info "Starting up..."
