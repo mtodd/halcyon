@@ -8,7 +8,6 @@ module Halcyon
     
     autoload :Router, 'halcyon/application/router'
     
-    attr_accessor :collection # collects values set in startup hook to set for controller
     attr_accessor :session
     
     DEFAULT_OPTIONS = {
@@ -23,10 +22,7 @@ module Halcyon
     def initialize
       self.logger.info "Starting up..."
       
-      self.collection = {}
-      
       self.hooks[:startup].call(Halcyon.config) if self.hooks[:startup]
-      self.class.instance_variables.reject{|v| ['@hooks', '@inheritable_attributes'].include? v }.each{|v| self.collection[v] = self.class.instance_variable_get(v) }
       
       # clean after ourselves and get prepared to start serving things
       self.logger.debug "Starting GC."
@@ -89,7 +85,6 @@ module Halcyon
         Object.const_get(route[:controller].camel_case.to_sym).new(env)
       end
       
-      self.collection.keys.each {|k| controller.instance_variable_set(k, self.collection[k]) }
       controller.send(route[:action].to_sym)
     end
     
