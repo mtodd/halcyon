@@ -61,7 +61,7 @@ module Halcyon
           Object.instance_eval do
             $log = ''
             Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
-            Halcyon.config['logger'] = Logger.new(StringIO.new($log))
+            Halcyon.config[:logger] = Logger.new(StringIO.new($log))
             $app = Halcyon::Runner.new
             $response = nil
           end

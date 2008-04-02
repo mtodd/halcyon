@@ -68,7 +68,7 @@ module Halcyon
       timing[:per_sec] = (((1.0/(timing[:total]))*1e2).round.to_f/1e2)
       
       self.logger.info "[#{response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)"
-      self.logger << "Session ID: #{self.session.id}\n"
+      # self.logger << "Session ID: #{self.session.id}\n" # TODO: Implement session
       self.logger << "Params: #{request.params.merge(env['halcyon.route']).inspect}\n\n"
       
       response.finish

@@ -12,14 +12,16 @@ module Halcyon
   
   VERSION = [0,5,0] unless defined?(Halcyon::VERSION)
   
-  autoload :Runner, 'halcyon/runner'
-  autoload :Exceptions, 'halcyon/exceptions'
   autoload :Application, 'halcyon/application'
-  autoload :Controller, 'halcyon/controller'
   autoload :Client, 'halcyon/client'
+  autoload :Controller, 'halcyon/controller'
+  autoload :Exceptions, 'halcyon/exceptions'
+  autoload :Logging, 'halcyon/logging'
+  autoload :Runner, 'halcyon/runner'
   
   class << self
     
+    attr_accessor :app
     attr_accessor :config
     attr_accessor :logger
     

@@ -25,21 +25,15 @@ module Halcyon
     
     # Sets up the application to run
     def initialize
+      # Set application name
+      Halcyon.app = Halcyon.root.split('/').last.camel_case
+      
+      # Setup logger
       if Halcyon.config[:logger]
-        Halcyon.logger = Halcyon.config[:logger]
-      else
-        Halcyon.logger = case Halcyon.config[:log_file]
-        when "nil", NilClass
-          Logger.new(STDOUT)
-        when String
-          Logger.new(Halcyon.config[:log_file])
-        else
-          Logger.new(STDOUT)
-        end
+        Halcyon.config[:logging] = {:type => Halcyon.config[:logger].class.to_s, :logger => Halcyon.config[:logger]}
       end
-      Halcyon.logger.formatter = proc{|s,t,p,m|"%5s [%s] (%s) %s :: %s\n" % [s, t.strftime("%Y-%m-%d %H:%M:%S"), $$, p, m]}
-      Halcyon.logger.progname = Halcyon.root.split('/').last.camel_case
-      Halcyon.logger.level = Logger.const_get(Halcyon.config[:log_level].upcase)
+      Halcyon::Logging.set((Halcyon.config[:logging][:type] rescue nil))
+      Halcyon.logger = Halcyon::Logger.setup(Halcyon.config[:logging])
       
       # Run initializers
       Dir.glob([Halcyon.root/'config'/'initialize.rb', Halcyon.root/'config'/'initialize'/'*']).each do |initializer|
@@ -76,7 +70,7 @@ module Halcyon
           
           # load the config file
           begin
-            Halcyon.config = Halcyon.config.merge YAML.load_file(file).to_mash
+            Halcyon.config = (Halcyon.config.merge YAML.load_file(file)).to_mash
           rescue Errno::EACCES
             abort("Can't access #{file}, try 'sudo #{$0}'")
           end
