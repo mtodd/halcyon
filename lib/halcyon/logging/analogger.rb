@@ -21,6 +21,11 @@ module Halcyon
         
       end
       
+      def <<(message)
+        # Should << be assumed as INFO level?
+        self.log('info', message)
+      end
+      
     end
   end
 end
