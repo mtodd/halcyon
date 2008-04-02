@@ -1,5 +1,5 @@
 logging:
   type: Logger
-  # file: 
+  # file: # STDOUT
   level: debug
 allow_from: all
