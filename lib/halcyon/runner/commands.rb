@@ -1,3 +1,5 @@
+require 'optparse'
+
 module Halcyon
   class Runner
     

@@ -1,8 +1,6 @@
 # Partly modeled after Thin's Runner, found at
 # http://github.com/macournoyer/thin/tree/master/lib/thin/runner.rb
 
-require 'optparse'
-
 module Halcyon
   
   # = CLI Runner
