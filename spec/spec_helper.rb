@@ -1,8 +1,26 @@
 require File.join(File.dirname(__FILE__), '..', 'lib', 'halcyon')
 require 'rack/mock'
 
-class Application < Halcyon::Controller; end
-class Primary < Application
+# Default Settings
+
+$config = {
+  :allow_from => :all,
+  :logger => nil,
+  :logging => {
+    :level => 'debug'
+  }
+}
+
+# Default Application
+
+class Application < Halcyon::Controller
+  
+  def failure
+    raise NotFound.new
+  end
+  
+end
+class Specs < Application
   
   def greeter
     ok("Hello #{params[:name]}")
@@ -12,18 +30,20 @@ class Primary < Application
     ok('Found')
   end
   
-  def failure
-    raise NotFound.new
+  def cause_exception
+    raise Exception.new("Oops!")
   end
   
 end
 
 class Halcyon::Application
   route do |r|
-    r.match('/hello/:name').to(:controller => 'primary', :action => 'greeter')
-    r.match('/:action').to(:controller => 'primary')
-    r.match('/').to(:controller => 'primary', :action => 'index', :arbitrary => 'random')
-    {:action => 'failure'}
+    r.match('/hello/:name').to(:controller => 'specs', :action => 'greeter')
+    r.match('/:action').to(:controller => 'specs')
+    r.match('/:controller/:action').to()
+    r.match('/').to(:controller => 'specs', :action => 'index', :arbitrary => 'random')
+    # r.default_routes
+    {:action => 'missing'}
   end
   startup do |config|
     $started = true

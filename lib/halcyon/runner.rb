@@ -24,11 +24,14 @@ module Halcyon
     # Sets up the application to run
     def initialize
       # Set application name
-      Halcyon.app = Halcyon.root.split('/').last.camel_case
+      Halcyon.app = Halcyon.config[:app] || Halcyon.root.split('/').last.camel_case
       
       # Setup logger
       if Halcyon.config[:logger]
-        Halcyon.config[:logging] = {:type => Halcyon.config[:logger].class.to_s, :logger => Halcyon.config[:logger]}
+        Halcyon.config[:logging] = Halcyon.config[:logging].merge({
+          :type => Halcyon.config[:logger].class.to_s,
+          :logger => Halcyon.config[:logger]
+        })
       end
       Halcyon::Logging.set((Halcyon.config[:logging][:type] rescue nil))
       Halcyon.logger = Halcyon::Logger.setup(Halcyon.config[:logging])
@@ -70,7 +73,7 @@ module Halcyon
           begin
             Halcyon.config = (Halcyon.config.merge YAML.load_file(file)).to_mash
           rescue Errno::EACCES
-            abort("Can't access #{file}, try 'sudo #{$0}'")
+            raise LoadError.new("Can't access #{file}, try 'sudo #{$0}'")
           end
           
           # store config file path so SIGHUP and SIGUSR2 will reload the config in case it changes
@@ -78,7 +81,7 @@ module Halcyon
           
           Halcyon.config
         else
-          abort "Config file failed to load. #{file} was not found. Correct the path and try again."
+          raise LoadError.new("Can't access #{file}, try 'sudo #{$0}'")
         end
       end
       

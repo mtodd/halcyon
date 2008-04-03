@@ -8,6 +8,7 @@ module Halcyon
     
     class << self
       def set(logger = 'Logger')
+        Halcyon.send(:remove_const, :Logger) if Halcyon.const_defined? :Logger
         Halcyon.const_set :Logger, Halcyon::Logging.const_get(logger)
       end
     end
