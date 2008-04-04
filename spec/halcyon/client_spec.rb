@@ -23,7 +23,7 @@ end
 #++
 
 at_exit do
-  pids = (`ps aux | grep support/generators/halcyon/templates | cut -f 5 -d " "`).split("\n")
+  pids = (`ps auxww | grep support/generators/halcyon/templates`).split("\n").collect{|pid|pid.match(/(\w+)\s+(\w+).+/)[2]}
   pids.each {|pid| Process.kill(9, pid.to_i) rescue nil }
 end
 
