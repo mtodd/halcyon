@@ -1,3 +1,9 @@
+---
+extension: html
+filter:
+  - erb
+  - haml
+---
 !!! 1.0 Strict
 %html{:xmlns => 'http://www.w3.org/1999/xhtml', :"xml:lang" => 'en', :lang => 'en'}
   %head
@@ -6,7 +12,8 @@
     %meta{:name => 'author', :content => 'Igor Pengivrag (www.colorlightstudio.com)'}
     %meta{:name => 'description', :content => 'Halcyon, Ruby JSON App Framework'}
     %meta{:name => 'keywords', :content => 'ruby, json, framework, soa, http'}
-    %link{:rel => 'stylesheet', :type => 'text/css', :href => 'stylesheets/styles.css', :media => 'screen'}
+    %link{:rel => 'stylesheet', :type => 'text/css', :href => 'css/styles.css', :media => 'screen'}
+    %link{:rel => 'stylesheet', :type => 'text/css', :href => 'css/coderay.css', :media => 'screen'}
   %body
     #wrap
       #top
@@ -24,51 +31,8 @@
               %a{:href => 'http://github.com/mtodd/halcyon'} GitHub
       #content
         #left
-          %h2 Introduction
-          %p Halcyon is a JSON Web App Framework built on Rack for speed and light weight.
-          %p Halcyon has several aims and goals, including:
-          :textile
-            * *Be fast* -- easy with "Rack":http://rack.rubyforge.org/ and "Mongrel":http://mongrel.rubyforge.org/ or "Thin":http://code.macournoyer.com/thin
-            * *Be small* -- also not a problem with Rack and Mongrel
-            * *Be cross-platform* -- communications are flexible with JSON transport layer
-            * *Be flexible* -- since it uses HTTP, it's very simple to be flexible
-            * *Be easy to implement* -- also easy since we're developing in "Ruby":http://ruby-lang.org/ here
+          =@content
           
-          %h2 Functionality &amp; Performance
-          %p With Mongrel leading the pack and Rack holding things up, JSON doing the fast talking and with plenty of room to spare, how could you not be interested, even about this new framework? Still not convinced? OK, fair enough, here's some code for you.
-          %code
-            %pre
-              :preserve
-                class QueueController < Application
-                  @queue = []
-                  def enqueue
-                    @queue << params[:body]
-                    ok
-                  end
-                  def dequeue
-                    ok @queue.shift
-                  end
-                  def list
-                    ok @queue
-                  end
-                end
-          %p You can then run it with
-          %code $ thin start -r runner.ru -p 4647
-          %p That's all it takes to open up the door to let you communicate with your applications that implement or use the simple client.
-          :textile
-            Read the "Getting Started Tutorial":#.
-          
-          %h2 Supported Platforms
-          %p Halcyon is primarily written in Ruby, but Halcyon also supports multiple platforms due to the fact that it communicates via HTTP and packages its messages in JSON. Halcyon currently has Ruby, PHP, and Java clients available, with more clients planned.
-          
-          %h2 Metrics
-          %p Ohloh's pretty cool and we use it to track the development metrics of Halcyon. Check out some of the more interesting details on our project page. You can find the link at the top of the page.
-          %p For your viewing pleasure, here are some of the Ohloh project factoids:
-          %script{:type => 'text/javascript', :src => 'http://www.ohloh.net/projects/10313/widgets/project_factoids'}
-          %p.small
-            %strong Note:
-            It says that Halcyon is mostly written in Java because we include the client libraries in the code base, each of which can have their own extensive dependencies, including the Java one. Since Ruby's syntax is much leaner, Java's line count overtakes the Ruby line count even though the Java code is only for the client library.
-        
         #right
           .box
             %h2 About

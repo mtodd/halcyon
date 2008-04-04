@@ -1,0 +1,11 @@
+---
+title:      About
+created_at: 2008-04-03 02:18:56.433003 -04:00
+filter:
+  - erb
+  - textile
+---
+p(title). <%= h(@page.title) %>
+
+Halcyon is a JSON web app framework built on Rack.
+
