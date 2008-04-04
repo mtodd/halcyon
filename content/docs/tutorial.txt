@@ -1,0 +1,96 @@
+---
+title:  Docs &mdash; Tutorial
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Tutorial
+
+Coming to a new, unfamiliar framework can be daunting, especially with nobody there to hold your hand through the scary bits. Hopefully this tutorial will get you through those parts just fine and get you into developing cool services.
+
+
+h3. Installation
+
+If you've not installed Halcyon yet, read the "Installation":/docs/installation.html guide.
+
+
+h3. Starting a new application
+
+If you're familiar with "Rails":http://rubyonrails.org/ or "Merb":http://merbivore.com/, you know that you can begin working on a new application very easily by issuing a simple command, similar to @rails app_name@. Halcyon provides a similar command to do the same.
+
+Run the following in your command line (make sure you're in a directory you're OK having your project created in):
+
+<pre><code>$ halcyon init app_name</code></pre>
+
+This will generate output similar to the following:
+
+<pre><code>
+      create
+      create  runner.ru
+      create  README
+      create  config
+      create  config/initialize.rb
+      create  config/config.yml
+      create  app
+      create  app/application.rb
+      create  Rakefile
+      create  lib
+      create  lib/client.rb
+      create  log
+</pre></code>
+
+This shows you what files were created, but more importantly, what files you'll be working with.
+
+Now, change into the @app_name@ directory:
+
+<pre><code>$ cd app_name</code></pre>
+
+You are now the proud owner of a brand new Halcyon application. Now would be a good time to run @git init@ to begin tracking your app under Git's revision control.
+
+
+h3. Running Halcyon Apps
+
+So with our brand new application, let's see what running our application looks like:
+
+<pre><code>halcyon start -p 4647</code></pre>
+
+This tells Halcyon to start up the Halcyon application using either Rack's @rackup@ utility or Thin's @thin start@ utility (if "Thin":http://code.macournoyer.com/thin/ is installed) along with the port to run the server on.
+
+You will see the following output:
+
+<pre><code>
+(Starting in /path/to/app_name)
+DEBUG [2008-04-04 04:20:19] (11421) AppName :: Init: Initialize
+DEBUG [2008-04-04 04:20:19] (11421) AppName :: Load: Application Controller
+ INFO [2008-04-04 04:20:19] (11421) AppName :: Starting up...
+ INFO [2008-04-04 04:20:19] (11421) AppName :: Initialize application resources and define routes in config/initialize.rb
+DEBUG [2008-04-04 04:20:19] (11421) AppName :: Starting GC.
+ INFO [2008-04-04 04:20:19] (11421) AppName :: Started. PID is 11421
+</code></pre>
+
+This reveals a bit about its booting process and lets you know when it's ready to begin accepting connections.
+
+In another shell window, keeping your Halcyon app running, run the following:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+$ irb -r rubygems -r halcyon
+>> client = Halcyon::Client.new('http://localhost:4647/')
+=> #<Halcyon::Client ...>
+>> client.get('/time')
+=> {"status"=>200, "body"=>"Fri Apr 04 04:24:15 -0400 2008"}
+>> exit
+<% end -%>
+
+What this does is, after requiring the Halcyon library, we create an instance of @Halcyon::Client@, telling it where to connect to.
+
+After the client is created, we can then perform requests using standard HTTP request types, GET, POST, PUT, and DELETE. Here we simply call @get('/time')@ which gets routed to the @time@ action inside of the @Application@ controller inside of @app_name/app/application.rb@.
+
+Don't worry, you'll be able to wrap up @get@s and @post@s in your own custom client methods and make corresponding actions in the actual Halcyon application.
+
+
+h2. What's Next
+
+Now that you know how to get things running, you'll want to customize your application by "Defining Routes":/docs/routes.html, "Writing Controllers":/docs/controllers.html, and "Customizing Clients":/docs/clients.html.
+
+Still confused? Read a more thorough "Introduction to Halcyon":/docs/introduction.html.

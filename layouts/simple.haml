@@ -34,44 +34,15 @@ filter:
           %strong Notice:
           The website is currently being udpated. Sorry for any inconvenience.
           
-        #left
-          - puts @content
-          
-        #right
-          .box
-            %h2 About
-            %p Halcyon is a JSON Web App Framework built on Rack for speed and light weight.
-            
-            %h2 Recent Entries
-            #twitter_div
-              %ul#twitter_update_list
-            
-            %h2 Installation
-            %p Installation is easy, all you need is RubyGems and you're set. Just run the following:
-            %code $ sudo gem install halcyon
-            %p If you're interested in the most recent version, check out our GitHub page (link above). You can install the latest development version with these steps:
-            %code
-              $ git clone git://github.com/mtodd/halcyon.git
-              $ cd halcyon && rake install
-            %p This will get the latest version of Halcyon and run the install task.
-            %p
-              %strong Note:
-              Due to limitations, only json_pure is a dependency since it is supported on all platforms. However, for faster performance, make sure you run this command which will install the faster C extension of JSON:
-              %code $ sudo gem install json
-            
-            %h2 Community
-            :textile
-              Welcome to the infantile community, I really hope you do choose to stay with us for a while and help us get our feet on the ground.
-              
-              There are several ways to participate: on IRC, you can find us at #halcyon on irc.freenode.net. Join us on "our mailing list":http://groups.google.com/group/halcyon-dev hosted by GOogle Groups. Regardless, you can always get a hold of Matt Todd via his "email address":mailto:chiology@gmail.com.
+        - puts @content
         
         #clear
-    
+        
     #footer
       %p Halcyon &copy; 2007-2008 Matt Todd. Design by Color Light Studio.
       %p.small
         == Last updated: #{Time.now.strftime('%d %b %Y')}
-    
+        
   %script{:type => 'text/javascript'}
     var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
     document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));

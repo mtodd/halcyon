@@ -39,12 +39,12 @@ end
 
 You can then run it with
 
-<code>$ thin start -r runner.ru -p 4647</code>
+<pre><code>$ halcyon start -p 4647</code></pre>
 
 That's all it takes to open up the door to let you communicate with your applications that implement or use the simple client.
 
-Read the "Getting Started Tutorial":#.
-  
+Read the "Docs":/test/docs/.
+
 
 h2. Supported Platforms
 
@@ -57,6 +57,6 @@ Ohloh's pretty cool and we use it to track the development metrics of Halcyon. C
 
 For your viewing pleasure, here are some of the Ohloh project factoids:
 
-<script type ='text/javascript', :src => 'http://www.ohloh.net/projects/10313/widgets/project_factoids'></script>
+<script type='text/javascript' src='http://www.ohloh.net/projects/10313/widgets/project_factoids'></script>
 
 <strong>Note:</strong> It says that Halcyon is mostly written in Java because we include the client libraries in the code base, each of which can have their own extensive dependencies, including the Java one. Since Ruby's syntax is much leaner, Java's line count overtakes the Ruby line count even though the Java code is only for the client library.

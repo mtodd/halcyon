@@ -1,0 +1,10 @@
+---
+title:  Docs &mdash; Usage
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Usage
+
+Coming soon.

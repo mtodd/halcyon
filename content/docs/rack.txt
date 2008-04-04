@@ -1,0 +1,54 @@
+---
+title:  Docs &mdash; Advanced Rack Topics
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Advanced Rack Topics
+
+Coming soon!
+
+Rack is a meta-framework used to simplify servers and frameworks/applications communicating. Read some interesting bits in this InfoQ article "Rack: HTTP request handling made easy":http://www.infoq.com/news/2008/04/rack-http-web.
+
+
+h3. Using Halcyon to back web apps
+
+Since Halcyon apps are simply Rack applications, using Halcyon selectively behind your larger web application can be handy. For example, your Halcyon application can map to @/api/...@ and provide a public API to your fancy application.
+
+In order to do this, a Rack middleware will need to be defined in order to make sure that requests get routed to both your web application and your Halcyon application depending on the correct request URL. There are two primary ways to do this:
+
+# Look for a specific URL pattern and route to your Halcyon app, failing over to your web app; or
+# Use the Cascade middleware already built into Rack which tries each app in its array until it finds an app that doesn't throw back a _404 Not Found_ error.
+
+Both of these are simple and effective methods, so both will be covered.
+
+
+h4. Custom Middleware
+
+<small>Look at Ezra Zygmuntowicz' MountainWest Ruby Conf video for a good example, around 18 minutes in.</small>
+
+_Coming soon!_
+
+
+h4. Using @Cascade@
+
+<small>Refer to "Rack::Cascade":http://rack.rubyforge.org/doc/classes/Rack/Cascade.html.</small>
+
+_Coming soon!_
+
+
+h3. Writing Custom Middleware
+
+"Vidar Hokstad":http://www.hokstad.com/tag/rack has several great Rack middleware examples you should check out.
+
+_Coming soon!_
+
+
+h3. Useful Rack Middleware
+
+This list will contain articles on and links to Rack middleware that you may find interesting or useful:
+
+* "Rewriting Content-Types with Rack":http://www.hokstad.com/rewriting-content-types-with-rack.html
+* "Adding Cache Headers":http://www.hokstad.com/rack-middleware-adding-cache-headers.html
+* "Tracking Referrers":http://www.hokstad.com/latest-referrers-using-rack-and-ruby.html

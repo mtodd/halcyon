@@ -1,0 +1,10 @@
+---
+title:  Docs &mdash; Connecting to Databases
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Connecting to Databases
+
+Coming soon.

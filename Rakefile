@@ -13,8 +13,8 @@ namespace(:site) do
   
   desc 'Update the website'
   task :update => [:build] do
-    `rsync -avz ./output/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/test/ > /dev/null`
-    puts "* uploaded ./output/ to http://halcyon.rubyforge.org/test/"
+    `rsync -avz ./output/ mtodd@halcyon.rubyforge.org:/var/www/gforge-projects/halcyon/ > /dev/null`
+    puts "* uploaded ./output/ to http://halcyon.rubyforge.org/"
   end
   
 end

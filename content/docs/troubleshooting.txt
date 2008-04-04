@@ -1,0 +1,10 @@
+---
+title:  Docs &mdash; Troubleshooting
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Troubleshooting
+
+Coming soon.

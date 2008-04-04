@@ -1,0 +1,66 @@
+---
+title:  Docs &mdash; Installation
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Installation
+
+There are three primary ways to install Halcyon, from RubyGems, from the repository, and from the tarball downloaded from the repository.
+
+
+h3. Dependencies
+
+Before showing you how to install Halcyon, here's a quick review of the primary Halcyon dependencies.
+
+* "Rack":http://rack.rubyforge.org/ -- Handles serving Halcyon Apps
+* "JSON":http://json.rubyforge.org/ -- Renders and Parses JSON strings
+* "Merb":http://merbivore.com/ -- Provides many core language extensions and a clean Router implementation
+* "RubiGen":http://rubigen.rubyforge.org/ -- Handles generating fresh Halcyon Apps
+
+
+h3. RubyGems
+
+To install Halcyon from RubyGems, run this at your command line:
+
+<pre><code>$ sudo gem install halcyon</code></pre>
+
+
+h3. From Sources
+
+In order to install directly from the source, you will either need to install Git (available via Apt, Yum, or MacPorts), or look at the section below on installing from the Tarball.
+
+The "primary development repository":http://github.com/mtodd/halcyon.git is located at "GitHub":http://github.com/.
+
+Make sure you're in an appropriate directory (~/source/ perhaps) and run this command from your command line:
+
+<pre><code>$ git clone git://github.com/mtodd/halcyon.git</code></pre>
+
+This will download the repository into @halcyon/@. Change into this directory and run this command:
+
+<pre><code>$ rake install</code></pre>
+
+This will package up Halcyon into a Gem package and then install it locally.
+
+
+h3. From Source Tarball
+
+The tarball is provided by the same location as the "Git repository":http://github.com/mtodd/halcyon.
+
+You can either go to that website and click _Download Tarball_ or run this command (replacing @curl -O@ with @wget@ if you choose):
+
+<pre><code>$ curl -o halcyon.tgz http://github.com/tarballs/mtodd-halcyon-master.tar.gz</code></pre>
+
+Once done, unpack the tarball and change into the created directory:
+
+<pre><code>
+$ tar xzf halcyon.tgz
+$ cd mtodd-halcyon-master/
+</code></pre>
+
+Once your in the directory, run the following:
+
+<pre><code>$ rake install</code></pre>
+
+This will perform the same was as from source.

@@ -1,0 +1,40 @@
+---
+title:  Docs
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Documentation
+
+If you're looking for thorough documentation and plenty of samples, this is where you will find what you're looking for.
+
+Links marked with a -strike- are not finished. Bear with us while we grind away at the documentation.
+
+
+h3. Getting Started
+
+* -"Introduction to Halcyon":/docs/introduction.html-
+* "Installation":/docs/installation.html
+* "Tutorial":/docs/tutorial.html
+
+
+h3. Advanced Topics
+
+* "Defining Routes":/docs/routes.html
+* -"Writing Controllers":/docs/controllers.html-
+* -"Connecting to Databases":/docs/databases.html-
+* -"Customizing Clients":/docs/clients.html-
+* "Advanced Rack Topics":/docs/rack.html
+* -"Troubleshooting":/docs/troubleshooting.html-
+
+
+h3. Samples
+
+* -"Simple":/docs/samples/simple.html-
+* -"MPQueue":/docs/samples/mpqueue.html-
+
+
+h3. Manual
+
+* "The Halcyon RDocs":/manual/

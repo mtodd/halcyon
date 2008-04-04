@@ -1,0 +1,69 @@
+---
+title:  Docs &mdash; Defining Routes
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Defining Routes
+
+One of the most peculiar parts of Halcyon is its dependency on "Merb":http://merbivore.com/, but this is for a very good reason: Merb provides a great deal of great code that is modular and clean, perfect to implement into Halcyon. This has two affects: first, those pieces of code are very well documented by a very large and active community, and secondly is that they are continually being updated to better perform. Rewriting what Merb has already done would be silly. *So when it comes to defining routes in Halcyon, much of the documentation for defining routes in Merb still applies!*
+
+For links to various Routing documentation for Merb, jump to the bottom of the page and look under the Resources section.
+
+
+h3. Getting Started
+
+Routes are defined in @app_name/config/initialize.rb@, wherein you will find something like this by default:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+# = Required Libraries
+%w().each {|dep|require dep}
+
+# = Initialization
+class Halcyon::Application
+
+  startup do |config|
+    self.logger.info 'Initialize application resources and define routes in config/initialize.rb'
+  end
+
+  # = Routes
+  route do |r|
+    r.match('/time').to(:controller => 'application', :action => 'time')
+
+    r.match('/').to(:controller => 'application', :action => 'index')
+
+    # failover
+    {:action => 'not_found'}
+  end
+
+end
+<% end -%>
+
+In the lower half you see where two routes are defined and one failover route is specified. (This failover route is actually set by default, but it is provided here as well to indicate how to update this default easily).
+
+Within the @route@ block, @r@ is used to define what routes to match against and where to route those requests to. Routes can be very specific or very general, accepting no or many variables in the route itself. Here are several examples to hopefully clarify the flexibility of these routes:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+r.match('/api/:version/app_name/:controller/:action').to()
+r.match('/:controller/:action/:id').to()
+r.match('/:controller/:action').to()
+r.match('/time').to(:controller => 'utilities', :action => 'time')
+r.match('/').to(:controller => 'application', :action => 'usage')
+<% end -%>
+
+The @default_routes@ method is also one provided for by Merb and can also provide extra functionality as well as clarifies some other useful methods like @defer_to@ for conditional routes. Read below in the Resources section for more information.
+
+_More coming soon!_
+
+
+h3. Resources
+
+Merb's API provides two very useful resources for defining routes. These two are the methods used to match paths and define how to handle those routes. These links are:
+
+* "Merb::Router::Behavior#match":http://merbivore.com/documentation/merb-core/head/index.html?a=M000787&name=match
+* "Merb::Router::Behavior#to":http://merbivore.com/documentation/merb-core/head/index.html?a=M000790&name=to
+
+The @Merb::Router::Behavior@ class is used to generate each route, which you will recognize it as the block parameter passed and used similar to @r.match('/').to(:controller => 'application', :action => 'index')@.
+
+Also, the "Merb::Router::Behavior#default_routes":http://merbivore.com/documentation/merb-core/head/index.html?a=M000792&name=default_routes method may be worth investigating as it handles defining common routes like @/:controller/:action/:id@ and the like.

@@ -1,0 +1,28 @@
+---
+title:  Docs &mdash; Getting Started
+layout: simple
+filter:
+  - erb
+  - textile
+---
+h2. Introduction
+
+Sample documentation page.
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class QueueController < Application
+  @queue = []
+  def enqueue
+    @queue << params[:body]
+    ok
+  end
+  def dequeue
+    ok @queue.shift
+  end
+  def list
+    ok @queue
+  end
+end
+<% end -%>
+
+<pre><code>$ halcyon start -p 4647</code></pre>
