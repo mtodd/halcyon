@@ -57,6 +57,9 @@ module Halcyon
     
     USER_AGENT = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Client/#{Halcyon.version}"
     CONTENT_TYPE = 'application/json'
+    DEFAULT_OPTIONS = {
+      :raise_exceptions => false
+    }
     
     #--
     # Initialization and setup
@@ -112,49 +115,14 @@ module Halcyon
     # The differences are purely semantic and of personal taste.
     def initialize(uri)
       @uri = URI.parse(uri)
+      @options = DEFAULT_OPTIONS
       if block_given?
         yield self
       end
     end
     
-    #--
-    # Reverse Routing
-    #++
-    
-    # = Reverse Routing
-    # 
-    # The concept of writing our Routes in our Client is to be able to
-    # automatically generate the appropriate URL based on the hash given
-    # and where it was called from. This makes writing actions in Clients
-    # go from something like this:
-    # 
-    #   def greet(name)
-    #     get("/hello/#{name}")
-    #   end
-    # 
-    # to this:
-    # 
-    #   def greet(name)
-    #     get(url_for(__method__, :name))
-    #   end
-    # 
-    # This doesn't immediately seem to be beneficial, but it is better for
-    # automating URL generating, taking out the hardcoding, and has room to
-    # to improve in the future.
-    def url_for(action, params = {})
-     Halcyon::Client::Router.route(action, params)
-    end
-    
-    # Sets up routing for creating preparing +url_for+ URLs. See the
-    # +url_for+ method documentation and the Halcyon::Client::Router docs.
-    def self.route
-      if block_given?
-        Halcyon::Client::Router.prepare do |r|
-          Halcyon::Client::Router.default_to yield(r)
-        end
-      else
-        warn "Routes should be defined in a block."
-      end
+    def raise_exceptions!(setting = true)
+      @options[:raise_exceptions] = setting
     end
     
     #--
@@ -168,7 +136,7 @@ module Halcyon
     end
     
     # Performs a POST request on the URI specified.
-    def post(uri, data, headers={})
+    def post(uri, data = {}, headers={})
       req = Net::HTTP::Post.new(uri)
       req.body = format_body(data)
       request(req, headers)
@@ -181,7 +149,7 @@ module Halcyon
     end
     
     # Performs a PUT request on the URI specified.
-    def put(uri, data, headers={})
+    def put(uri, data = {}, headers={})
       req = Net::HTTP::Put.new(uri)
       req.body = format_body(data)
       request(req, headers)
@@ -202,13 +170,12 @@ module Halcyon
     # +Halcyon::Exceptions::Base+. It is up to the client to handle these
     # exceptions specifically.
     def request(req, headers={})
-      # define essential headers for Halcyon::Server's picky requirements
+      # set default headers
       req["Content-Type"] = CONTENT_TYPE
       req["User-Agent"] = USER_AGENT
       
       # apply provided headers
-      headers.each do |pair|
-        header, value = pair
+      headers.each do |(header, value)|
         req[header] = value
       end
       
@@ -219,12 +186,11 @@ module Halcyon
       res = Net::HTTP.start(@uri.host, @uri.port) {|http|http.request(req)}
       
       # parse response
-      body = JSON.parse(res.body)
-      body.to_mash
+      body = JSON.parse(res.body).to_mash
       
       # handle non-successes
-      unless res.kind_of? Net::HTTPSuccess
-        raise const_get(Exceptions::HTTP_STATUS_CODES[body[:status]].camel_case.gsub(/( |\-)/,'')).new
+      if @options[:raise_exceptions] && !res.kind_of?(Net::HTTPSuccess)
+        raise self.class.const_get(Exceptions::HTTP_STATUS_CODES[body[:status]].tr(' ', '_').camel_case.gsub(/( |\-)/,'')).new
       end
       
       # return response

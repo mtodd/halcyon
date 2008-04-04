@@ -13,13 +13,7 @@ $config = {
 
 # Default Application
 
-class Application < Halcyon::Controller
-  
-  def failure
-    raise NotFound.new
-  end
-  
-end
+class Application < Halcyon::Controller; end
 class Specs < Application
   
   def greeter
