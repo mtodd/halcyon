@@ -1,16 +1,14 @@
 require 'logging'
 module Halcyon
   module Logging
-    class Logging < Log4r::Logger
+    class Logging < Logging::Logger
       
       class << self
         
         def setup(config)
-          raise NotImplementedError
-          # TODO: Needs to be expanded to set up the correct params; these will cause errors
-          logger = config[:logger] || self.logger(config[:file] || STDOUT)
-          logger.formatter = proc{|s,t,p,m|"%5s [%s] (%s) %s :: %s\n" % [s, t.strftime("%Y-%m-%d %H:%M:%S"), $$, p, m]}
+          logger = config[:logger] || ::Logging.logger(config[:file] || STDOUT)
           logger.level = config[:level].downcase.to_sym
+          logger.instance_variable_get("@appenders")[0].instance_variable_set("@layout", ::Logging::Layouts::Pattern.new(:pattern => "%5l [%d] (%p) #{Halcyon.app} :: %m\n", :date_pattern => "%Y-%m-%d %H:%M:%S"))
           logger
         end
         

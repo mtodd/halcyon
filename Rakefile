@@ -57,7 +57,7 @@ spec = Gem::Specification.new do |s|
   }
   s.requirements << project[:requirements]
   s.required_ruby_version = project[:ruby_version_required]
-  s.files = (project[:rdoc_files] + %w[Rakefile README LICENSE AUTHORS] + Dir["{spec,lib,example,support,clients}/**/*"]).uniq
+  s.files = (project[:rdoc_files] + %w[Rakefile README LICENSE AUTHORS] + Dir["{spec,lib,example,support}/**/*"]).uniq
 end
 
 Rake::GemPackageTask.new(spec) do |p|
