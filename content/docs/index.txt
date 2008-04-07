@@ -14,7 +14,7 @@ Links marked with a -strike- are not finished. Bear with us while we grind away 
 
 h3. Getting Started
 
-* -"Introduction to Halcyon":/docs/introduction.html-
+* "Introduction to Halcyon":/docs/introduction.html
 * "Installation":/docs/installation.html
 * "Tutorial":/docs/tutorial.html
 

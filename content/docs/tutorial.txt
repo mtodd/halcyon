@@ -86,11 +86,16 @@ What this does is, after requiring the Halcyon library, we create an instance of
 
 After the client is created, we can then perform requests using standard HTTP request types, GET, POST, PUT, and DELETE. Here we simply call @get('/time')@ which gets routed to the @time@ action inside of the @Application@ controller inside of @app_name/app/application.rb@.
 
-Don't worry, you'll be able to wrap up @get@s and @post@s in your own custom client methods and make corresponding actions in the actual Halcyon application.
+Don't worry, you'll be able to wrap up @get@ and @post@ requests in your own custom client methods and make corresponding actions in the actual Halcyon application.
+
+
+h3. Modifying Your App
+
+_Coming soon!_
 
 
 h2. What's Next
 
-Now that you know how to get things running, you'll want to customize your application by "Defining Routes":/docs/routes.html, "Writing Controllers":/docs/controllers.html, and "Customizing Clients":/docs/clients.html.
+Now that you know how to get things running, you'll want to delve deeper into learning just how to customize your application by reading "Defining Routes":/docs/routes.html, "Writing Controllers":/docs/controllers.html, and "Customizing Clients":/docs/clients.html.
 
 Still confused? Read a more thorough "Introduction to Halcyon":/docs/introduction.html.

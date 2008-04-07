@@ -22,28 +22,46 @@ h2. Functionality &amp; Performance
 With Mongrel leading the pack and Rack holding things up, JSON doing the fast talking and with plenty of room to spare, how could you not be interested, even about this new framework? Still not convinced? OK, fair enough, here's some code for you.
 
 <% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
-class QueueController < Application
-  @queue = []
-  def enqueue
-    @queue << params[:body]
+class Messages < Application
+  def new
+    # respond with fields acceptable
+    ok [:body, :title, :tags]
+  end
+  def create
+    case method
+    when :post
+      DB[:messages] << params
+      ok
+    else
+      raise NotImplemented
+    end
+  end
+  def read
+    ok DB[:messages][params[:id]]
+  end
+  def update
+    case method
+    when :post
+      DB[:messages].filter(:id => params[:id]).update(params)
+      ok
+    else
+      raise NotImplemented
+    end
+  end
+  def delete
+    DB[:messages].filter(:id => params[:id]).delete
     ok
-  end
-  def dequeue
-    ok @queue.shift
-  end
-  def list
-    ok @queue
   end
 end
 <% end -%>
 
-You can then run it with
+You can then run it with:
 
 <pre><code>$ halcyon start -p 4647</code></pre>
 
 That's all it takes to open up the door to let you communicate with your applications that implement or use the simple client.
 
-Read the "Docs":/test/docs/.
+Read the "Docs":/docs/.
 
 
 h2. Supported Platforms
