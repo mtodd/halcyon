@@ -1,13 +1,16 @@
-#!/usr/bin/env ruby
-#--
-#  Created by Matt Todd on 2007-12-14.
-#  Copyright (c) 2007. All rights reserved.
-#++
-
 $:.unshift File.dirname(__FILE__)
 
-%w(rubygems rack merb-core/core_ext merb-core/dispatch/router json uri logger).each {|dep|require dep}
+%w(rubygems rack merb-core/core_ext merb-core/dispatch/router json uri).each {|dep|require dep}
 
+# Provides global values, like the root of the current application directory,
+# the current logger, the application name, and the framework version.
+# 
+# Examples
+#   Halcyon.app #=> AppName
+#   Halcyon.root #=> Dir.pwd
+#   Halcyon.config #=> {:allow_from => :all, :logging => {...}, ...}
+#   Halcyon.logger #=> #<Logger>
+#   Halcyon.version #=> "0.5.0"
 module Halcyon
   
   VERSION = [0,5,0] unless defined?(Halcyon::VERSION)
@@ -29,6 +32,9 @@ module Halcyon
       VERSION.join('.')
     end
     
+    # The root directory of the current application.
+    # 
+    # Returns String:root_directory
     def root
       self.config[:root] || Dir.pwd rescue Dir.pwd
     end

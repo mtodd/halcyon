@@ -1,10 +1,21 @@
-# Partly modeled after Thin's Runner, found at
-# http://github.com/macournoyer/thin/tree/master/lib/thin/runner.rb
-
 module Halcyon
   
-  # = CLI Runner
-  # Parse options and start serving the app
+  # Handles initializing and running the application, including:
+  # * setting up the logger
+  # * loading initializers
+  # * loading controllers
+  # 
+  # The Runner is a full-fledged Rack application, and accepts calls to #call.
+  # 
+  # Also handles running commands form the command line.
+  # 
+  # Examples
+  #   # start serving the current app (in .)
+  #   Halcyon::Runner.run!(['start', '-p', '4647'])
+  #   
+  #   # load the config file and initialize the app
+  #   Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
+  #   Halcyon::Runner.new
   class Runner
     
     autoload :Commands, 'halcyon/runner/commands'
@@ -14,14 +25,17 @@ module Halcyon
     
     class << self
       
-      # Runs commands from the CLI; foregoes actually running the app
+      # Runs commands from the CLI.
+      #   +argv+ the arguments to pass to the commands
+      # 
+      # Returns nothing
       def run!(argv=ARGV)
         Commands.send(argv.shift, argv)
       end
       
     end
     
-    # Sets up the application to run
+    # Initializes the application and application resources.
     def initialize
       # Set application name
       Halcyon.app = Halcyon.config[:app] || Halcyon.root.split('/').last.camel_case
@@ -51,6 +65,10 @@ module Halcyon
       @app = Halcyon::Application.new
     end
     
+    # Calls the application, which gets proxied to the dispatcher.
+    #   +env+ the request environment details
+    # 
+    # Returns [Fixnum:status, {String:header => String:value}, [String:body]]
     def call(env)
       @app.call(env)
     end
@@ -65,7 +83,15 @@ module Halcyon
         Halcyon.logger
       end
       
-      def load_config file
+      # Loads the configuration file specified into <tt>Halcyon.config</tt>.
+      #   +file+ the configuration file to load
+      # 
+      # Examples
+      #   Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
+      #   Halcyon.config #=> {:allow_from => :all, :logging => {...}, ...}.to_mash
+      # 
+      # Returns {Symbol:key => String:value}.to_mash
+      def load_config(file)
         if File.exist?(file)
           require 'yaml'
           
