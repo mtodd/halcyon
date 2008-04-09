@@ -1,6 +1,6 @@
 require 'rbconfig'
 
-class HalcyonGenerator < RubiGen::Base
+class HalcyonFlatGenerator < RubiGen::Base
   DEFAULT_SHEBANG = File.join(Config::CONFIG['bindir'],
                               Config::CONFIG['ruby_install_name'])
   
