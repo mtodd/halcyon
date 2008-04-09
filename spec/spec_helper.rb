@@ -1,5 +1,6 @@
 require File.join(File.dirname(__FILE__), '..', 'lib', 'halcyon')
 require 'rack/mock'
+require 'logger'
 
 # Default Settings
 
