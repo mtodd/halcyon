@@ -19,97 +19,44 @@ h3. The Framework
 
 As a framework, Halcyon breaks your application code up into controllers with absolutely no views and no predefined system for models or database connectivity. Routes are used to define what paths are handled by what actions in which controllers.
 
-
-h4. Controllers
-
-Halcyon's controllers all inherit from Halcyon::Controller which provides several useful methods for responding in different situations, such as the @ok@ method to respond with the @200 OK@ standard HTTP success response, along with any data you need to send back.
-
-For example, a controller may look like this:
-
-<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
-class Messages < Application
-  def new
-    # respond with fields acceptable
-    ok [:body, :title, :tags]
-  end
-  def create
-    case method
-    when :post
-      DB[:messages] << params.merge(:tags => params[:tags].join)
-      ok
-    when :get
-      # the params required for new messages
-      ok [:message, :tags]
-    else
-      raise NotImplemented
-    end
-  end
-  def read
-    ok DB[:messages][params[:id]]
-  end
-  def update
-    case method
-    when :post
-      DB[:messages].filter(:id => params[:id]).update(params)
-      ok
-    else
-      raise NotImplemented
-    end
-  end
-  def delete
-    DB[:messages].filter(:id => params[:id]).delete
-    ok
-  end
-end
-<% end -%>
-
-@DB@ refers to a "Sequel":http://code.google.com/p/ruby-sequel/ connection, which lets us talk to the @messages@ table. This could just as easily be a Sequel model, ActiveRecord model, or DataMapper model.
-
-Read more about "Writing Controllers":/docs/controllers.html
+Halcyon distinguishes itself by the distinct combination of technologies it employs to simplify its task. To clarify, Halcyon specifically chooses to reinvent as little as possible and yet provide a great deal of functionality. We do this by using standard HTTP protocols, transferring complex data across platforms with JSON, designing Halcyon apps on top of "Rack":http://rack.rubyforge.org/, and even reusing portions of "Merb":http://merbivore.com/ to prevent duplication. Here's a quick look at each of these.
 
 
-h4. Routes
+h4. JSON
 
-Part of developing a Halcyon app is writing the controllers, but requests need to be routed to the appropriate actions.
-
-There are, by default, no routes defined for an application, but there is a way to quickly define routes as matching any variation of @/:controller/:action/:id@, etc. For example:
-
-<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
-Halcyon::Application.route do |r|
-  r.default_routes
-end
-<% end -%>
-
-Of course, you can add to the default routes with custom routes, like so:
-
-<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
-Halcyon::Application.route do |r|
-  r.match('/api/:version/:controller/:action(/:id)?').to()
-  r.default_routes
-end
-<% end -%>
-
-Read more about "Defining Routes":/docs/routes.html.
+JSON, or JavaScript Object Notation, is a simple format to transport complex data structures across the HTTP medium and across to many platforms. It's a simple format like XML, easy to read and write (unlike XML), and serializable. "CouchDB":http://couchdb.com/ chose JSON over XML for similar reasons, and has been very happy with the decision.
 
 
-h4. Clients
 
-The easiest way to communicate with your Halcyon application is with a Halcyon client. By default, it creates a simple way to perform GET, POST, PUT, and DELETE requests on application routes, but can be extended with methods that easily corresponds with your routes. For example:
+h4. HTTP
 
-<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
->> class MessageClient < Halcyon::Client
-*>   def create(params)
-*>     post("/api/1.0/messages/create", params)
-*>   end
-*> end
->> Message = MessageClient.new('http://localhost:4647/')
-=> #<MessageClient>
->> Message.create(:message => 'First test.', :tags => ['test', 'first'])
-=> {'status' => 200, 'body' => {:id => 1}}
->> Message.post("/api/1.0/messages/create", :message => 'Second test.', :tags => [])
-=> {'status' => 200, 'body' => {:id => 2}}
-<% end -%>
+Hypertext Transfer Protocol is a widely support protocol, supported on pretty much every platform, and provides a familiar way to modify resources with Representational State Transfer.
 
-You can also implement clients into your currently existing models.
 
-Read more about "Customizing Clients":/docs/clients.html
+h4. Rack
+
+Rack provides a uniform model for handling HTTP request and response cycles, allowing for server-independent development and for powerful layering of applications and specialized functionality through middleware.
+
+Jim Weirich's talk at MountainWest 2008 focuses on the power of simplicity. Specifically, Jim mentions three poignant parts to a powerful system, having:
+
+# Small Core
+# Simple Rules
+# Powerful Abstractions
+
+Rack's design elegantly shows off the power of its simplicity.
+
+
+h4. Merb
+
+Having Merb as a dependency of Halcyon seems a bit ironic, but its active community, quality modular code, and thorough documentation provides an excellent souce of functionality without all of the repetitive development. Halcyon specifically takes advantage of the Merb Router and the Core Extensions.
+
+
+h3. Purpose
+
+...
+
+
+h3. Alternatives
+
+...
+
