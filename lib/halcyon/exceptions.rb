@@ -1,5 +1,3 @@
-# Taken from Rack's definition:
-# http://chneukirchen.org/darcs/darcsweb.cgi?r=rack;a=plainblob;f=/lib/rack/utils.rb
 module Halcyon
   
   # Included into Halcyon::Application in order to provide exception classes

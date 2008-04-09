@@ -1,21 +1,4 @@
-#--
-#  Created by Matt Todd on 2007-12-14.
-#  Copyright (c) 2007. All rights reserved.
-#++
-
-#--
-# dependencies
-#++
-
-begin
-  %w(rubygems merb-core/core_ext merb-core/dispatch/router uri).each {|dep|require dep}
-rescue LoadError => e
-  abort "Merb must be installed for Routing to function. Please install Merb."
-end
-
-#--
-# module
-#++
+%w(rubygems merb-core/core_ext merb-core/dispatch/router uri).each {|dep|require dep}
 
 module Halcyon
   class Application
@@ -26,13 +9,10 @@ module Halcyon
     # 
     # == Usage
     # 
-    #   class Xy < Halcyon::Server::Base
+    #   class Halcyon::Application
     #     route do |r|
-    #       r.match('/path/to/match').to(:action => 'do_stuff')
+    #       r.match('/path/to/match').to(:controller => 'a', :action => 'b')
     #       {:action => 'not_found'} # the default route
-    #     end
-    #     def do_stuff(params)
-    #       [200, {}, 'OK']
     #     end
     #   end
     # 
@@ -41,7 +21,7 @@ module Halcyon
     # Supplying a default route if none of the others match is good practice,
     # but is unnecessary as the predefined route is always, automatically,
     # going to contain a redirection to the +not_found+ method which already
-    # exists in Halcyon::Server::Base. This method is freely overwritable, and
+    # exists in Halcyon::Controller. This method is freely overwritable, and
     # is recommended for those that wish to handle unroutable requests
     # themselves.
     # 
@@ -65,21 +45,27 @@ module Halcyon
           Halcyon.logger
         end
         
-        # Retrieves the last value from the +route+ call in Halcyon::Server::Base
+        # Retrieves the last value from the +route+ call in Halcyon::Controller
         # and, if it's a Hash, sets it to +@@default_route+ to designate the
         # failover route. If +route+ is not a Hash, though, the internal default
         # should be used instead (as the last returned value is probably a Route
         # object returned by the +r.match().to()+ call).
+        #   +route+ the default route, or nothing to use <tt>not_found</tt>
         # 
         # Used exclusively internally.
-        def default_to route
+        # 
+        # Returns nothing
+        def default_to(route)
           @@default_route = route.is_a?(Hash) ? route : {:action => 'not_found'}
         end
         
-        # Called internally by the Halcyon::Server::Base#call method to match
+        # Called internally by the Halcyon::Controller#call method to match
         # the current request against the currently defined routes. Returns the
         # params list defined in the +to+ routing definition, opting for the
         # default route if no match is made.
+        #   +request+ the request object to route against
+        # 
+        # Returns Hash:{:controller=>..., :action=>..., ...}
         def route(request)
           req = Struct.new(:path, :method, :params).new(request.path_info, request.request_method.downcase.to_sym, request.params)
           
