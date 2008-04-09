@@ -107,7 +107,8 @@ module Halcyon
           
           Halcyon.config
         else
-          raise LoadError.new("Can't access #{file}, try 'sudo #{$0}'")
+          warn "#{file} not found, ensure the path to this file is correct. Ignoring."
+          Halcyon.config = Halcyon::Application::DEFAULT_OPTIONS
         end
       end
       
