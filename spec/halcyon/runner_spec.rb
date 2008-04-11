@@ -1,3 +1,11 @@
+module Kernel
+  alias_method :__warn, :warn
+  def warn(msg)
+    $warning = msg
+    __warn(msg) if $do_warns
+  end
+end
+
 describe "Halcyon::Runner" do
   
   before do
@@ -9,8 +17,12 @@ describe "Halcyon::Runner" do
     @app = Halcyon::Runner.new
   end
   
-  it "should raise an exception if a non-existent config file is loaded" do
-    should.raise(LoadError) { Halcyon::Runner.load_config(Halcyon.root/'config'/'config.yml') }
+  it "should warn if a non-existent config file is loaded" do
+    $do_warns = false
+    path = Halcyon.root/'config'/'config.yml'
+    Halcyon::Runner.load_config(path).is_a?(Hash).should == true
+    $warning.should =~ %r{#{path} not found}
+    $do_warns = true
   end
   
   it "should set up logging according to configuration" do
