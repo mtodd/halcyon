@@ -50,6 +50,7 @@ mailing list as well, so do stop by.
 * Elliott Cable, missing dependency, Thin testing
 * ramstedt, Mongrel on JRuby port numericality issue (#14)
 * Ben Simpson, PHP Client bug fixes
+* Eivind Uggedal, dependencies for Router support of resources
 
 == Links
 
