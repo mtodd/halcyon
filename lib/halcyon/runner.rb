@@ -55,7 +55,7 @@ module Halcyon
       
       # Setup logger
       if Halcyon.config[:logger]
-        Halcyon.config[:logging] = Halcyon.config[:logging].merge({
+        Halcyon.config[:logging] = (Halcyon.config[:logging] || Halcyon::Application::DEFAULT_OPTIONS[:logging]).merge({
           :type => Halcyon.config[:logger].class.to_s,
           :logger => Halcyon.config[:logger]
         })
@@ -116,7 +116,7 @@ module Halcyon
           end
         else
           warn "#{file} not found, ensure the path to this file is correct. Ignoring."
-          {}.to_mash
+          nil
         end
       end
       

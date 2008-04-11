@@ -53,6 +53,7 @@ module Halcyon
           # prepare environment for IRB
           ARGV.clear
           require 'rack/mock'
+          require 'logger'
           require 'irb'
           require 'irb/completion'
           if File.exists? '.irbrc'
@@ -62,7 +63,7 @@ module Halcyon
           # Set up the application
           Object.instance_eval do
             $log = ''
-            Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
+            (Halcyon.config = Halcyon::Runner.load_config) || require(Halcyon.root/'app')
             Halcyon.config[:logger] = Logger.new(StringIO.new($log))
             $app = Halcyon::Runner.new
             $response = nil

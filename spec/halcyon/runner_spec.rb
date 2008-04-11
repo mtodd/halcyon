@@ -20,7 +20,7 @@ describe "Halcyon::Runner" do
   it "should warn if a non-existent config file is loaded" do
     $do_warns = false
     path = Halcyon.root/'config'/'config.yml'
-    Halcyon::Runner.load_config(path).is_a?(Hash).should == true
+    Halcyon::Runner.load_config(path).nil?.should == true
     $warning.should =~ %r{#{path} not found}
     $do_warns = true
   end
