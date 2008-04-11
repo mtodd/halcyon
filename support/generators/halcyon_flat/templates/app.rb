@@ -4,6 +4,7 @@ require 'halcyon'
 %w().each {|dep|require dep}
 
 # = Configuration
+# Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
 Halcyon.config = {
   :allow_from => 'all',
   :logging => {
@@ -13,20 +14,19 @@ Halcyon.config = {
   }
 }.to_mash
 
-# = Initialization
-class Halcyon::Application
-  startup do |config|
-    self.logger.info 'Initialize application resources and define routes in config/initialize.rb'
-  end
-  # = Routes
-  route do |r|
-    r.match('/time').to(:controller => 'application', :action => 'time')
-    
-    r.match('/').to(:controller => 'application', :action => 'index')
-    
-    # failover
-    {:action => 'not_found'}
-  end
+# = Routes
+Halcyon::Application.route do |r|
+  r.match('/time').to(:controller => 'application', :action => 'time')
+  
+  r.match('/').to(:controller => 'application', :action => 'index')
+  
+  # failover
+  {:action => 'not_found'}
+end
+
+# = Hooks
+Halcyon::Application.startup do |config, logger|
+  logger.info 'Define startup tasks in config/initialize/hooks.rb'
 end
 
 # = Application

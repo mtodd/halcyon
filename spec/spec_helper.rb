@@ -40,7 +40,7 @@ class Halcyon::Application
     # r.default_routes
     {:action => 'missing'}
   end
-  startup do |config|
+  startup do |config, logger|
     $started = true
   end
 end
