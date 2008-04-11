@@ -32,7 +32,7 @@ module Halcyon
           
           if options[:server] == 'thin'
             # Thin is installed
-            command = "thin start -r runner.ru #{argv.join(' ')}"
+            command = "thin start -R runner.ru #{argv.join(' ')}"
           else
             # Thin is not installed
             command = "rackup runner.ru -s #{options[:server]} #{argv.join(' ')}"
