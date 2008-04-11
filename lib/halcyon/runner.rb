@@ -20,9 +20,6 @@ module Halcyon
     
     autoload :Commands, 'halcyon/runner/commands'
     
-    # Make sure that the Halcyon.config hash is setup
-    Halcyon.config ||= Mash.new(Halcyon::Application::DEFAULT_OPTIONS)
-    
     class << self
       
       # Runs commands from the CLI.
@@ -33,10 +30,26 @@ module Halcyon
         Commands.send(argv.shift, argv)
       end
       
+      # Returns the path to the configuration file specified, defaulting
+      # to the path for the <tt>config.yml</tt> file.
+      #   +file+ the name of the config file path (without the <tt>.yml</tt>
+      #   extension)
+      def config_path(file = "config")
+        Halcyon.root/'config'/"#{file}.yml"
+      end
+      
     end
     
     # Initializes the application and application resources.
     def initialize
+      if Halcyon.config.nil?
+        if File.exist?(Halcyon::Runner.config_path)
+          Halcyon.config = Halcyon::Runner.load_config
+        else
+          Halcon.config = Halcyon::Application::DEFAULT_OPTIONS
+        end
+      end
+      
       # Set application name
       Halcyon.app = Halcyon.config[:app] || Halcyon.root.split('/').last.camel_case
       
@@ -91,24 +104,19 @@ module Halcyon
       #   Halcyon.config #=> {:allow_from => :all, :logging => {...}, ...}.to_mash
       # 
       # Returns {Symbol:key => String:value}.to_mash
-      def load_config(file)
+      def load_config(file=Halcyon::Runner.config_path)
         if File.exist?(file)
           require 'yaml'
           
           # load the config file
           begin
-            Halcyon.config = (Halcyon.config.merge YAML.load_file(file)).to_mash
+            config = YAML.load_file(file).to_mash
           rescue Errno::EACCES
             raise LoadError.new("Can't access #{file}, try 'sudo #{$0}'")
           end
-          
-          # store config file path so SIGHUP and SIGUSR2 will reload the config in case it changes
-          Halcyon.config[:config_file] = file
-          
-          Halcyon.config
         else
           warn "#{file} not found, ensure the path to this file is correct. Ignoring."
-          Halcyon.config = Halcyon::Application::DEFAULT_OPTIONS
+          {}.to_mash
         end
       end
       

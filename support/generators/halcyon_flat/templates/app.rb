@@ -4,7 +4,7 @@ require 'halcyon'
 %w().each {|dep|require dep}
 
 # = Configuration
-# Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
+# Halcyon.config = Halcyon::Runner.load_config
 Halcyon.config = {
   :allow_from => 'all',
   :logging => {
@@ -26,7 +26,7 @@ end
 
 # = Hooks
 Halcyon::Application.startup do |config, logger|
-  logger.info 'Define startup tasks in config/initialize/hooks.rb'
+  logger.info 'Define startup tasks in Halcyon::Application.startup {}'
 end
 
 # = Application
