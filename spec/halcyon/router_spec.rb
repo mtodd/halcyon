@@ -42,4 +42,16 @@ describe "Halcyon::Application::Router" do
     Halcyon::Application::Router.route(request)[:arbitrary].should == 'random'
   end
   
+  it "should match index method of resources" do
+    index_req = Rack::Request.new(Rack::MockRequest.env_for('/resources'))
+    Halcyon::Application::Router.route(index_req)[:controller].should == 'resources'
+    Halcyon::Application::Router.route(index_req)[:action].should == 'index'
+  end
+
+  it "should match show method of resource" do
+    show_req = Rack::Request.new(Rack::MockRequest.env_for('/resources/id'))
+    Halcyon::Application::Router.route(show_req)[:controller].should == 'resources'
+    Halcyon::Application::Router.route(show_req)[:action].should == 'show'
+  end
+  
 end

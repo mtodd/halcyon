@@ -31,8 +31,21 @@ class Specs < Application
   
 end
 
+class Resources < Application
+
+  def index
+    ok('List of resources')
+  end
+
+  def show
+    ok("One resource: #{params[:id]}")
+  end
+end
+
 class Halcyon::Application
   route do |r|
+    r.resources :resources
+
     r.match('/hello/:name').to(:controller => 'specs', :action => 'greeter')
     r.match('/:action').to(:controller => 'specs')
     r.match('/:controller/:action').to()
