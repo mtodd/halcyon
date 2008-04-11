@@ -1,5 +1,3 @@
-require 'ostruct'
-
 describe "Halcyon::Controller" do
   
   before do
