@@ -42,6 +42,10 @@ class Resources < Application
   end
 end
 
+class Model
+  attr_accessor :id
+end
+
 class Halcyon::Application
   route do |r|
     r.resources :resources

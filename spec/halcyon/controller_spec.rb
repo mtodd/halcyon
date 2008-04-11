@@ -1,3 +1,5 @@
+require 'ostruct'
+
 describe "Halcyon::Controller" do
   
   before do
@@ -51,6 +53,18 @@ describe "Halcyon::Controller" do
     
     controller = Specs.new(Rack::MockRequest.env_for(""))
     controller.uri.should == '/'
+  end
+
+  it 'should provide url accessor for resource index route' do
+    controller = Resources.new(Rack::MockRequest.env_for("/resources"))
+    controller.uri.should == controller.url(:resources)
+  end
+
+  it 'should provide url accessor for resource show route' do
+    resource = Model.new
+    resource.id = 1
+    controller = Resources.new(Rack::MockRequest.env_for("/resources/1"))
+    controller.uri.should == controller.url(:resource, resource)
   end
   
 end

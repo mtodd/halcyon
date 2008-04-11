@@ -142,6 +142,32 @@ module Halcyon
       {:status => 404, :body => body}
     end
     alias_method :missing, :not_found
+
+    # Returns the name of the controller in path form.
+    def self.controller_name
+      @controller_name ||= self.name.to_const_path
+    end
+
+    # Returns the name of the controller in path form.
+    def controller_name
+      self.class.controller_name
+    end
+
+    # Generates a URL based on the given name and passed
+    # options. Used with named routes and resources:
+    #
+    #  url(:users) # => "/users"
+    #  url(:admin_permissons) # => "/admin/permissions"
+    #  url(:user, @user) # => "/users/1"
+    #
+    # Based on the identical method of Merb's controller.
+    def url(name, rparams={})
+      Halcyon::Application::Router.generate(name, rparams,
+        { :controller => controller_name,
+          :action => method
+        }
+      )
+    end
     
   end
   
