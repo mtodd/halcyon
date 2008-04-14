@@ -25,7 +25,7 @@ Halcyon::Application.route do |r|
 end
 
 # = Hooks
-Halcyon::Application.startup do |config, logger|
+Halcyon::Application.startup do |config|
   logger.info 'Define startup tasks in Halcyon::Application.startup {}'
 end
 

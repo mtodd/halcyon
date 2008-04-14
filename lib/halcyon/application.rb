@@ -28,7 +28,7 @@ module Halcyon
     def initialize
       self.logger.info "Starting up..."
       
-      self.hooks[:startup].call(Halcyon.config, Halcyon.logger) if self.hooks[:startup]
+      self.hooks[:startup].call(Halcyon.config) if self.hooks[:startup]
       
       # clean after ourselves and get prepared to start serving things
       self.logger.debug "Starting GC."
@@ -38,7 +38,7 @@ module Halcyon
       
       at_exit do
         self.logger.info "Shutting down #{$$}."
-        self.hooks[:shutdown].call(Halcyon.config, Halcyon.logger) if self.hooks[:shutdown]
+        self.hooks[:shutdown].call(Halcyon.config) if self.hooks[:shutdown]
         self.logger.info "Done."
       end
     end
