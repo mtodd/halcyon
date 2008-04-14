@@ -25,8 +25,8 @@ module Halcyon
   class << self
     
     attr_accessor :app
-    attr_accessor :config
     attr_accessor :logger
+    attr_accessor :config
     
     def version
       VERSION.join('.')
@@ -37,6 +37,19 @@ module Halcyon
     # Returns String:root_directory
     def root
       self.config[:root] || Dir.pwd rescue Dir.pwd
+    end
+    
+    # Retreives the current database configuration settings from
+    # <tt>Halcyon.config</tt>.
+    def db
+      Halcyon.config[:db]
+    end
+    
+    # Set the DB configuration settings with the value of +config+ which is
+    # stored in the <tt>Halcyon.config</tt> hash.
+    #   +config+ the configuration settings for the Database.
+    def db=(config = {})
+      Halcyon.config[:db] = config.to_mash
     end
     
   end
