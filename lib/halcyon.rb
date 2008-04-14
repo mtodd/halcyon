@@ -43,5 +43,5 @@ module Halcyon
   
 end
 
-#logger and klass.logger methods for use everywhere.
+# Include the klass#logger and klass.logger accessor methods into Object.
 Object.send(:include, Halcyon::Logging::Helpers)
