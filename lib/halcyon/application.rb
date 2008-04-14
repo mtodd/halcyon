@@ -6,7 +6,7 @@ module Halcyon
   # 
   # Manages shutting down and starting up hooks, routing, dispatching, etc.
   # Also restricts the requests to acceptable clients, defaulting to all.
-  class Application
+  class Application 
     include Exceptions
     
     autoload :Router, 'halcyon/application/router'
@@ -167,10 +167,6 @@ module Halcyon
       end
     end
     
-    def logger
-      Halcyon.logger
-    end
-    
     def hooks
       self.class.hooks
     end
@@ -181,10 +177,6 @@ module Halcyon
       
       def hooks
         @hooks ||= {}
-      end
-      
-      def logger
-        Halcyon.logger
       end
       
       # Defines routes for the application.

@@ -19,18 +19,6 @@ module Halcyon
     
     class << self
       
-      # The current application logger instance, usable in the class context.
-      # This means you can call <tt>self.logger</tt> from inside of class
-      # methods, filters, etc.
-      # 
-      # Examples
-      #   self.logger.debug "Test message"
-      # 
-      # Returns Logger:logger
-      def logger
-        Halcyon.logger
-      end
-      
       # Not implemented.
       def before method, &proc
         raise NotImplemented.new
@@ -41,14 +29,6 @@ module Halcyon
         raise NotImplemented.new
       end
       
-    end
-    
-    # The current application logger instance.
-    # 
-    # Examples
-    #   self.logger.debug "Deleting user's cached data"
-    def logger
-      Halcyon.logger
     end
     
     # Returns the request params and the route params.

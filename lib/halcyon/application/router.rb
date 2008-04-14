@@ -41,10 +41,6 @@ module Halcyon
       
       class << self
         
-        def logger
-          Halcyon.logger
-        end
-        
         # Retrieves the last value from the +route+ call in Halcyon::Controller
         # and, if it's a Hash, sets it to +@@default_route+ to designate the
         # failover route. If +route+ is not a Hash, though, the internal default

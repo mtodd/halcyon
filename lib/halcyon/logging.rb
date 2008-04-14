@@ -1,6 +1,8 @@
 module Halcyon
   module Logging
     
+    autoload :Helpers, 'halcyon/logging/helpers'
+    
     autoload :Logger, 'halcyon/logging/logger'
     autoload :Logging, 'halcyon/logging/logging'
     autoload :Analogger, 'halcyon/logging/analogger'

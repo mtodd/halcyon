@@ -86,15 +86,7 @@ module Halcyon
       @app.call(env)
     end
     
-    def logger
-      Halcyon.logger
-    end
-    
     class << self
-      
-      def logger
-        Halcyon.logger
-      end
       
       # Loads the configuration file specified into <tt>Halcyon.config</tt>.
       #   +file+ the configuration file to load
