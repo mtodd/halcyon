@@ -122,20 +122,22 @@ module Halcyon
     # 
     # Returns (String|Array|Hash):body
     def dispatch(env)
-      route = env['halcyon.route']
-      # make sure that the right controller/action is called based on the route
-      controller = case route[:controller]
-      when NilClass
-        # default to the Application controller
-        ::Application.new(env)
-      when String
-        # pulled from URL, so camelize (from merb/core_ext) and symbolize first
-        Object.const_get(route[:controller].camel_case.to_sym).new(env)
-      end
-      
       begin
+        route = env['halcyon.route']
+        # make sure that the right controller/action is called based on the route
+        controller = case route[:controller]
+        when NilClass
+          # default to the Application controller
+          ::Application.new(env)
+        when String
+          # pulled from URL, so camelize (from merb/core_ext) and symbolize first
+          Object.const_get(route[:controller].camel_case.to_sym).new(env)
+        end
+        
         controller.send((route[:action] || 'default').to_sym)
       rescue NoMethodError => e
+        raise NotFound.new
+      rescue NameError => e
         raise NotFound.new
       end
     end
