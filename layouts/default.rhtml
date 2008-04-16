@@ -35,9 +35,18 @@ filter:
           The website is currently being udpated. Sorry for any inconvenience.
           
         #left
+          
           - puts @content
           
         #right
+        
+          #rubyfringe{:style => 'margin:0 1em 1em;'}
+            %a{:href => 'http://rubyfringe.com/'}
+              %img{:src => 'http://halcyon.rubyforge.org/img/rubyfringespeak.jpg', :title => 'Speaking at RubyFringe', :border => '0', :style => 'float: right;'}
+            I'm speaking at
+            %a{:href => 'http://rubyfringe.com/'} RubyFringe
+            about Halcyon in mid-July along with several other notable Ruby developers. RubyFringe is unlike most other Ruby conferences... check it out!
+            
           .box
             %h2 About
             %p Halcyon is a JSON Web App Framework built on Rack for speed and light weight.
