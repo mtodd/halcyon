@@ -45,9 +45,9 @@ describe "Halcyon::Client" do
   
   it "should be able to perform get, post, put, and delete requests" do
     @client.get('/time')[:body].length.should > 25
-    @client.post('/time')[:body].length.should > 25
-    @client.put('/time')[:body].length.should > 25
-    @client.delete('/time')[:body].length.should > 25
+    @client.post('/time')[:body].length.should > 20
+    @client.put('/time')[:body].should == "Not Implemented"
+    @client.delete('/time')[:status].should == 501
   end
   
   it "should throw exceptions unless an OK response is sent if toggled to" do
