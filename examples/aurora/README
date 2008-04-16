@@ -1,0 +1,12 @@
+= Aurora
+
+Aurora is an Authentication system designed to centralize the actual
+authentication process for numerous independent applications, not necessarily
+running on the same platform (such as a legacy PHP application).
+
+Aurora is being developed in parallel to Halcyon, and was in fact the reason
+that Halcyon exists: Aurora at first was both the framework and application but
+the application was separated from the framework to make reuse of the framework
+design.
+
+Aurora is stored at http://github.com/mtodd/aurora and is open source.

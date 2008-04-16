@@ -1,0 +1,4 @@
+= Guesser
+
+This application consists of the back end to keep track as the game progresses,
+and the client which is a website to facilitate playing the game.
