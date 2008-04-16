@@ -1,6 +1,6 @@
-%w(rubygems halcyon).each {|dep|require dep}
+%w(rubygems halcyon).each{|dep|require dep}
 
-module Sparrow
+module <%= app %>
   
   class Client < Halcyon::Client
     

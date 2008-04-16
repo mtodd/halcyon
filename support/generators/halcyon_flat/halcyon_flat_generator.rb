@@ -27,7 +27,7 @@ class HalcyonFlatGenerator < RubiGen::Base
         if File.directory?(source+path)
           m.directory path
         else
-          m.template path, path
+          m.template path, path, :assigns => {:app => @module_name, :unix => @app_name}
         end
       end
       m.directory 'log'

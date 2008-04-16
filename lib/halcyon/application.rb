@@ -169,6 +169,7 @@ module Halcyon
       end
     end
     
+    # See the documentation for generated apps in <tt>config/initialze/hooks.rb</tt>
     def hooks
       self.class.hooks
     end
@@ -177,6 +178,7 @@ module Halcyon
       
       attr_accessor :hooks
       
+      # See the documentation for generated apps in <tt>config/initialze/hooks.rb</tt>
       def hooks
         @hooks ||= {}
       end
