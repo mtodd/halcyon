@@ -58,4 +58,10 @@ describe "Halcyon::Application" do
     body['body'].should == "Internal Server Error"
   end
   
+  it "should not confuse a NoMethodFound error in an action as a missing route" do
+    body = JSON.parse(Rack::MockRequest.new(@app).get("/specs/call_nonexistent_method").body)
+    body['status'].should.not == 404
+    body['body'].should == "Internal Server Error"
+  end
+  
 end

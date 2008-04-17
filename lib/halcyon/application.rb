@@ -122,35 +122,32 @@ module Halcyon
     # 
     # Returns (String|Array|Hash):body
     def dispatch(env)
-      begin
-        route = env['halcyon.route']
-        # make sure that the right controller/action is called based on the route
-        controller = case route[:controller]
-        when NilClass
-          # default to the Application controller
-          ::Application.new(env)
-        when String
-          # pulled from URL, so camelize (from merb/core_ext) and symbolize first
-          Object.const_get(route[:controller].camel_case.to_sym).new(env)
-        end
-        
-        # This block and the following call to +action+ detects if a non-
-        # existent action is routed to, as opposed to just catching a blanket
-        # <tt>NoMethodFound</tt> error which can occur in actions too,
-        # reporting as a <tt>404 Not Found error</tt> incorrectly.
+      route = env['halcyon.route']
+      # make sure that the right controller/action is called based on the route
+      controller = case route[:controller]
+      when NilClass
+        # default to the Application controller
+        ::Application.new(env)
+      when String
+        # pulled from URL, so camelize (from merb/core_ext) and symbolize first
         begin
-          action = controller.method((route[:action] || 'default').to_sym)
+          Object.const_get(route[:controller].camel_case.to_sym).new(env)
         rescue NameError => e
           raise NotFound.new
         end
-        
-        # Calls the action. This will only run if the action exists inside of
-        # the controller and won't throw false positives for bad method calls
-        # in the action as a <tt>404 Not Found</tt> error.
-        action.call
-      rescue NameError => e
-        raise NotFound.new
       end
+      
+      # Establish the selected action, defaulting to +default+.
+      action = (route[:action] || 'default').to_sym
+      
+      # Respond correctly that a non-existent action was specified if the
+      # method does not exist.
+      raise NotFound.new unless controller.methods.include?(action.to_s)
+      
+      # if no errors have occured up to this point, the route should be fully
+      # valid and all exceptions raised should be treated as
+      # <tt>500 Internal Server Error</tt>s, which is handled by <tt>call</tt>.
+      controller.send(action)
     end
     
     # Filters unacceptable requests depending on the configuration of the

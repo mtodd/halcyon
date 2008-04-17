@@ -29,6 +29,12 @@ class Specs < Application
     raise Exception.new("Oops!")
   end
   
+  def call_nonexistent_method
+    hash = Hash.new
+    hash.please_dont_exist_and_please_throw_no_method_error
+    ok
+  end
+  
 end
 
 class Resources < Application
