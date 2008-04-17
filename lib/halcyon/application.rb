@@ -134,9 +134,20 @@ module Halcyon
           Object.const_get(route[:controller].camel_case.to_sym).new(env)
         end
         
-        controller.send((route[:action] || 'default').to_sym)
-      rescue NoMethodError => e
-        raise NotFound.new
+        # This block and the following call to +action+ detects if a non-
+        # existent action is routed to, as opposed to just catching a blanket
+        # <tt>NoMethodFound</tt> error which can occur in actions too,
+        # reporting as a <tt>404 Not Found error</tt> incorrectly.
+        begin
+          action = controller.method((route[:action] || 'default').to_sym)
+        rescue NameError => e
+          raise NotFound.new
+        end
+        
+        # Calls the action. This will only run if the action exists inside of
+        # the controller and won't throw false positives for bad method calls
+        # in the action as a <tt>404 Not Found</tt> error.
+        action.call
       rescue NameError => e
         raise NotFound.new
       end
