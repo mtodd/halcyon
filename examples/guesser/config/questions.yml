@@ -1,0 +1,45 @@
+questions:
+  
+  - question: "Freebie"
+    options:
+      - "Pick me!"
+    answer: "Pick me!"
+    
+  - question: "What time is it?"
+    options:
+      - "Now!"
+      - "Then."
+      - "Soon."
+    answer: "Now!"
+    
+  - question: "What's up?"
+    options:
+      - "Nothing."
+      - "Something!"
+    answer: "Nothing."
+    
+  - question: "What year did Columbus sail to America first?"
+    options:
+      - "1388"
+      - "1469"
+      - "1492"
+      - "1545"
+    answer: "1492"
+    
+  - question: "Which of these shows does Cartoon Network not air?"
+    options:
+      - "Robot Chicken"
+      - "Metalocolypse"
+      - "Harvey Birdman, Attorney at Law"
+      - "The Damn Show"
+      - "Futurama"
+      - "Venture Brothers"
+    answer: "The Damn Show"
+    
+  - question: "When I say 'What?', you say:"
+    options:
+      - "What what in the Butt"
+      - "Yeehaw!"
+      - "Galappegos Islands"
+      - "The Damn Show"
+    answer: "What what in the Butt"

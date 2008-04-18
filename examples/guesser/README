@@ -1,4 +1,30 @@
 = Guesser
 
-This application consists of the back end to keep track as the game progresses,
-and the client which is a website to facilitate playing the game.
+
+== Introduction
+
+Asks the viewer a question and the viewer can see if their answer was correct.
+
+This is a sample of a complicated Rack application (which can serve both the
+necessary static files as well as the Halcyon application routes) and a simple
+example of how to use the JavaScript client in a website.
+
+
+== Installation
+
+Just make sure that all of the dependencies are installed to run a normal
+Halcyon application, include Rack, Merb, JSON, etc.
+
+
+=== Dependencies
+
+* Halcyon (halcyon >= 0.5.0)
+
+== License
+
+MIT License <http://www.opensource.org/licenses/mit-license.php>
+
+
+== Contact
+
+* Matt Todd <chiology@gmail.com>

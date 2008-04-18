@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <title>Guesser &mdash; guess the correct answer</title>
+    
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    
+    <script type="text/javascript" src="http://prototypejs.org/assets/2007/11/6/prototype.js"></script>
+    <script type="text/javascript" src="/javascripts/halcyon.js"></script>
+    
+    <style type="text/css">
+      /* Page Styles */
+      body {
+        margin: 0;
+        padding: 0;
+        font-size: 1.2em;
+      }
+      h1, h2, h3, h4, h5, h6 {
+        padding: 0;
+        margin: 0;
+        line-height: 1em;
+      }
+      a:visited {
+        color: #777;
+      }
+      
+      /* Header Styles */
+      div#header {
+        padding: 1em;
+        background: #000;
+      }
+        div#header h1.title {
+          color: #FFF;
+        }
+        div#header h2.sub-title {
+          font-style: italic;
+          color: #777;
+        }
+        div#header img#header-graphic {
+          float: left;
+          margin: 0 1em;
+        }
+        div#header h3.loading {
+          float: right;
+          color: #FFF;
+          padding: 1em;
+        }
+      
+      /* Body Styles */
+      div#body {
+        padding: 2em 3em;
+      }
+        div#body div.body-section {
+          margin: 2em;
+          padding: 1em;
+        }
+        div#body div.body-section p {
+          margin: 0em;
+        }
+        div#body div.body-section h1 {
+          display: inline;
+          float: right;
+        }
+        
+        /* Question Styles */
+        div#body div#question-container {
+          background: #D8A;
+        }
+        div#body div#question-container p {
+          font-size: 1.25em;
+        }
+        
+        /* Options Styles */
+        div#body div#options-container {
+          background: #CFD;
+        }
+        div#body div#options-container ul#options {
+          list-style: none;
+          padding: 0;
+        }
+        div#body div#options-container ul#options li {
+          padding: 0.5em;
+          margin: 0.5em;
+          background: #AEB;
+        }
+        div#body div#options-container ul#options li:before {
+          font-family: "Courier New", Courier;
+          content: attr(normal);
+        }
+        div#body div#options-container ul#options li:hover:before {
+          font-family: "Courier New", Courier;
+          content: attr(hovering);
+        }
+        
+        /* Result Styles */
+        div#body div#result-container {
+          background: #FDC;
+        }
+          div#body div#result-container p {
+            font-size: 0.8em;
+          }
+          div#body div#result-container h2#result.correct {
+            color: #6C6;
+          }
+          div#body div#result-container h2#result.incorrect {
+            color: #C66;
+          }
+      
+      /* Footer Styles */
+      div#footer {
+        position: fixed;
+        bottom: 0em;
+        width: 100%;
+        background: #000;
+        color: #FFF;
+        font-size: 0.8em;
+      }
+        div#footer div {
+          text-align: center;
+          margin: 0.5em;
+        }
+    </style>
+    <script type="text/javascript" charset="utf-8">
+      // Initialize client
+      var GuessServer = new Halcyon("http://localhost:4647/");
+      
+      var Question = Class.create({
+        "initialize": function() {
+          $$('.loading').each(function(loading) {
+            loading.show();
+          });
+          GuessServer.get({path:'/questions/random'}, function(response){
+            $$('.loading').each(function(loading) {
+              loading.hide();
+            });
+            problem = response['body'];
+            $('question').update(problem['question']);
+            $('options').update();
+            problem['options'].each(function(option) {
+              $('options').appendChild(
+                new Element('a', {href:"#guess", onclick:"process_guess('"+option+"'); return false;"}).
+                update(option).
+                wrap('li', {normal: "[ ] ", hovering: "[√] "})
+              );
+            });
+            $('result').update("Pick an answer...").className = "";
+          });
+        }
+      });
+      
+      function process_guess(option) {
+        GuessServer.post({
+          path: "/answers/check",
+          params: {
+            question: $('question').innerHTML,
+            answer: option
+          }
+        }, function(response){
+          if(response['body']) {
+            response = "Correct";
+            klass = "correct";
+          } else {
+            response = "Incorrect";
+            klass = "incorrect";
+          }
+          $('result').update(response).className = klass;
+        });
+      }
+      
+      // Define onLoad actions
+      document.observe('dom:loaded', function() {
+        new Question();
+      });
+      
+      // Make <space> go to the next question.
+      document.observe('keypress', function(event) {
+        if(event.keyCode == " ") {
+          new Question();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <div id="container">
+      
+      <div id="header">
+        <img id="header-graphic" src="http://farm3.static.flickr.com/2009/2417702480_de6127de39_s.jpg" border="0" />
+        <h3 class="loading">Loading...</h3>
+        <h1 class="title">Guesser</h1>
+        <h2 class="sub-title">guess the correct answer</h2>
+      </div>
+      
+      <div id="body">
+        
+        <div id="question-container" class="body-section">
+          <h1>Question</h1>
+          <p id="question">Loading...</p>
+        </div>
+        
+        <div id="result-container" class="body-section">
+          <h1>Result</h1>
+          <h2 id="result"></h2>
+          <p>
+            Would you like <a href="#new_question" onclick="new Question(); return false;">another question</a>?
+            Your <code>&lt;spacebar&gt;</code> will also request a new question.
+          </p>
+        </div>
+        
+        <div id="options-container" class="body-section">
+          <h1>Answer</h1>
+          <p>Choose the correct answer by clicking on the option:</p>
+          <ul id="options"></ul>
+        </div>
+        
+      </div>
+      
+      <div id="footer">
+        <div>&copy; 2008 <a href="http://purl.org/net/maraby">Matt Todd</a>. A sample <a href="http://halcyon.rubyforge.org/">Halcyon</a> client/application using the JavaScript client.</div>
+        <div>Released under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>. <a href="http://flickr.com/photos/miracle_w/2417702480/">Question Mark</a> by <a href="http://flickr.com/photos/miracle_w/">willvv99</a>.</div>
+      </div>
+      
+    </div>
+  </body>
+</html>
