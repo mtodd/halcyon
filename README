@@ -1,23 +1,47 @@
-= Halcyon JSON Application Framework
+= Halcyon
+== JSON Application Framework
 
 A JSON Web Application Framework for developing lightweight applications
 interfaced via JSON-encoded HTTP requests. This is ideal for back end
 applications serving functionality for other applications.
 
+Halcyon consists of two parts, the server application and the client. The
+server application is similar to a Merb or Rails app, without the need for
+implementing views, and the client is used to facilitate talking to the
+application from other applications.
+
+
 == On Rack
 
-Halcyon is based off of Rack. Rejoice, Rack is amazing.
+Halcyon is a Rack application, meaning that it can sit right along with any
+other Rack app, such as a Merb or Rails app, and can be manipulated by any
+kind of Rack middleware/filter. This means that interfacing with Halcyon in
+unconventional ways is trivial since the Rack specification makes communicating
+with Rack apps dead simple.
+
 
 == Development
 
-Halcyon is currently undergoing major refactoring and restructuring. The API is
-subject to change up until the official 0.5.0 release.
+Halcyon is actively being developed by a very small community of developers and
+contributors. Halcyon has seen a good deal of paradigm shift up until the 0.5.0
+release, but with that release its internal API has stabilized and should
+remain fairly backwards compatible from here on.
+
+The changes made on the way to the 0.5.0 codebase were to remove all of the
+server-like code to make Halcyon more application-centric and also to model
+application development and structure to be more Rails- or Merb-like, though
+this was just the natural evolution of Halcyon's design.
+
 
 == Installation
 
 A Gem of Halcyon is available.  You can install it with:
 
   $ sudo gem install halcyon
+
+The latest development release can be installed with RubyGems:
+
+  $ sudo gem install halcyon --source http://halcyon.rubyforge.org/latest/
 
 Alternatively, you can install the latest development efforts from the git
 repository, located at http://github.com/mtodd/halcyon:
@@ -29,10 +53,27 @@ Don't forget to install the JSON gem for improved performance:
 
   $ sudo gem install json
 
+More in depth documentation can be found at
+http://halcyon.rubyforge.org/docs/installation.html.
+
+
 == Usage
 
-Usage instructions will be updated when the application generation code is
-completed.
+After installing a Halcyon app, you can generate a new app, similar to the
+<tt>rails</tt> or <tt>merb-gen app</tt> commands, with this:
+
+  $ halcyon init app_name
+
+This will create a directory and generate a skeletal Halcyon application. You
+can run this application without changing anything; here's how:
+
+  $ cd app_name
+  $ halcyon start -p 4647
+
+A great tutorial to dive right into using Halcyon and writing apps is located
+at http://halcyon.rubyforge.org/docs/tutorial.html. This will step you through
+what to do, what to expect, and what it means.
+
 
 == Contact
 
@@ -44,6 +85,7 @@ Our website is up so stop by and check out what's going down. Our address is
 http://halcyon.rubyforge.org/. On there you will find information about our
 mailing list as well, so do stop by.
 
+
 == Thanks To
 
 * Bill Marquette, typo correction, reviewing examples
@@ -52,12 +94,14 @@ mailing list as well, so do stop by.
 * Ben Simpson, PHP Client bug fixes
 * Eivind Uggedal, dependencies for Router support of resources
 
+
 == Links
 
 Halcyon:: <http://halcyon.rubyforge.org/>
 Aurora:: <http://aurora.rubyforge.org/>
 
 Rack:: <http://rack.rubyforge.org/>
+Merb:: <http://merbivore.com/>
 JSON:: <http://json.rubyforge.org/>
 
 Matt Todd:: <http://maraby.org/>
