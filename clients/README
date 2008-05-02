@@ -1,0 +1,9 @@
+= Halcyon
+== Clients
+
+The non-Ruby clients have been moved to a new repository.
+
+You can clone it at: git://github.com/mtodd/halcyon-clients.git
+
+You can also browse to the GitHub project online at
+http://github.com/mtodd/halcyon-clients/.
