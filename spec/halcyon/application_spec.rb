@@ -55,10 +55,6 @@ describe "Halcyon::Application" do
     Halcyon.config[:allow_from].should == :all
   end
   
-  it "should record the correct environment details" do
-    Halcyon.root.should == Dir.pwd
-  end
-  
   it "should handle exceptions gracefully" do
     body = JSON.parse(Rack::MockRequest.new(@app).get("/specs/cause_exception").body)
     body['status'].should == 500

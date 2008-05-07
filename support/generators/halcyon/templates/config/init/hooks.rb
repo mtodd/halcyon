@@ -26,7 +26,7 @@
 # Ideal for establishing connections to resources like databases.
 # Establish configuration options in initializer files, though.
 Halcyon::Application.startup do |config|
-  logger.info 'Define startup tasks in config/initialize/hooks.rb'
+  logger.info 'Define startup tasks in config/init/hooks.rb'
 end
 
 # = Shutdown
@@ -35,5 +35,5 @@ end
 # 
 # Ideal for closing connections to resources.
 Halcyon::Application.shutdown do |config|
-  logger.info 'Define shutdown tasks in config/initialize/hooks.rb'
+  logger.info 'Define shutdown tasks in config/init/hooks.rb'
 end

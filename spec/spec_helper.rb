@@ -12,9 +12,12 @@ $config = {
   }
 }
 
-# Default Application
+# Testing Application
 
+# Default controller
 class Application < Halcyon::Controller; end
+
+# Weird edge-case controller
 class Specs < Application
   
   def greeter
@@ -43,6 +46,7 @@ class Specs < Application
   
 end
 
+# Resources controller
 class Resources < Application
 
   def index
@@ -54,22 +58,25 @@ class Resources < Application
   end
 end
 
+# Models
+
 class Model
   attr_accessor :id
 end
 
-class Halcyon::Application
-  route do |r|
-    r.resources :resources
+# Testing routes
 
-    r.match('/hello/:name').to(:controller => 'specs', :action => 'greeter')
-    r.match('/:action').to(:controller => 'specs')
-    r.match('/:controller/:action').to()
-    r.match('/').to(:controller => 'specs', :action => 'index', :arbitrary => 'random')
-    # r.default_routes
-    {:action => 'missing'}
-  end
-  startup do |config|
-    $started = true
-  end
+Halcyon::Application.route do |r|
+  r.resources :resources
+  
+  r.match('/hello/:name').to(:controller => 'specs', :action => 'greeter')
+  r.match('/:action').to(:controller => 'specs')
+  r.match('/:controller/:action').to()
+  r.match('/').to(:controller => 'specs', :action => 'index', :arbitrary => 'random')
+  # r.default_routes
+  {:action => 'missing'}
+end
+
+Halcyon::Application.startup do |config|
+  $started = true
 end

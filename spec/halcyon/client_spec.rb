@@ -5,7 +5,7 @@
 
 fork do
   dir = Halcyon.root/'support'/'generators'/'halcyon'/'templates'
-  command = "thin start -r runner.ru -p 89981 -c #{dir} > /dev/null 2>&1"
+  command = "thin start -R runner.ru -p 89981 -c #{dir} > /dev/null 2>&1"
   STDOUT.close
   STDERR.close
   exec command

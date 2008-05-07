@@ -35,13 +35,24 @@ module Halcyon
       #   +file+ the name of the config file path (without the <tt>.yml</tt>
       #   extension)
       def config_path(file = "config")
-        Halcyon.root/'config'/"#{file}.yml"
+        Halcyon.paths[:config]/"#{file}.yml"
       end
       
     end
     
     # Initializes the application and application resources.
     def initialize
+      # Set the default application paths, not overwriting manually set paths
+      Halcyon.paths = {
+        :controller => Halcyon.root/'app',
+        :model => Halcyon.root/'app'/'models',
+        :lib => Halcyon.root/'lib',
+        :config => Halcyon.root/'config',
+        :init => Halcyon.root/'config'/'{init,initialize}',
+        :log => Halcyon.root/'log'
+      }.to_mash.merge(Halcyon.paths || {})
+      
+      # Load the configuration if none is set already
       if Halcyon.config.nil?
         if File.exist?(Halcyon::Runner.config_path)
           Halcyon.config = Halcyon::Runner.load_config
@@ -64,13 +75,13 @@ module Halcyon
       Halcyon.logger = Halcyon::Logger.setup(Halcyon.config[:logging])
       
       # Run initializers
-      Dir.glob(Halcyon.root/'config'/'initialize'/'{requires.rb,hooks.rb,routes.rb,*}').each do |initializer|
+      Dir.glob(Halcyon.paths[:init]/'{requires.rb,hooks.rb,routes.rb,*}').each do |initializer|
         self.logger.debug "Init: #{File.basename(initializer).chomp('.rb').camel_case}" if
         require initializer.chomp('.rb')
       end
       
       # Setup autoloads for Controllers found in Halcyon.root/'app'
-      Dir.glob(Halcyon.root/'app'/'{application.rb,*}').each do |controller|
+      Dir.glob(Halcyon.paths[:controller]/'{application.rb,*}').each do |controller|
         self.logger.debug "Load: #{File.basename(controller).chomp('.rb').camel_case} Controller" if
         require controller.chomp('.rb')
       end

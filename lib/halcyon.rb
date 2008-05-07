@@ -9,6 +9,7 @@ $:.unshift File.dirname(__FILE__)
 #   Halcyon.app #=> AppName
 #   Halcyon.root #=> Dir.pwd
 #   Halcyon.config #=> {:allow_from => :all, :logging => {...}, ...}
+#   Halcyon.paths #=> {:config => Halcyon.root/'config', ...}
 #   Halcyon.logger #=> #<Logger>
 #   Halcyon.version #=> "0.5.0"
 module Halcyon
@@ -27,6 +28,7 @@ module Halcyon
     attr_accessor :app
     attr_accessor :logger
     attr_accessor :config
+    attr_accessor :paths
     
     def version
       VERSION.join('.')
