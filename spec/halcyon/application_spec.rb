@@ -11,6 +11,7 @@ describe "Halcyon::Application" do
   end
   
   it "should run startup hook if defined" do
+    # $started is set by the startup hook
     $started.should.be.true?
   end
   
@@ -30,6 +31,12 @@ describe "Halcyon::Application" do
     body['status'].should == 200
     body['body'].should == "Hello Matt"
     @log.split("\n").last.should =~ /"test"=>"value"/
+  end
+  
+  it "should not dispatch private methods" do
+    body = JSON.parse(Rack::MockRequest.new(@app).get("/specs/undispatchable_private_method").body)
+    body['status'].should == 404
+    body['body'].should == "Not Found"
   end
   
   it "should route unmatchable requests to the default route and return JSON with appropriate status" do

@@ -35,6 +35,12 @@ class Specs < Application
     ok
   end
   
+  private
+  
+  def undispatchable_private_method
+    "it's private, so it won't be found by the dispatcher"
+  end
+  
 end
 
 class Resources < Application
