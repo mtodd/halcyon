@@ -86,6 +86,8 @@ module Halcyon
         
         # Generate a new Halcyon application
         def init(argv)
+          app_name = argv.last
+          
           options = {
             :generator => 'halcyon',
             :git => false
@@ -101,6 +103,7 @@ module Halcyon
             opts.separator ""
             opts.separator "Additional options:"
             opts.on("-g", "--git", "Initialize a Git repository when finished generating") { options[:git] = true }
+            opts.on("-G", "--git-commit", "Initialize a Git repo and commit") { options[:git] = options[:git_commit] = true }
             
             begin
               opts.parse! argv
@@ -114,6 +117,21 @@ module Halcyon
           RubiGen::Base.use_application_sources!
           RubiGen::Base.sources << RubiGen::PathSource.new(:custom, File.expand_path(File.join(File.dirname(__FILE__), '..', '..', '..', "support/generators")))
           RubiGen::Scripts::Generate.new.run(argv, :generator => options[:generator])
+          
+          # Create a Git repository in the new app dir
+          if options[:git]
+            system("cd #{app_name} && git init -q && cd #{Dir.pwd}")
+            puts "Initialized Git repository in #{app_name}/"
+            File.open(File.join("#{app_name}",'.gitignore'),"w") {|f| f << "log/*.log" }
+            File.open(File.join("#{app_name}",'log','.gitignore'),"w") {|f| f << "" }
+          end
+          
+          # commit to the git repo
+          if options[:git_commit]
+            system("cd #{app_name} && git add . && git commit -m 'Initial import.' -q && cd #{Dir.pwd}")
+            puts "Committed empty application in #{app_name}/"
+            puts "Run `git commit --amend` to change the commit message."
+          end
         end
         
       end
