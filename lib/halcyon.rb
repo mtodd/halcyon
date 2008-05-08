@@ -41,20 +41,25 @@ module Halcyon
       self.config[:root] || Dir.pwd rescue Dir.pwd
     end
     
-    # Retreives the current database configuration settings from
-    # <tt>Halcyon.config</tt>.
-    def db
-      Halcyon.config[:db]
+    def configurable(attribute)
+      eval <<-"end;"
+        def #{attribute.to_s}
+          Halcyon.config[:#{attribute.to_s}]
+        end
+        def #{attribute.to_s}=(value)
+          value = value.to_mash if value.is_a?(Hash)
+          Halcyon.config[:#{attribute.to_s}] = value
+        end
+      end;
     end
-    
-    # Set the DB configuration settings with the value of +config+ which is
-    # stored in the <tt>Halcyon.config</tt> hash.
-    #   +config+ the configuration settings for the Database.
-    def db=(config = {})
-      Halcyon.config[:db] = config.to_mash
-    end
+    alias_method :configurable_attr, :configurable
     
   end
+  
+  # Creates <tt>Halcyon.db</tt> to alias <tt>Halcyon.config[:db]</tt>.
+  # Also creates the complementary assignment method, <tt>Halcyon.db=</tt>
+  # that aliases <tt>Halcyon.config[:db]=</tt>.
+  configurable_attr :db
   
 end
 

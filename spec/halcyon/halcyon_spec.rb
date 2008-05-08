@@ -39,4 +39,20 @@ describe "Halcyon" do
     Halcyon.paths[:log].should == Halcyon.root/"log"
   end
   
+  it "should provide configurable attribute definition for quick access to specific configuration values" do
+    test_method = "oracle"
+    method_count = Halcyon.methods.length
+    Halcyon.configurable("oracle")
+    (Halcyon.methods.length - method_count).should == 2
+    Halcyon.method(test_method.to_sym).is_a?(Method).should.be.true?
+    Halcyon.method("#{test_method}=".to_sym).is_a?(Method).should.be.true?
+    Halcyon.send("#{test_method}=".to_sym, 10)
+    Halcyon.send(test_method).should == Halcyon.config[test_method.to_sym]
+  end
+  
+  it "should predefine quick access to the 'db' configuration value" do
+    Halcyon.db = 100
+    Halcyon.db.should == Halcyon.config[:db]
+  end
+  
 end
