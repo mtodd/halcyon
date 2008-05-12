@@ -67,13 +67,13 @@ module Halcyon
       Halcyon.logger = Halcyon::Logger.setup(Halcyon.config[:logging])
       
       # Run initializers
-      Dir.glob(Halcyon.paths[:init]/'{requires.rb,hooks.rb,routes.rb,*}').each do |initializer|
+      Dir.glob(Halcyon.paths[:init]/'{requires,hooks,routes,environment,*}.rb').each do |initializer|
         self.logger.debug "Init: #{File.basename(initializer).chomp('.rb').camel_case}" if
         require initializer.chomp('.rb')
       end
       
       # Setup autoloads for Controllers found in Halcyon.root/'app'
-      Dir.glob(Halcyon.paths[:controller]/'{application.rb,*}').each do |controller|
+      Dir.glob(Halcyon.paths[:controller]/'{application,*}.rb').each do |controller|
         self.logger.debug "Load: #{File.basename(controller).chomp('.rb').camel_case} Controller" if
         require controller.chomp('.rb')
       end

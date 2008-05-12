@@ -14,6 +14,12 @@ Halcyon.config = {
   }
 }.to_mash
 
+# = Environment
+# Set the environment if not set above; create the <tt>Halcyon.environment</tt>
+# configurable attribute. Maps to <tt>Halcyon.config[:environment]</tt>.
+Halcyon.configurable_attr(:environment)
+Halcyon.environment = :development unless Halcyon.environment
+
 # = Routes
 Halcyon::Application.route do |r|
   r.match('/time').to(:controller => 'application', :action => 'time')

@@ -18,6 +18,11 @@ describe "Halcyon" do
     Halcyon.config.is_a?(Hash).should.be.true?
   end
   
+  it "should provide environment label" do
+    Halcyon.environment.should == :development
+    Halcyon.environment.should == Halcyon.config[:environment]
+  end
+  
   it "should provide universal access to a logger" do
     # We assume Logger here because, you know, we're gods of the test
     Halcyon.logger.is_a?(Logger).should.be.true?

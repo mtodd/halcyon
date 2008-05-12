@@ -6,6 +6,7 @@ require 'logger'
 
 $config = {
   :allow_from => :all,
+  :environment => :development,
   :logger => nil,
   :logging => {
     :level => 'debug'
@@ -63,6 +64,10 @@ end
 class Model
   attr_accessor :id
 end
+
+# Environment
+
+Halcyon.configurable_attr(:environment)
 
 # Testing routes
 

@@ -6,6 +6,13 @@
 # * <tt>halcyon_clients</tt>: only Halcyon clients (tests the User-Agent only)
 allow_from: all
 
+# = Environment
+# 
+# Uncomment to manually specify the environment to run the application in.
+# Defaults to <tt>:development</tt>.
+# 
+# environment: production
+
 # = Logging
 # 
 # Configures the logging client in the framework, including destination,
