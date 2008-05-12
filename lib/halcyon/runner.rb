@@ -42,15 +42,7 @@ module Halcyon
     
     # Initializes the application and application resources.
     def initialize
-      # Set the default application paths, not overwriting manually set paths
-      Halcyon.paths = {
-        :controller => Halcyon.root/'app',
-        :model => Halcyon.root/'app'/'models',
-        :lib => Halcyon.root/'lib',
-        :config => Halcyon.root/'config',
-        :init => Halcyon.root/'config'/'{init,initialize}',
-        :log => Halcyon.root/'log'
-      }.to_mash.merge(Halcyon.paths || {})
+      Halcyon::Runner.load_paths if Halcyon.paths.nil?
       
       # Load the configuration if none is set already
       if Halcyon.config.nil?
@@ -121,6 +113,26 @@ module Halcyon
           warn "#{file} not found, ensure the path to this file is correct. Ignoring."
           nil
         end
+      end
+      
+      # Set the paths for resources to be located.
+      # 
+      # Used internally for setting the load paths if not manually overridden
+      # and needed to be set before normal application initialization.
+      # 
+      # TODO: Move this to the planned <tt>Halcyon::Config</tt> object.
+      # 
+      # Returns nothing.
+      def load_paths
+        # Set the default application paths, not overwriting manually set paths
+        Halcyon.paths = {
+          :controller => Halcyon.root/'app',
+          :model => Halcyon.root/'app'/'models',
+          :lib => Halcyon.root/'lib',
+          :config => Halcyon.root/'config',
+          :init => Halcyon.root/'config'/'{init,initialize}',
+          :log => Halcyon.root/'log'
+        }.to_mash.merge(Halcyon.paths || {})
       end
       
     end
