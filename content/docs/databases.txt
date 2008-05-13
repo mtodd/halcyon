@@ -7,4 +7,228 @@ filter:
 ---
 h2. Connecting to Databases
 
-Coming soon.
+Although Halcyon doesn't come with any ORM-specific plumbing, getting connected
+and building database-centric Halcyon applications is trivial. Well, it's
+certainly not impossible.
+
+As of Halcyon's 0.5.0 Release (which, as of this writing, will be released any
+day now), connecting to databases is surprisingly easy, but requires some
+effort. Getting connected to a database is made of a few essential steps:
+loading the database configuration, connecting to the database, and,
+optionally, loading all models as well as hooking up migrations.
+
+The instructions provided here will be focused on a
+"Sequel":http://code.google.com/p/ruby-sequel system, but the instructions
+should still be relevant for most systems, including
+"DataMapper":http://datamapper.org/ and "ActiveRecord":http://rubyonrails.org/.
+
+
+h3. But First
+
+One tiny detail to go ahead and address is that you will need to require the
+appropriate ORM library, which can be done from
+<code>config/init/requires.rb</code>. You can get by with something like this:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+## config/init/requires.rb
+%w(sample_app sequel).each{|dep|require dep}
+<% end -%>
+
+Don't mind the unfamiliar syntax (if, indeed, this is unfamiliar), we're simply
+creating an array of strings separated by spaces and then requiring each
+dependency programmatically.
+
+Go ahead and require the <code>sample_app</code> file (which is located in
+<code>lib/sample_app.rb</code> file), or, specifically, whatever your
+application's primary module located in <code>lib/</code>, we'll put additional
+functionality here as well as storing the current instance of the database
+connection.
+
+
+h3. Load Database Configuration
+
+Presently, Halcyon doesn't have any explicit location to load the database, but
+it does provide a mechanism for injecting into the initialization process. This
+is done by creating a file in the <code>config/init/</code> folder. This file
+will look something like this:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+## config/init/database.rb
+Halcyon.db = Halcyon::Runner.load_config(Halcyon.paths[:config]/'database.yml')
+Halcyon.db = Halcyon.db[(Halcyon.environment || :development).to_sym]
+<% end -%>
+
+What's above appears fairly verbose, but what's happening is that the file,
+located at <code>Halcyon.root/'config'/'database.yml'</code> (which gets
+expanded to the application directory's configuration folder) is getting parsed
+by the framework configuration loader (through YAML), processed (through Mash),
+and then saved into <code>Halcyon.db</code> which gets mapped to
+<code>Halcyon.config[:db]</code>. (This is a common abstraction mechanism for
+Halcyon configuration values.)
+
+We're also telling it to select the current application runtime environment's
+database configuration. Let's assume a somewhat standard database configuration
+file:
+
+<% coderay(:lang => "yaml", :line_numbers => "inline", :tab_width => 2) do -%>
+---
+## config/database.yml
+development: &defaults
+  adapter: mysql
+  database: sample_development
+  username: sample_user
+  password: sample_password
+  host: localhost
+
+test:
+  <<: *defaults
+  database: sample_test
+
+production:
+  <<: *defaults
+  database: sample_production
+<% end -%>
+
+This should look familiar, and the unfamiliar parts should at least be
+comprehendible.
+
+
+h3. Connecting
+
+Once the database configuration has been loaded, we will need to actually
+connect to the database in question. We will put this in the
+<code>config/init/hooks.rb</code> file since we want this to happen once the
+application has been fully initialized with all of its necessary requirements
+preloaded.
+
+Go ahead and add this to your <code>startup</code> hook:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+## config/init/hooks.rb, in Halcyon::Application.startup block
+# Connect to DB
+SampleApp::DB = Sequel.connect(Halcyon.db)
+SampleApp::DB.logger = Halcyon.logger if $DEBUG
+logger.info 'Connected to Database'
+<% end -%>
+
+*Note*: Be sure to put this inside of the
+<code>Halcyon::Application.startup</code> code block. This is not demonstrated
+explicitly above, but is essential.
+
+<code>Sequel.connect</code> is specific to the Sequel library, but it is fairly
+obvious what purpose it servers. We store the result, an instance of a
+connection, as <code>SampleApp::DB</code> to have a common location from which
+to refer to the connection, particularly under the <code>SampleApp</code> module
+to signify its tight bond to the application domain. We also set the logger
+instance to the current, app-wide logger if the <code>$DEBUG</code> flag is set.
+
+While we're at it, let's go ahead and load any models we may have stored in
+<code>app/models/</code>, the unofficial default location for application
+models. Put this directly below the code listed above inside of
+<code>config/init/hooks.rb</code>:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+## config/init/hooks.rb, in Halcyon::Application.startup block
+# Load Models
+Dir.glob([Halcyon.paths[:model]/'*.rb']).each do |model|
+  logger.debug "Load: #{File.basename(model).chomp('.rb').camel_case} Model" if require model
+end
+<% end -%>
+
+The above code simply requires each model file found within the model directory,
+printing out a debugging message if it succeeds. Any failure should normally
+result in application startup failing (which is expected).
+
+If you have questions about how to create models with the Sequel ORM, refer to
+their excellent
+"Sequel Models":http://code.google.com/p/ruby-sequel/wiki/SequelModels wiki page
+which contains simple instructions for writing your models.
+
+
+h3. Step One: Done
+
+And that, in turn, connects your application to a database.
+
+
+h2. Step Two: Polish
+
+Now, to simplify using this database system, you may be interested in a few
+conventional portions of code that will simplify your life, particularly with
+keeping track of your database schema with migrations.
+
+
+h3. Migrations
+
+Most developers interested in Halcyon should be familiar with migrations already
+since many come from Rails or more modern frameworks like Merb et al, so we
+won't go over them. However, we will learn about the conventions used to
+organize and load migrations.
+
+Migrations are often stored in <code>lib/migrations</code> with the standard
+<code>001_create_records.rb</code> naming structure. You can find out the
+specific migration syntax to use from the Sequel wiki, linked above, or from the
+WeeDB sample application, linked at the bottom of this page.
+
+Now, to make your application use migrations is the fun part. In the section
+labelled for custom Rake tasks in the application <code>Rakefile</code>, place
+this code:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+## Rakefile
+desc "Load up the application environment"
+task :env do
+  $log = ''
+  $logger = Logger.new(StringIO.new($log))
+  Halcyon.config = {:logger => $logger}
+  Halcyon::Runner.new
+end
+ 
+namespace(:db) do
+  desc "Migrate the database to the latest version"
+  task :migrate => :env do
+    current = Sequel::Migrator.get_current_migration_version(WeeDB::DB)
+    latest = Sequel::Migrator.apply(WeeDB::DB, Halcyon.paths[:lib]/'migrations')
+    puts "Database successfully migrated to latest version (#{latest})." if current < latest
+    puts "Migrations finished successfully."
+  end
+end
+<% end -%>
+
+The first task, though seemingly unneeded, goes through and loads the full
+application environment, including the instance of the database connection. This
+is used to check the current migration version and also to apply the migrations
+to if necessary. It also hides any normal debugger output, though it keeps it
+saved for when it's necessary.
+
+The second task in the <code>db</code> namespace then executes the migrations if
+in fact they are out of date.
+
+Putting these tasks into the <code>Rakefile</code> opens up more in the future
+and prevents cluttering up more of the application loading process. Also, it's
+at least somewhat familiar because we can run a command like so:
+
+<pre><code>
+$ rake db:migrate
+</code></pre>
+
+
+h2. Step Three: Usage
+
+Accessing data from the database an be trivial, depending on whether you like to
+use the models you've defined. If you've created your models already, you
+probably have already read the documentation for accessing rows with the models.
+Refer there again if you have questions. And, of course, there's always the
+WeeDB sample app with actual code for connecting to and manipulating the
+database inside of a Halcyon app, specifically in the <code>Records</code>
+controller.
+
+
+h2. Conclusion
+
+Hope this helps you get familiar with how to start using databases with your
+Halcyon applications sooner than ever.
+
+If you're looking for a good example of this code in action, check out the WeeDB
+sample application located at the "GitHUB
+repository":http://github.com/mtodd/halcyon/tree/master/examples/weedb/ which is
+where most of this code was pulled from.

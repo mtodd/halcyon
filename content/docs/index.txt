@@ -23,7 +23,7 @@ h3. Advanced Topics
 
 * "Defining Routes":/docs/routes.html
 * -"Writing Controllers":/docs/controllers.html-
-* -"Connecting to Databases":/docs/databases.html-
+* "Connecting to Databases":/docs/databases.html
 * -"Customizing Clients":/docs/clients.html-
 * "Advanced Rack Topics":/docs/rack.html
 * -"Troubleshooting":/docs/troubleshooting.html-
@@ -31,8 +31,10 @@ h3. Advanced Topics
 
 h3. Samples
 
-* -"Simple":/docs/samples/simple.html-
-* -"MPQueue":/docs/samples/mpqueue.html-
+* -"Aurora":/docs/samples/aurora.html-
+* -"Guesser":/docs/samples/guesser.html-
+* -"Ranger":/docs/samples/ranger.html-
+* -"WeeDB":/docs/samples/weedb.html-
 
 
 h3. Manual
