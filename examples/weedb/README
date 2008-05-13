@@ -1,0 +1,62 @@
+= WeeDB
+
+The Halcyon clone of TinyDB (http://tinydb.org/).
+
+
+== Introduction
+
+This is a simple 
+
+
+== Installation & Setup
+
+Install the dependencies listed below, set up the database, and run the
+migrations.
+
+=== Dependencies
+
+* Halcyon (halcyon >= 0.5.0)
+* Sequel (sequel >= 1.5.1)
+
+=== Database
+
+Set up a database, @weedb_development@ for example, and create a user,
+@wee_user@ should work fine. Copy the @config/database.sample.yml@ file to
+@config/database.yml@ and update the values to match the database name and user
+set up.
+
+Now, run the migrations:
+
+  $ rake db:migrate
+
+== Usage
+
+=== Start The Server
+
+  $ halcyon start -p 4647
+
+=== Interacting With The Server
+
+In Ruby:
+
+  $ irb -r lib/client
+  >> client = WeeDB::Client.new("http://localhost:4647/")
+  >> client << {'foo' => 'bar'}
+  => '1aB2'
+  >> client['1aB2']
+  => {'foo' => 'bar'}
+
+Elsewhere:
+
+  $ curl --data '' http://localhost:4647/?foo=bar
+    {'status':200,'body':'2bC3'}
+  $ curl http://localhost:4647/2bC3
+    {'status':200,'body':{'foo':'bar'}}
+
+== License
+
+WeeDB is licensed under the MIT License.
+
+== Contact
+
+Matt Todd <chiology@gmail.com>

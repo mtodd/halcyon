@@ -1,0 +1,23 @@
+development:
+  adapter: mysql
+  encoding: utf8
+  database: weedb_development
+  username: wee_user
+  password: password
+  host: localhost
+
+test:
+  adapter: mysql
+  encoding: utf8
+  database: weedb_development
+  username: wee_user
+  password: password
+  host: localhost
+
+production:
+  adapter: mysql
+  encoding: utf8
+  database: weedb_development
+  username: wee_user
+  password: password
+  host: localhost
