@@ -1,0 +1,84 @@
+== 0.5.0 2008-05-15 WIP
+* major refactor, completely incompatible with 0.4.0 applications
+* new application-centric structure and design [#13 resolved]
+* remove coupled server code, completely Rack-based
+* full Rack handler support (Thin/Mongrel/etc), daemonization [#12 resolved]
+* application structure split into controllers [#17 resolved]
+* application initialize improved greatly, structured
+* new configurable attributes with config hooks [#31 resolved]
+* configurable paths [#33 resolved]
+* new commandline interface for application tasks
+* new application generation from commandline
+* able to run application interactively in IRB shell [#18 resolved]
+* logging configuration improved, more loggers supported [#4 resolved]
+* added JavaScript, PHP, and Java clients [#27 resolved]
+* enhanced debugging output [#15 resolved]
+* fixed changed merb/core_ext dependencies [#16 resolved]
+* DateTime et al return ISO 8601 format for to_json [#19 resolved/deferred]
+* much improved documentation, API and otherwise [#7 resolved]
+* generated applications include better inline documentation [#21 resolved]
+* improved specs with more thorough testing [#2 resolved]
+* new examples [#23 resolved]
+* app init can specify to initialize new Git repo for new app [#25 resolved]
+* fixed bug with interactive shell not loading the correct paths [#39 resolved]
+
+== 0.4.1 2008-05-09
+* added explicit dependency versions
+* daemonization [#1 resolved]
+* fixed bug with daemonization killing logger
+
+== 0.4.0 2008-02-10
+* params method argument removed, now a method
+* GET and POST getter methods added [#10 resolved]
+* primitive support for Basic authentication for servers and clients
+* refactored dirty code, using more conventions from merb/core_ext
+* root configuration option as the applications current working directory
+* Client-side requests allow optional headers
+* startup and shutdown hooks
+* "Thanks To" section in the README for contributors
+* use Thin handler by default if it is installed, Mongrel otherwise
+* exceptions display properly
+* documentation updated
+* specs updated
+* examples updated
+* fixed minor issues with Basic authorization
+* port value sent as integer, not string [#14 resolved:ramstedt]
+* missing dependency URI added for the Router class [Elliott Cable]
+* typo [Bill Marquette]
+
+== 0.3.22 2008-01-07
+* reorganized exceptions
+* specifications added for Router, errors/exceptions, and server base
+* acceptable requests tested more accurately, ignored in debug mode
+* added test mode for running tests without handler
+* cleanup code cleaned up
+* fixed URI parsing of path info
+* documentation updated
+
+== 0.3.18 2007-12-31
+* many minor issues resolved with dependencies and auto loading
+* exceptions made to be friendlier with standard, recoverable errors
+* clients now throw exceptions on errors
+* fixed HTTP verbs
+* use json_pure where the JSON extension fails to load
+* exceptions include all standard HTTP error codes
+* fixed handlers' inconsistency with the data in REQUEST_URI
+* @env contains helpers, including halcyon.logger
+* proper logging and PID files handling
+* minor issues with acceptable requests resolved
+* signal trapping for graceful and clean exits
+* added signal trap for SIGUSR1 to toggle debugging mode
+* warnings for unacceptable requests
+* improved usage
+* added sample app
+
+== 0.3.7 2007-12-17
+* project structuring and design
+* server implementation with routing
+* modular action grouping
+* pure JSON request/response data
+* commandline utility to aid in running server apps
+* client implementation
+
+== 0.0.0 2007-12-17
+* Initial project concept implementation
