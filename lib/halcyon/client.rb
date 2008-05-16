@@ -15,7 +15,7 @@ module Halcyon
   # 
   # Creating a simple client can be as simple as this:
   # 
-  #   class Simple < Halcyon::Client::Base
+  #   class Simple < Halcyon::Client
   #     def greet(name)
   #       get("/hello/#{name}")
   #     end
@@ -38,20 +38,6 @@ module Halcyon
   # client actions which can be complex or simple series of requests to the
   # server.
   # 
-  # == Acceptable Clients
-  # 
-  # The Halcyon Server is intended to be very picky with whom it will speak
-  # to, so it requires that we specifically mention that we speak only
-  # "application/html", that we're "JSON/1.1.1 Compatible", and that we're
-  # local to the server itself (in process, anyways). This ensures that it
-  # has to deal with as little noise as possible and focus it's attention on
-  # performing our requests.
-  # 
-  # This shouldn't affect usage when working with the Client or in production
-  # but might if you're trying to check things in your browser. Just make
-  # certain that the debug option is turned on (-d for the +halcyon+ command)
-  # when you start the server so that it knows to be a little more lenient
-  # about to whom it speaks.
   class Client
     include Exceptions
     
@@ -60,6 +46,10 @@ module Halcyon
     DEFAULT_OPTIONS = {
       :raise_exceptions => false
     }
+    
+    attr_accessor :uri # The server URI
+    attr_accessor :headers # Instance-wide headers
+    attr_accessor :options # Options
     
     #--
     # Initialization and setup
@@ -90,7 +80,7 @@ module Halcyon
     # 
     # An example of creating and using a Simple client:
     # 
-    #   class Simple < Halcyon::Client::Base
+    #   class Simple < Halcyon::Client
     #     def greet(name)
     #       get("/hello/#{name}")
     #     end
@@ -113,16 +103,17 @@ module Halcyon
     # except that it is not executed in a block.
     # 
     # The differences are purely semantic and of personal taste.
-    def initialize(uri)
-      @uri = URI.parse(uri)
-      @options = DEFAULT_OPTIONS
+    def initialize(uri, headers = {})
+      self.uri = URI.parse(uri)
+      self.headers = headers
+      self.options = DEFAULT_OPTIONS
       if block_given?
         yield self
       end
     end
     
     def raise_exceptions!(setting = true)
-      @options[:raise_exceptions] = setting
+      self.options[:raise_exceptions] = setting
     end
     
     #--
@@ -167,7 +158,7 @@ module Halcyon
     # If the server responds with any kind of failure (anything with a status
     # that isn't 200), Halcyon will in turn raise the respective exception
     # (defined in Halcyon::Exceptions) which all inherit from
-    # +Halcyon::Exceptions::Base+. It is up to the client to handle these
+    # +Halcyon::Exceptions+. It is up to the client to handle these
     # exceptions specifically.
     def request(req, headers={})
       # set default headers
@@ -175,21 +166,18 @@ module Halcyon
       req["User-Agent"] = USER_AGENT
       
       # apply provided headers
-      headers.each do |(header, value)|
+      self.headers.merge(headers).each do |(header, value)|
         req[header] = value
       end
       
-      # provide hook for modifying the headers
-      req = headers(req) if respond_to? :headers
-      
       # prepare and send HTTP request
-      res = Net::HTTP.start(@uri.host, @uri.port) {|http|http.request(req)}
+      res = Net::HTTP.start(self.uri.host, self.uri.port) {|http|http.request(req)}
       
       # parse response
       body = JSON.parse(res.body).to_mash
       
       # handle non-successes
-      if @options[:raise_exceptions] && !res.kind_of?(Net::HTTPSuccess)
+      if self.options[:raise_exceptions] && !res.kind_of?(Net::HTTPSuccess)
         raise self.class.const_get(Exceptions::HTTP_STATUS_CODES[body[:status]].tr(' ', '_').camel_case.gsub(/( |\-)/,'')).new
       end
       
