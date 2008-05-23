@@ -6,6 +6,7 @@ module Halcyon
   # 
   # Manages shutting down and starting up hooks, routing, dispatching, etc.
   # Also restricts the requests to acceptable clients, defaulting to all.
+  # 
   class Application 
     include Exceptions
     
@@ -25,6 +26,7 @@ module Halcyon
     # Initializes the app:
     # * runs startup hooks
     # * registers shutdown hooks
+    # 
     def initialize
       self.logger.info "Starting up..."
       
@@ -67,6 +69,7 @@ module Halcyon
     #   as an error and a <tt>500 Internal Server Error</tt> is returned.
     # 
     # Returns [Fixnum:status, {String:header => String:value}, [String:body].to_json]
+    # 
     def call(env)
       timing = {:started => Time.now}
       
@@ -98,7 +101,7 @@ module Halcyon
       
       self.logger.info "[#{response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)"
       # self.logger << "Session ID: #{self.session.id}\n" # TODO: Implement session
-      self.logger << "Params: #{request.params.merge(env['halcyon.route']).inspect}\n\n"
+      self.logger << "Params: #{filter_params_for_log(request, env).inspect}\n\n"
       
       response.finish
     end
@@ -121,6 +124,7 @@ module Halcyon
     # and for where to get further documentation.
     # 
     # Returns (String|Array|Hash):body
+    # 
     def dispatch(env)
       route = env['halcyon.route']
       # make sure that the right controller/action is called based on the route
@@ -162,6 +166,7 @@ module Halcyon
     #   <tt>:local</tt>:: do not allow for requests from an outside host
     # 
     # Raises Forbidden
+    # 
     def acceptable_request!(env)
       case Halcyon.config[:allow_from].to_sym
       when :all
@@ -177,7 +182,19 @@ module Halcyon
       end
     end
     
+    # Assemble params for logging.
+    # 
+    # This method exists to be overridden or method-chained to filter out params
+    # from being logged for applications with sensitive data like passwords.
+    # 
+    # Returns Hash:params_to_log
+    # 
+    def filter_params_for_log(request, env)
+      request.params.merge(env['halcyon.route'])
+    end
+    
     # See the documentation for generated apps in <tt>config/initialze/hooks.rb</tt>
+    # 
     def hooks
       self.class.hooks
     end
@@ -187,6 +204,7 @@ module Halcyon
       attr_accessor :hooks
       
       # See the documentation for generated apps in <tt>config/initialze/hooks.rb</tt>
+      # 
       def hooks
         @hooks ||= {}
       end
@@ -194,6 +212,7 @@ module Halcyon
       # Defines routes for the application.
       # 
       # Refer to Halcyon::Application::Router for documentation and resources.
+      # 
       def route
         if block_given?
           Router.prepare do |router|
@@ -208,6 +227,7 @@ module Halcyon
       # connections.
       # 
       # Use initializers where possible.
+      # 
       def startup &hook
         self.hooks[:startup] = hook
       end
@@ -215,6 +235,7 @@ module Halcyon
       # Sets the shutdown hook to the proc.
       # 
       # Close any resources opened in the +startup+ hook.
+      # 
       def shutdown &hook
         self.hooks[:shutdown] = hook
       end
