@@ -1,5 +1,8 @@
 # $Id$
 
+gem 'haml', '=1.8.2'
+require 'haml'
+
 load 'tasks/setup.rb'
 
 task :default => :build

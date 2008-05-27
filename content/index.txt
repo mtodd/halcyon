@@ -22,34 +22,26 @@ h2. Functionality &amp; Performance
 With Mongrel leading the pack and Rack holding things up, JSON doing the fast talking and with plenty of room to spare, how could you not be interested, even about this new framework? Still not convinced? OK, fair enough, here's some code for you.
 
 <% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Message < Sequel::Model; end
 class Messages < Application
   def new
     # respond with fields acceptable
-    ok [:body, :title, :tags]
+    ok Message.columns
   end
   def create
-    case method
-    when :post
-      DB[:messages] << params
-      ok
-    else
-      raise NotImplemented
-    end
+    msg = Message.create(params)
+    msg.save # add error handling
+    ok msg.id
   end
   def read
-    ok DB[:messages][params[:id]]
+    ok Message[params[:id]]
   end
   def update
-    case method
-    when :post
-      DB[:messages].filter(:id => params[:id]).update(params)
-      ok
-    else
-      raise NotImplemented
-    end
+    Message.filter(:id => params[:id]).update(params)
+    ok
   end
   def delete
-    DB[:messages].filter(:id => params[:id]).delete
+    Message.filter(:id => params[:id]).delete
     ok
   end
 end
@@ -68,6 +60,8 @@ h2. Supported Platforms
 
 Halcyon is primarily written in Ruby, but Halcyon also supports multiple platforms due to the fact that it communicates via HTTP and packages its messages in JSON. Halcyon currently has Ruby, PHP, and Java clients available, with more clients planned.
 
+You can see the various client implementations at http://github.com/mtodd/halcyon-clients (except for the Ruby client, which is part of the Halcyon gem).
+
 
 h2. Metrics
 
@@ -76,5 +70,3 @@ Ohloh's pretty cool and we use it to track the development metrics of Halcyon. C
 For your viewing pleasure, here are some of the Ohloh project factoids:
 
 <script type='text/javascript' src='http://www.ohloh.net/projects/10313/widgets/project_factoids'></script>
-
-<strong>Note:</strong> It says that Halcyon is mostly written in Java because we include the client libraries in the code base, each of which can have their own extensive dependencies, including the Java one. Since Ruby's syntax is much leaner, Java's line count overtakes the Ruby line count even though the Java code is only for the client library.
