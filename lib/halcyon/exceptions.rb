@@ -34,6 +34,7 @@ module Halcyon
     HTTP_STATUS_CODES = {
       100  => 'Continue',
       101  => 'Switching Protocols',
+      102  => 'Processing',
       200  => 'OK',
       201  => 'Created',
       202  => 'Accepted',
@@ -41,12 +42,14 @@ module Halcyon
       204  => 'No Content',
       205  => 'Reset Content',
       206  => 'Partial Content',
+      207  => 'Multi-Status',
       300  => 'Multiple Choices',
       301  => 'Moved Permanently',
       302  => 'Moved Temporarily',
       303  => 'See Other',
       304  => 'Not Modified',
       305  => 'Use Proxy',
+      307  => 'Temporary Redirect',
       400  => 'Bad Request',
       401  => 'Unauthorized',
       402  => 'Payment Required',
@@ -63,13 +66,26 @@ module Halcyon
       413  => 'Request Entity Too Large',
       414  => 'Request-URI Too Large',
       415  => 'Unsupported Media Type',
+      416  => 'Requested Range Not Satisfiable',
+      417  => 'Expectation Failed',
+      422  => 'Unprocessable Entity',
+      423  => 'Locked',
+      424  => 'Failed Dependency',
+      425  => 'No Code',
+      426  => 'Upgrade Required',
       500  => 'Internal Server Error',
       501  => 'Not Implemented',
       502  => 'Bad Gateway',
       503  => 'Service Unavailable',
       504  => 'Gateway Time-out',
-      505  => 'HTTP Version not supported'
+      505  => 'HTTP Version not supported',
+      506  => 'Variant Also Negotiates',
+      507  => 'Insufficient Storage',
+      510  => 'Not Extended'
     }
+    
+    # Added extended HTTP status codes found from
+    # http://www.askapache.com/htaccess/apache-status-code-headers-errordocument.html
     
     #--
     # Classify Status Codes
