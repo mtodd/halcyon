@@ -17,6 +17,13 @@ Halcyon has several aims and goals, including:
 * *Be easy to implement* -- also easy since we're developing in "Ruby":http://ruby-lang.org/ here
 
 
+h2. What Is Halcyon For?
+
+This is the question most often asked about Halcyon, <em>what is Halcyon for?</em> Simply put, <strong>Halcyon is a web application framework with a twist</strong>. The twist is simply that Halcyon applications communicate solely through "JSON":http://json.org/, both incoming and outgoing.
+
+This doesn't, however, answer what Halcyon is <em>for</em>.
+
+
 h2. Functionality &amp; Performance
 
 With Mongrel leading the pack and Rack holding things up, JSON doing the fast talking and with plenty of room to spare, how could you not be interested, even about this new framework? Still not convinced? OK, fair enough, here's some code for you.
@@ -30,7 +37,7 @@ class Messages < Application
   end
   def create
     msg = Message.create(params)
-    msg.save # add error handling
+    msg.save
     ok msg.id
   end
   def read

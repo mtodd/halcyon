@@ -26,6 +26,11 @@ To install Halcyon from RubyGems, run this at your command line:
 
 <pre><code>$ sudo gem install halcyon</code></pre>
 
+There is also the latest development release available from
+http://halcyon.rubyforge.org/latest/. This can be installed with:
+
+<pre><code>$ sudo gem install --source=http://halcyon.rubyforge.org/latest/</code></pre>
+
 
 h3. From Sources
 

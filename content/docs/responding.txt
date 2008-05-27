@@ -1,0 +1,155 @@
+---
+title:  Docs &mdash; Responding to the Client
+layout: simple
+filter:
+  - erb
+  - textile
+---
+
+h2. Responding to the Client
+
+This is a comprehensive overview of the various ways in which to respond to
+requests from clients, going from the simplest, standard response (using the
+<code>ok</code> and <code>not_found</code> methods) to issuing standard errors
+and even responding with the standard Rack format.
+
+
+h2. Rack Response
+
+Since Halcyon is a Rack-based application, responding to requests follows the
+simple format:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+[status, headers, body]
+<% end -%>
+
+For example, a simple response could be:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+[200, {}, 'OK']
+<% end -%>
+
+In fact, the above is close to what results by calling <code>ok</code>.
+
+
+h2. Standard Responses
+
+The <code>ok</code> method will be the primary response method call, simply
+wrapping the body of the message into a standard Rack response with the status
+set to <code>200</code> and headers set appropriately (though additional headers
+are set before responses are sent) with the body being set with a specific
+format:
+
+<code>{:status => status, :body => body}</code>
+
+The status code does appear twice: this is on purpose, providing the clients
+with status information that they would otherwise have to repackage from the
+HTTP response as well. Also, since JSON requires a minimum of a hash or array,
+this meets this minimum requirement while allowing you to respond with simple
+primitives such as plain integers or strings without having to wrap it manually.
+
+A simple example of using <code>ok</code>:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+ok "OK" #=> [200, {}, {:status => 200, :body => 'OK'}]
+<% end -%>
+
+and in context:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  def show
+    ok Message[params[:id]].to_json
+  end
+end
+<% end -%>
+
+This will take the instance of <code>Message</code> (a
+"Sequel":http://code.google.com/p/ruby-sequel model object in this example) and
+call <code>to_json</code> on it before passing it to <code>ok</code> which wraps
+it in the standard Halcyon response format:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+[
+  200,
+  {},
+  {:status => 200, :body => {
+    :id => 40, :message => 'foo'}
+  }.to_json
+]
+<% end -%>
+
+The above example shows you what the body of the response would be before
+Halcyon converts it to JSON (hence <code>to_json</code> appearing at the end).
+
+The following methods are available: <code>ok</code> (status code:
+<code>200</code>) and <code>not_found</code> (status code: <code>404</code>).
+More are planned for later.
+
+
+h2. Errors
+
+Halcyon provides several exception classes that can be raised to simplify error
+handling. These exceptions all model the standard HTTP errors, mapping to the
+200, 300, 400, and 500 errors (and, in fact, they are not all errors, but can
+still be raised to simplify responding with this status code and message).
+
+For example:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  def create
+    msg = Message.create(params)
+    if msg.save
+      raise Created.new
+    else
+      ok UnprocessableEntity.new
+    end
+  end
+end
+<% end -%>
+
+It is not necessarily required or even recommended to raise an exception like
+this to respond, but it is certainly possible and for a pure
+"RESTful":http://wikipedia.org/wiki/RESTful application it can remove the tedium
+of having to manually specify the status code and message.
+
+The most common example would be closer to the following:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  def show
+    ok Message[params[:id]] or raise NotFound.new
+  end
+end
+<% end -%>
+
+The best place to see all of the status codes available would be to view the
+source code ("view source":http://github.com/mtodd/halcyon/tree/master/lib/halcyon/exceptions.rb#L34-85)
+or at http://www.askapache.com/htaccess/apache-status-code-headers-errordocument.html.
+
+
+h2. Custom Responses
+
+As indicated above, the standard response format follows something like this:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+[status, headers, body]
+<% end -%>
+
+This is the format indicated in the Rack specification for response. If you
+would like to create a custom response, forgoing the standard <code>ok</code>
+et al methods or the exception classes, or you do not need the body wrapped up
+in a hash ( like <code>{:status => status, :body => body}</code>), you can
+specify your own response manually. For instance:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  def list
+    [200, {}, Message.all]
+  end
+end
+<% end -%>
+
+Extra flexibility with responses, such as just responding with the body and the
+status being assumed <code>200</code>, is planned for the future.

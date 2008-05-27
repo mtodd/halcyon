@@ -1,0 +1,17 @@
+---
+title:  Docs &mdash; Samples &mdash; WeeDB
+layout: simple
+filter:
+  - erb
+  - textile
+---
+
+h2. WeeDB
+
+Source: "http://github.com/mtodd/halcyon/tree/master/examples/weedb/":http://github.com/mtodd/halcyon/tree/master/examples/weedb/
+
+WeeDB is a clone of the "TinyDB":http://tinydb.org/ service. It is not
+production quality code, but it is a good example of how to write a
+database-driven Halcyon application.
+
+<em>More coming soon.</em>

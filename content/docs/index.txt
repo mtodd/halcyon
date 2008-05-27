@@ -25,6 +25,7 @@ h3. Advanced Topics
 * -"Writing Controllers":/docs/controllers.html-
 * "Connecting to Databases":/docs/databases.html
 * -"Customizing Clients":/docs/clients.html-
+* "Responding to the Client":/docs/responding.html
 * "Advanced Rack Topics":/docs/rack.html
 * -"Troubleshooting":/docs/troubleshooting.html-
 
@@ -34,7 +35,7 @@ h3. Samples
 * -"Aurora":/docs/samples/aurora.html-
 * -"Guesser":/docs/samples/guesser.html-
 * -"Ranger":/docs/samples/ranger.html-
-* -"WeeDB":/docs/samples/weedb.html-
+* "WeeDB":/docs/samples/weedb.html
 
 
 h3. Manual

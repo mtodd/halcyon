@@ -5,39 +5,91 @@ filter:
   - erb
   - textile
 ---
+
 h2. Introduction to Halcyon
 
-Halcyon is a simple framework to ease development of service-oriented applications, such as public or private APIs or custom services for applications.
+Halcyon is a simple framework to ease development of service-oriented
+applications, such as public or private APIs or custom services for
+applications.
 
 
-h3. Conception
+h2. Purpose
 
-Halcyon started off as a centralized authentication system for numerous applications on varied platforms, at the time called Aurora. The decision was made to split Aurora into a framework and an application, Halcyon becoming the framework.
-
-
-h3. The Framework
-
-As a framework, Halcyon breaks your application code up into controllers with absolutely no views and no predefined system for models or database connectivity. Routes are used to define what paths are handled by what actions in which controllers.
-
-Halcyon distinguishes itself by the distinct combination of technologies it employs to simplify its task. To clarify, Halcyon specifically chooses to reinvent as little as possible and yet provide a great deal of functionality. We do this by using standard HTTP protocols, transferring complex data across platforms with JSON, designing Halcyon apps on top of "Rack":http://rack.rubyforge.org/, and even reusing portions of "Merb":http://merbivore.com/ to prevent duplication. Here's a quick look at each of these.
+This is the *what is Halcyon for?* question and basically summarizes why anyone
+would need to use Halcyon. Halcyon's purpose is to provide a dedicated,
+simplistic application development framework for exposing functionality through
+HTTP/JSON requests, removing the need for content-negotiation or explicitly
+formatting everything to the JSON format.
 
 
-h4. JSON
+h3. An Example
 
-JSON, or JavaScript Object Notation, is a simple format to transport complex data structures across the HTTP medium and across to many platforms. It's a simple format like XML, easy to read and write (unlike XML), and serializable. "CouchDB":http://couchdb.com/ chose JSON over XML for similar reasons, and has been very happy with the decision.
+This can be hard to grasp at immediately, so let's take a look at an example:
+"Twitter":http://twitter.com/ provides a service centered around tiny
+(140-character limit) messages being aggregated for friends and family. Twitter
+also provides a service for making third party clients to send messages to or
+read messages from Twitter without having to be on the website.
+
+Twitter does this by exposing URLs for applications to send data to and pull
+data from. The Twitter API (what they've called this interface to their
+application functionality) can be seen at
+"The Twitter API page":http://groups.google.com/group/twitter-development-talk/web/api-documentation#EasyWay
+with several examples of how to use Twitter outside of the website.
+
+For example, to post a new message (or a _status update_ as Twitter calls it),
+you would POST the data to <code>http://twitter.com/statuses/update.xml</code>.
+
+Twitter responds in XML and expects XML as its input in some cases, whereas
+Halcyon applications (for now) just use JSON. JSON is widely accepted and used
+across the web and competes with XML.
+
+Halcyon could just as easily provide an API to a given application, routing
+requests to controllers with specific actions without the need to negotiate the
+content types requested (<code>application/json</code>) or define views.
+
+
+h2. The Framework
+
+As a framework, Halcyon breaks your application code up into controllers with
+absolutely no views and no predefined system for models or database
+connectivity. Routes are used to define what paths are handled by what actions
+in which controllers.
+
+Halcyon distinguishes itself by the distinct combination of technologies it
+employs to simplify its task. To clarify, Halcyon specifically chooses to
+reinvent as little as possible and yet provide a great deal of functionality.
+We do this by using standard HTTP protocols, transferring complex data across
+platforms with JSON, designing Halcyon apps on top of
+"Rack":http://rack.rubyforge.org/, and even reusing portions of
+"Merb":http://merbivore.com/ to prevent duplication. Here's a quick look at
+each of these.
+
+
+h3. JSON
+
+JSON, or JavaScript Object Notation, is a simple format to transport complex
+data structures across the HTTP medium and across to many platforms. It's a
+simple format like XML, easy to read and write (unlike XML), and serializable.
+"CouchDB":http://couchdb.com/ chose JSON over XML for similar reasons, and has
+been very happy with the decision.
 
 
 
-h4. HTTP
+h3. HTTP
 
-Hypertext Transfer Protocol is a widely support protocol, supported on pretty much every platform, and provides a familiar way to modify resources with Representational State Transfer.
+Hypertext Transfer Protocol is a widely support protocol, supported on pretty
+much every platform, and provides a familiar way to modify resources with
+"Representational State Transfer":http://wikipedia.org/wiki/REST.
 
 
-h4. Rack
+h3. Rack
 
-Rack provides a uniform model for handling HTTP request and response cycles, allowing for server-independent development and for powerful layering of applications and specialized functionality through middleware.
+Rack provides a uniform model for handling HTTP request and response cycles,
+allowing for server-independent development and for powerful layering of
+applications and specialized functionality through middleware.
 
-Jim Weirich's talk at MountainWest 2008 focuses on the power of simplicity. Specifically, Jim mentions three poignant parts to a powerful system, having:
+Jim Weirich's talk at MountainWest 2008 focuses on the power of simplicity.
+Specifically, Jim mentions three poignant parts to a powerful system, having:
 
 # Small Core
 # Simple Rules
@@ -46,17 +98,36 @@ Jim Weirich's talk at MountainWest 2008 focuses on the power of simplicity. Spec
 Rack's design elegantly shows off the power of its simplicity.
 
 
-h4. Merb
+h3. Merb
 
-Having Merb as a dependency of Halcyon seems a bit ironic, but its active community, quality modular code, and thorough documentation provides an excellent souce of functionality without all of the repetitive development. Halcyon specifically takes advantage of the Merb Router and the Core Extensions.
-
-
-h3. Purpose
-
-...
+Having Merb as a dependency of Halcyon seems a bit ironic, but its active
+community, quality modular code, and thorough documentation provides an
+excellent souce of functionality without all of the repetitive development.
+Halcyon specifically takes advantage of the Merb Router and the Core Extensions.
 
 
-h3. Alternatives
+h2. Conception
 
-...
+Halcyon started off as a centralized authentication system for numerous
+applications on varied platforms, at the time called Aurora. The decision was
+made to split Aurora into a framework and an application, Halcyon becoming the
+framework.
 
+
+h2. Alternatives
+
+Any web application framework should be a sufficient alternative, and may
+provide a better solution. Here are several frameworks that could be used
+instead of Halcyon, though may require more effort to handle the incoming and
+outgoing JSON requests.
+
+* "Merb":http://merbivore.com/
+* "Sinatra":http://sinatra.rubyforge.org/
+* "Ramaze":http://ramaze.net/
+* "Mack":http://mackframework.com/
+* "Rack":http://rack.rubyforge.org/
+* "Vintage":http://vintage.devjavu.com/
+* "Rails":http://rubyonrails.org/
+
+A more comprehensive list can be found at
+"the Ramaze website":http://ramaze.net/#other-frameworks.
