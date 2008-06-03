@@ -16,17 +16,36 @@ Halcyon has several aims and goals, including:
 * *Be flexible* -- since it uses HTTP, it's very simple to be flexible
 * *Be easy to implement* -- also easy since we're developing in "Ruby":http://ruby-lang.org/ here
 
+Simply put, <strong>Halcyon is a web application framework with a
+twist</strong>. The twist is simply that Halcyon applications communicate
+solely through "JSON":http://json.org/, both incoming and outgoing.
+
 
 h2. What Is Halcyon For?
 
-This is the question most often asked about Halcyon, <em>what is Halcyon for?</em> Simply put, <strong>Halcyon is a web application framework with a twist</strong>. The twist is simply that Halcyon applications communicate solely through "JSON":http://json.org/, both incoming and outgoing.
+This is the question most often asked about Halcyon, <em>what is Halcyon
+for?</em> If "Rails":http://rubyonrails.org/ (and "Merb":http://merbivore.com/
+"et al":http://ramaze.net/#other-frameworks) is for quickly developing web
+applications, Halcyon aims to provide a framework for developing
+service-oriented applications (SOAs) such as APIs or other non-interfaced
+services.
 
-This doesn't, however, answer what Halcyon is <em>for</em>.
+The "Twitter":http://twitter.com/ API is a great example of a SOA where
+tweets can be submitted without needing any web interface. The power of this
+type of application is that other client-side applications can be developed to
+provide an interface to the web service.
+
+Halcyon aims to make writing these types of application interfaces and other
+similar services trivial.
+
 
 
 h2. Functionality &amp; Performance
 
-With Mongrel leading the pack and Rack holding things up, JSON doing the fast talking and with plenty of room to spare, how could you not be interested, even about this new framework? Still not convinced? OK, fair enough, here's some code for you.
+With Mongrel leading the pack and Rack holding things up, JSON doing the fast
+talking and with plenty of room to spare, how could you not be interested, even
+about this new framework? Still not convinced? OK, fair enough, here's some
+code for you.
 
 <% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
 class Message < Sequel::Model; end
@@ -58,21 +77,29 @@ You can then run it with:
 
 <pre><code>$ halcyon start -p 4647</code></pre>
 
-That's all it takes to open up the door to let you communicate with your applications that implement or use the simple client.
+That's all it takes to open up the door to let you communicate with your
+applications that implement or use the simple client.
 
 Read the "Docs":/docs/.
 
 
 h2. Supported Platforms
 
-Halcyon is primarily written in Ruby, but Halcyon also supports multiple platforms due to the fact that it communicates via HTTP and packages its messages in JSON. Halcyon currently has Ruby, PHP, and Java clients available, with more clients planned.
+Halcyon is primarily written in Ruby, but Halcyon also supports multiple
+platforms due to the fact that it communicates via HTTP and packages its
+messages in JSON. Halcyon currently has Ruby, PHP, and Java clients available,
+with more clients planned.
 
-You can see the various client implementations at http://github.com/mtodd/halcyon-clients (except for the Ruby client, which is part of the Halcyon gem).
+You can see the various client implementations at
+"the GitHub project":http://github.com/mtodd/halcyon-clients (except for the
+Ruby client, which is part of the Halcyon gem).
 
 
 h2. Metrics
 
-Ohloh's pretty cool and we use it to track the development metrics of Halcyon. Check out some of the more interesting details on our project page. You can find the link at the top of the page.
+Ohloh's pretty cool and we use it to track the development metrics of Halcyon.
+Check out some of the more interesting details on our project page. You can
+find the link at the top of the page.
 
 For your viewing pleasure, here are some of the Ohloh project factoids:
 
