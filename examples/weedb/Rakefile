@@ -31,7 +31,8 @@ desc "Load up the application environment"
 task :env do
   $log = ''
   $logger = Logger.new(StringIO.new($log))
-  Halcyon.config = {:logger => $logger}
+  Halcyon.config = {:logger => $logger
+    :environment => (ENV['HALCYON_ENV'] || ENV['ENV'] || :development).to_sym}
   Halcyon::Runner.new
 end
 
