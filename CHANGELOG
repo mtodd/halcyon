@@ -1,4 +1,4 @@
-== 0.5.0 2008-05-15 WIP
+== 0.5.0 2008-05-29
 * major refactor, completely incompatible with 0.4.0 applications
 * new application-centric structure and design [#13 resolved]
 * remove coupled server code, completely Rack-based
@@ -21,6 +21,7 @@
 * new examples [#23 resolved]
 * app init can specify to initialize new Git repo for new app [#25 resolved]
 * fixed bug with interactive shell not loading the correct paths [#39 resolved]
+* extended status codes to provide more extensive errors/states
 
 == 0.4.1 2008-05-09
 * added explicit dependency versions
