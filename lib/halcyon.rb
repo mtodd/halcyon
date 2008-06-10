@@ -14,7 +14,7 @@ $:.unshift File.dirname(__FILE__)
 #   Halcyon.version #=> "0.5.0"
 module Halcyon
   
-  VERSION = [0,5,0] unless defined?(Halcyon::VERSION)
+  VERSION = [0,5,1] unless defined?(Halcyon::VERSION)
   
   autoload :Application, 'halcyon/application'
   autoload :Client, 'halcyon/client'
@@ -53,6 +53,23 @@ module Halcyon
       end;
     end
     alias_method :configurable_attr, :configurable
+    
+    # Tests for Windows platform (to compensate for numerous Windows-specific
+    # bugs and oddities.)
+    # 
+    # Returns Boolean:is_windows
+    # 
+    def windows?
+      RUBY_PLATFORM =~ /mswin/
+    end
+    
+    # Tests for Linux platform.
+    # 
+    # Returns Boolean:is_linux
+    # 
+    def linux?
+      RUBY_PLATFORM =~ /linux/
+    end
     
   end
   
