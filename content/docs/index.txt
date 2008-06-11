@@ -19,13 +19,17 @@ h3. Getting Started
 * "Tutorial":/docs/tutorial.html
 
 
+h3. The Basics
+
+* -"Writing Controllers":/docs/controllers.html-
+* "Defining Routes":/docs/routes.html
+* "Responding to the Client":/docs/responding.html
+
+
 h3. Advanced Topics
 
-* "Defining Routes":/docs/routes.html
-* -"Writing Controllers":/docs/controllers.html-
 * "Connecting to Databases":/docs/databases.html
 * -"Customizing Clients":/docs/clients.html-
-* "Responding to the Client":/docs/responding.html
 * "Advanced Rack Topics":/docs/rack.html
 * -"Troubleshooting":/docs/troubleshooting.html-
 
