@@ -5,6 +5,65 @@ filter:
   - erb
   - textile
 ---
+
 h2. Writing Controllers
 
-Coming soon.
+Controllers are the functional heart of your application. Requests to your
+application get routed to controllers where the actions defined within them are
+dispatched.
+
+Those of you familiar with "Rails":http://rubyonrails.org/ or "MVC":http://wikipedia.org/wiki/Model-view-controller
+in general will recognize the role that the controller and its actions play.
+While the models will contain the primary portion of logic, controllers will
+coordinate it all.
+
+Really, there's nothing special about Halcyon controllers. Let's look at what
+they look like.
+
+
+h3. Controller Structure
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  
+  def show
+    ok Message[params[:id]]
+  end
+  
+end
+<% end -%>
+
+The @Application@ class we inherit from simply from @Halcyon::Controller@ and 
+provides a place for utility methods et al. @Application@ is created by default
+when generating an application.
+
+
+h3. Actions
+
+Actions make up the functional portion of classes. Actions are considered any
+public method (private methods are not callable through routes).
+
+Actions have several useful methods, two of which will be used in most actions:
+@params@ and @ok@. The @params@ method provides access to the parameters
+available, such as GET params, POST params, and route params. @ok@ is used to
+format responses and is akin to calling @render :json => val@ in Rails.
+
+
+h3. Resources
+
+The "REST":http://wikipedia.org/wiki/REST approach to application design treats
+our models as resources with a standard set of methods to work them them.
+Again, if you're familiar with Rails development, none of this is new. Here is
+an example controller defining these standard REST methods.
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  
+  def show
+    ok Message[params[:id]]
+  end
+  
+end
+<% end -%>
+
+...
