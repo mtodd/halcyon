@@ -31,6 +31,7 @@ h3. Advanced Topics
 * "Connecting to Databases":/docs/databases.html
 * -"Customizing Clients":/docs/clients.html-
 * "Advanced Rack Topics":/docs/rack.html
+* "Exceptions":/docs/exceptions.html
 * -"Troubleshooting":/docs/troubleshooting.html-
 
 
