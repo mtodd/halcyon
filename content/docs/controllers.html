@@ -63,7 +63,71 @@ class Messages < Application
     ok Message[params[:id]]
   end
   
+  def create
+    ok Message << params
+  end
+  
+  def update
+    Message.filter(:id => params[:id]).update(params)
+    ok
+  end
+  
+  def delete
+    Message.filter(:id => params[:id]).delete
+    ok
+  end
+  
 end
 <% end -%>
 
-...
+Resources are mapped to these methods through routing method @resource@. This
+is one of the benefits of using the "Merb":http://merbivore.com/ router.
+
+Read more about "writing routes":/docs/routes.html for great coverage of this
+topic.
+
+
+h3. Error Handling and Exceptions
+
+There will inevitably be errors that need to be handled and exceptions are a
+big part of gracefully working with errors in a meaningful way. Halcyon
+provides all of the standard HTTP responses as exceptions to help with quickly
+communicating the appropriate status of a request, and Halcyon handles
+exceptions to gracefully communicate with the client the appropriate status in
+the standard format.
+
+Here is an example of handling success or failure:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  
+  def show
+    if (msg = Message[params[:id]])
+      ok msg
+    else
+      raise NotFound.new
+    end
+  end
+  
+  def create
+    msg = Message.new
+    msg.values.merge! params
+    if (id = msg.save)
+      ok id
+    else
+      raise UnprocessableEntity.new
+    end
+  end
+  
+end
+<% end -%>
+
+The @UnprocessableEntity@ exception class maps directly to the standard HTTP
+response code @422 Unprocessable Entity@ which signifies that there were errors
+creating the record as the models validations failed. You can certainly supply
+the exception with a body other than the literal text @"Unprocessable Entity"@
+which could be the exact error (which is recommended). This is up to you, of
+course.
+
+Check out the "list of exceptions":/docs/exceptions.html to see what's
+available and how to use them.

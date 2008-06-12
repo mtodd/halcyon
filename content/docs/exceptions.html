@@ -1,0 +1,94 @@
+---
+title:  Docs &mdash; Exceptions
+layout: simple
+filter:
+  - erb
+  - textile
+---
+
+h2. Exceptions
+
+The most up-to-date list of HTTP status codes that Halcyon supports can be seen
+at the "GitHub source page":http://github.com/mtodd/halcyon/tree/master/lib/halcyon/exceptions.rb
+which is transformed into actual exception classes from the error message.
+
+Here is a list of the actual Exception classes as created by this list and a
+brief overview of when to use these exceptions:
+
+* @100 Continue@
+* @101 SwitchingProtocols@
+* @102 Processing@
+* @200 OK@ &mdash; this is the standard response, alias method @ok@
+* @201 Created@ &mdash; can be used to indicated success for @create@ action
+* @202 Accepted@
+* @203 NonAuthoritativeInformation@
+* @204 NoContent@
+* @205 ResetContent@
+* @206 PartialContent@
+* @207 MultiStatus@
+* @300 MultipleChoices@
+* @301 MovedPermanently@
+* @302 MovedTemporarily@
+* @303 SeeOther@
+* @304 NotModified@
+* @305 UseProxy@
+* @307 TemporaryRedirect@
+* @400 BadRequest@ &mdash; can be used to indicate insufficient params, etc
+* @401 Unauthorized@ &mdash; can indicate authorization necessary
+* @402 PaymentRequired@
+* @403 Forbidden@
+* @404 NotFound@ &mdash; can indicate resources not found
+* @405 MethodNotAllowed@
+* @406 NotAcceptable@ &mdash; can be used to indicate method is restricted to certain clients et al
+* @407 ProxyAuthenticationRequired@
+* @408 RequestTimeout@
+* @409 Conflict@
+* @410 Gone@
+* @411 LengthRequired@
+* @412 PreconditionFailed@
+* @413 RequestEntityTooLarge@
+* @414 RequestURITooLarge@
+* @415 UnsupportedMediaType@
+* @416 RequestedRangeNotSatisfiable@
+* @417 ExpectationFailed@
+* @422 UnprocessableEntity@ &mdash; can be used to indicate models fail validations
+* @423 Locked@
+* @424 FailedDependency@
+* @425 NoCode@
+* @426 UpgradeRequired@ &mdash; can be used to indicate change of API versions, etc
+* @500 InternalServerError@ &mdash; indicates uncaught error
+* @501 NotImplemented@ &mdash; can indicate non-functionality or partial implementation
+* @502 BadGateway@
+* @503 ServiceUnavailable@ &mdash; can indicate the service is temporarily unavailable for maintenance
+* @504 GatewayTimeout@
+* @505 HTTPVersionnotsupported@
+* @506 VariantAlsoNegotiates@
+* @507 InsufficientStorage@
+* @510 NotExtended@
+
+
+h3. Making Your Own
+
+Although the standard exceptions available should be sufficient (they are
+the HTTP response codes), you could certainly make up your own HTTP response
+codes. Putting this inside of an @init@ file or in the @lib@ directory should
+be fine:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+## lib/custom_exception.rb
+## or config/init/custom_exception.rb
+class CustomException < Halcyon::Exceptions::Base
+  
+  def initialize(body = 'Custom Exception')
+    super(460, body)
+  end
+  
+end
+<% end -%>
+
+As you can see, the status code is the first argument to the base @initialize@
+method and the @body@ variable is set to the default error text. Obviously, the
+exception name, file name, and error status should be more descriptive.
+Pick a sane error code as well, something that hasn't been used officially.
+
+If at all possible, <strong>use the default response codes/exceptions</strong>.
