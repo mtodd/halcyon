@@ -32,7 +32,11 @@ class Messages < Application
   end
   
   def show
-    ok Message[params[:id]]
+    if (msg = Message[params[:id]])
+      ok msg
+    else
+      raise NotFound.new
+    end
   end
   
   def create
