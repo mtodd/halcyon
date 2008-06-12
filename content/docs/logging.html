@@ -1,0 +1,74 @@
+---
+title:  Docs &mdash; Logging
+layout: simple
+filter:
+  - erb
+  - textile
+---
+
+h2. Logging
+
+When troubleshooting your application or monitoring its activity, logging
+provides a central source of statistics and a record of events. In Halcyon,
+several types of loggers are support, including the Ruby standard @Logger@, but
+also "Analogger":http://analogger.swiftcore.org/, Logging, and Log4r.
+
+
+h3. Configuration
+
+The default configuration for logging is to just output straight to standard
+out, including all debugging information. However, this can be adjusted
+according to your needs (such as in production).
+
+The logging configuration settings are found in @config/config.yml@ under the
+@logging@ heading. Depending on which logger client specified, the options
+available can change, but by default you have @file@ and @level@.
+
+If @file@ is @nil@ (commented out or left blank), standard output is used
+instead of logging to a file. However, if you would like to log to a file, it
+is suggested to log to <code>log/<em>environment</em>.log</code> (where
+<em>environment</em> is which environment you're running in, @development@,
+@test@, or @production@). This can be anything at all, though, including
+@/var/log/app_name.log@ (as long as the application is being run with the right
+permissions or access levels).
+
+For example, to only log messages of type @WARN@ with the standard Ruby logger
+to the local production log, the following configuration options would suffice:
+
+<% coderay(:lang => "yaml", :line_numbers => "inline", :tab_width => 2) do -%>
+---
+## config/config.yml
+logging:
+  type: Logger
+  file: log/production.log
+  level: warn
+<% end -%>
+
+
+h3. Logging Messages
+
+If you're needing log messages, every object is extended by the Logging helper
+and provides a method called @logger@. In most circumstances, you can call the
+logger like this:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  def create
+    msg = Message.new
+    msg.values.merge! params
+    if id = msg.save
+      self.logger.debug "Created Message with #{msg.values.inspect}"
+      ok id
+    else
+      msg.errors.each do |error|
+        self.logger.warn "Unable to save model: " << error
+      end
+      raise UnprocessableEntity.new
+    end
+  end
+end
+<% end -%>
+
+The essence is @self.logger.<em>level</em>@ where <em>level</em> is an
+acceptable logging level, including @debug@, @info@, @warn@, @error@, and
+@fatal@ for the default Ruby logger.

@@ -5,6 +5,7 @@ filter:
   - erb
   - textile
 ---
+
 h2. Connecting to Databases
 
 Although Halcyon doesn't come with any ORM-specific plumbing, getting connected

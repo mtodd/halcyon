@@ -24,11 +24,13 @@ h3. The Basics
 * "Writing Controllers":/docs/controllers.html
 * "Defining Routes":/docs/routes.html
 * "Responding to the Client":/docs/responding.html
+* "Configuration":/docs/configuration.html
 
 
 h3. Advanced Topics
 
 * "Connecting to Databases":/docs/databases.html
+* "Logging":/docs/logging.html
 * -"Customizing Clients":/docs/clients.html-
 * "Advanced Rack Topics":/docs/rack.html
 * "Exceptions":/docs/exceptions.html

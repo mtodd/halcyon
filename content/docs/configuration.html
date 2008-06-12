@@ -1,0 +1,189 @@
+---
+title:  Docs &mdash; Configuration
+layout: simple
+filter:
+  - erb
+  - textile
+---
+
+h2. Configuration
+
+There are a great deal of configuration points in your application, including
+but not limited to the @config/config.yml@ settings file.
+
+
+h3. @config/config.yml@
+
+This file often starts like this:
+
+<% coderay(:lang => "yaml", :line_numbers => "inline", :tab_width => 2) do -%>
+---
+## config/config.yml
+# = Framework
+# 
+allow_from: all
+
+# = Environment
+# 
+# environment: production
+
+# = Logging
+# 
+logging:
+  type: Logger
+  # file: # STDOUT
+  level: debug
+
+# = Application
+# 
+# Your application-specific configuration options here.
+<% end -%>
+
+(Extra comments have been removed for the sake of brevity.)
+
+In this file you can specify whether your application allows requests to come
+from clients locally (only requests from @localhost@), from Halcyon clients
+(ignoring any non-Halcyon client), or all (which is the default).
+
+You can also explicitly specify which environment to run under and how to log
+messages, including where to save the logged messages and what level to save.
+Read more about "configuring logging":/docs/logging.html.
+
+
+h3. Boot/Initialization
+
+The boot process also provides a great way to customize your application,
+including adding in dependencies and wiring in new functionality.
+Initialization is handled by the files in @config/init/@ such as @requires.rb@
+and @routes.rb@ etc.
+
+Let's take a look at each file.
+
+
+h4. Requires
+
+The file @config/init/requires.rb@ includes any necessary dependencies for your
+application, including your preferred ORM library and anything else necessary
+to your application's operation.
+
+By default, the requires init file is empty, requiring nothing. This is what it
+should look like for a freshly created app:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+%w().each{|dep|require dep}
+<% end -%>
+
+If you're not familiar with the syntax used here, this is simply another way to
+define an array of strings and require each entry as its own dependency. The
+following code snippets are identical and are both valid code for the
+@requires.rb@ file:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+%w(sequel drb).each{|dep|require dep}
+
+## OR
+
+require 'sequel'
+require 'drb'
+<% end -%>
+
+Initially it may seem like more code, but for longer lists of dependencies, it
+can save a lot of repetition.
+
+
+h4. Environment
+
+The file @config/init/environment.rb@ shouldn't require a great deal of change
+since it simply wires @Halcyon.environment@ to the
+@Halcyon.config[:environment]@ configuration value and sets the default value
+if not set already.
+
+However, feel free to alter this and any file at will (so long as you know what
+you're doing, and sometimes even when you don't).
+
+
+h4. Routes
+
+The file @config/init/routes.rb@ contains the definition of the routes. There
+is an in-depth article going over "routes":/docs/routes.html with plenty of
+links to further documentation.
+
+
+h4. Hooks
+
+The file @config/init/hooks.rb@ contains the definition of the startup,
+shutdown, and any other hooks available. This allows you to run some setup or
+shutdown tasks to be run after the configuration and all other dependencies
+have been loaded. This is ideal for connecting to databases or opening other
+resources necessary for the operation of your application.
+
+You can see where in the boot process the hooks are run by starting a brand new
+Halcyon application and then shutting it down. Look for notifications for where
+to define startup and shutdown hooks, this is when the code is run.
+
+
+h4. @config/init/*.rb@
+
+Other files in the @init@ folder are also run during boot so you can put any
+Ruby file in there and it will be run at boot. For example, a @database.rb@
+file is certainly appropriate to setup database configuration values, etc.
+
+
+h2. Rack and @runner.ru@
+
+The last point of customization exists between the application itself and the
+server running it through "Rack":http://rack.rubyforge.org/. Since Halcyon is a
+simple Rack application and Rack applications can be layered, it's perfectly
+acceptable to layer in static file serving (for development only, stick to
+something faster like Nginx or Apache for production) or for handling file
+uploads or other really-long-running processes (until we wire in the deferrable
+actions which spawn off as their own threads where necessary like Merb).
+
+There are also several standard Rack <em>middleware</em> available such as
+"Cascade":http://rack.rubyforge.org/doc/classes/Rack/Cascade.html which finds
+the first application in an array of applications (such as a Halcyon app
+followed by a Rails app) to return a non-404 response, or the "Reloader":http://rack.rubyforge.org/doc/classes/Rack/Reloader.html
+middleware which reloads changed classes if changed between requests. There are
+still more interesting middleware available.
+
+Here's a sample @runner.ru@ file used by one of the example applications
+distributed with Halcyon's source:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+require 'halcyon'
+
+$:.unshift(Halcyon.root/'lib')
+puts "(Starting in #{Halcyon.root})"
+Thin::Logging.silent = true if defined? Thin
+
+# = Apps
+# The applications to try.
+apps = []
+
+# = Redirecter
+# Requests to <tt>/</tt> get redirected to <tt>/index.html</tt>.
+apps << lambda do |env|
+  case env['PATH_INFO']
+  when '/'
+    puts " ~ Redirecting to /index.html"
+    [302, {'Location' => '/index.html'}, ""]
+  else
+    [404, {}, ""]
+  end
+end
+
+# = Static Server
+# Make sure that the static resources are accessible from the same address so
+# we don't have to worry about the Same Origin stuff.
+apps << Rack::File.new(Halcyon.root/'static')
+
+# = Halcyon App
+apps << Halcyon::Runner.new
+
+# = Server
+# Run the Cascading server
+run Rack::Cascade.new(apps)
+<% end -%>
+
+This will serve static files necessary for running the application, passing
+through non-matches to the actual Halcyon application.
