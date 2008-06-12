@@ -5,6 +5,7 @@ filter:
   - erb
   - textile
 ---
+
 h2. Documentation
 
 If you're looking for thorough documentation and plenty of samples, this is where you will find what you're looking for.
