@@ -8,4 +8,207 @@ filter:
 
 h2. Customizing Clients
 
-Coming soon.
+*Note*: This article concerns the Ruby client for your application specifically
+but most of the principles should still be applicable for clients not written
+in Ruby.
+
+Depending on how you plan to deploy your Halcyon application, either it will be
+accessed via any number of clients (@curl@ et al) or you can provide a
+customized client interface for your app (or both, really). A great deal of
+this process involves designing a good interface to your application via a
+remote client, but looking past that, let's take a look at the technical
+aspects of customizing a client for your application.
+
+
+h3. The Application
+
+Let's start with a simple application whose controller looks like this:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+class Messages < Application
+  
+  def list
+    ok Message.limit(10).all
+  end
+  
+  def show
+    ok Message[params[:id]]
+  end
+  
+  def create
+    ok Message << params
+  end
+  
+  def update
+    Message.filter(:id => params[:id]).update(params)
+    ok
+  end
+  
+  def delete
+    Message.filter(:id => params[:id]).delete
+    ok
+  end
+  
+end
+<% end -%>
+
+Though this is a simplistic approach (in production we would want and need much
+more in terms of handling errors) it should suffice.
+
+This application manages a single @Message@ resource which we'll assume
+consists of nothing other than a text message of a certain size (say, 140
+characters, similar to "Twitter":http://twitter.com/). The routes are defined
+like this:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+Halcyon::Application.route do |r|
+  
+  r.resources :messages
+  
+end
+<% end -%>
+
+This means that we will primarily interact with the application with the
+following routes:
+
+<code><pre>
+GET /messages
+POST /messages
+GET /messages/:id
+PUT /messages/:id
+DELETE /messages/:id
+</pre></code>
+
+In the future we may want to associate users with messages, but for now we'll
+just clump them all together in a single faceless cloud.
+
+The model itself is simple enough: it just provides a mapping for the database,
+but we will not define it here (though we are using "Sequel":http://code.google.com/p/ruby-sequel/
+syntax for performing actions on the model).
+
+For our purposes, our application will be called @Messanger@.
+
+
+h3. The Client
+
+On the client side we may want to define a pseudo model to behave functionally
+like the actual @Message@ model on the server side, but we'll leave that as an
+exercise for the reader; for now we'll just focus on defining the messaging
+client to be able to submit requests and handle responses from the server.
+
+Let's go ahead and look at what our message client will look like:
+
+<% coderay(:lang => "ruby", :line_numbers => "inline", :tab_width => 2) do -%>
+module Messanger
+  
+  class Client < Halcyon::Client
+    
+    # get list of messages
+    def list
+      if (msgs = get('/messages'))[:status] == 200
+        # success
+        msgs[:body] # return message
+      else
+        # failure
+        msgs # return status and error message
+      end
+    end
+    
+    # get a single message
+    def show(id)
+      if (msg = get('/messages/'+id))[:status] == 200
+        # success
+        msg[:body] # return message
+      else
+        # failure
+        msg # return status and error message
+      end
+    end
+    
+    # create a message
+    def create(message)
+      if (msg = post('/messages', :message => message))[:status] == 200
+        # success
+        return msg[:body] # the new message id
+      else
+        # failure
+        return msg
+      end
+    end
+    
+    # update a message
+    def update(id, message)
+      if (msg = put('/messages/'+id, :message => message))[:status] == 200
+        # success
+        return true
+      else
+        # failure
+        return msg
+      end
+    end
+    
+    # delete a message
+    def delete(id)
+      if (msg = delete('/messages/'+id))[:status] == 200
+        # success
+        return true
+      else
+        # failure
+        return msg
+      end
+    end
+    
+  end
+  
+end
+<% end -%>
+
+Not the best code in the world and pretty repetitive. These are certainly
+things that can be improved upon (and should be) with abstraction methods and
+possibly even enabling exceptions (where exceptions are raised if a non-200
+response is given).
+
+Also, if we chose to use more descriptive HTTP response codes, such as @201
+Created@ instead of just @200 OK@ for the @create@ method, we could change our
+code to better take advantage of this descriptive consistency related to the
+"REST":http://wikipedia.org/wiki/REST approach. This is highly recommended.
+
+Let's take a look at actually using this client in IRB. We'll assume we're also
+running the @Messanger@ application on port @4647@ (a common port for Halcyon 
+apps).
+
+<code><pre>
+$ irb -r lib/client
+>> client = Messanger::Client.new('http://localhost:4647/')
+=> #<Messanger::Client>
+>> client.list
+=> []
+>> client.show(12)
+=> {:status=>404, :body=>'Not Found'}
+>> client.create('Hi!')
+=> 1
+>> client.list
+=> [{:id=>1, :message=>'Hi!'}]
+>> client.create('Howdy!')
+=> 2
+>> client.list
+=> [{:id=>1, :message=>'Hi!'}, {:id=>2, :message=>'Howdy!'}]
+>> client.show(1)
+=> {:id=>1, :message=>'Hi!'}
+>> client.update(1, 'Bamboozle...')
+=> true
+>> client.get('/messages/1')[:body]
+=> {:id=>1, :message=>'Bamboozle...'}
+>> client.delete(2)
+=> true
+>> client.delete(2)
+=> {:status=>404, :body=>'Not Found'}
+>> client.list
+=> [{:id=>1, :message=>'Bamboozle...'}]
+</pre></code>
+
+And so on. Hopefully this example is clear enough.
+
+Now that we have a working interface to the resources in the application, we
+can write a pseudo model that maintains an active client and can wrap up method
+calls to appear almost like working with the real model remotely.
