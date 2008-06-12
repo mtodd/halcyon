@@ -5,6 +5,59 @@ filter:
   - erb
   - textile
 ---
+
 h2. Troubleshooting
 
-Coming soon.
+Troubleshooting Halcyon applications can be tricky, but Halcyon should be solid
+enough that most exceptions raised should be caught and the error logged along
+where your logger has been specified (by default to standard out) and should
+keep running. This means that the log should be your first place to check for
+issues in the code.
+
+
+h3. The Console
+
+Halcyon applications can be run through a server or can be run through the
+console interactively. To run your app this way (to hand construct requests
+and prod and poke your app to find the exact point of failure), simply run:
+
+<pre><code>
+$ halcyon -i
+</code></pre>
+
+This will start your application in <em>interactive</em> mode, similar to the
+@merb -i@ console.
+
+
+h3. @500 Server Internal Error@ and Uncaught Exceptions
+
+Since most errors won't crash the server and will be logged, you will rarely
+have to look hard to find what happened, though finding out why may be a
+different matter.
+
+If an uncaught exception (that doesn't inherit from
+@Halcyon::Exceptions::Base@) does occur, you should expect a simple response of
+@500 Internal Server Error@. If this does occur, simply look through the strack
+trace in the log and determine where in your code the problem exists.
+
+
+h3. Standard Debugging Tools
+
+In the course of figuring out issues you may be having, don't forget about some
+of the excellent debugging tools available to the Ruby community such as
+@ruby-debug@ and various other debuggers.
+
+
+h3. Bugs
+
+Of course, Halcyon isn't bug free so if you experience a problem with the
+framework itself, please visit our "issue tracker":http://halcyon.lighthouseapp.com/projects/7222-halcyon/overview
+and submit a bug report! Be sure to tag it with the @bug@ tag.
+
+
+h2. Known Issues
+
+As time progresses, we will try to document known gotchas and issues you may
+face while learning the ins and outs of Halcyon application development.
+
+* Windows users may experience a "FloatingDomainError issue":http://halcyon.lighthouseapp.com/projects/7222/tickets/46-floatdomainerror. This is resolved in 0.5.1!
