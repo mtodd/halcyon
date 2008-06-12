@@ -21,7 +21,7 @@ h3. Getting Started
 
 h3. The Basics
 
-* -"Writing Controllers":/docs/controllers.html-
+* "Writing Controllers":/docs/controllers.html
 * "Defining Routes":/docs/routes.html
 * "Responding to the Client":/docs/responding.html
 
