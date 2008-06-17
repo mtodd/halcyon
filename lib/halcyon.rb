@@ -11,24 +11,26 @@ $:.unshift File.dirname(__FILE__)
 #   Halcyon.config #=> {:allow_from => :all, :logging => {...}, ...}
 #   Halcyon.paths #=> {:config => Halcyon.root/'config', ...}
 #   Halcyon.logger #=> #<Logger>
-#   Halcyon.version #=> "0.5.0"
+#   Halcyon.version #=> "0.5.1"
+# 
 module Halcyon
   
   VERSION = [0,5,1] unless defined?(Halcyon::VERSION)
   
   autoload :Application, 'halcyon/application'
   autoload :Client, 'halcyon/client'
+  autoload :Config, 'halcyon/config'
   autoload :Controller, 'halcyon/controller'
   autoload :Exceptions, 'halcyon/exceptions'
   autoload :Logging, 'halcyon/logging'
   autoload :Runner, 'halcyon/runner'
   
+  include Halcyon::Config::Helpers
+  
   class << self
     
-    attr_accessor :app
     attr_accessor :logger
     attr_accessor :config
-    attr_accessor :paths
     
     def version
       VERSION.join('.')
@@ -37,22 +39,10 @@ module Halcyon
     # The root directory of the current application.
     # 
     # Returns String:root_directory
+    # 
     def root
       self.config[:root] || Dir.pwd rescue Dir.pwd
     end
-    
-    def configurable(attribute)
-      eval <<-"end;"
-        def #{attribute.to_s}
-          Halcyon.config[:#{attribute.to_s}]
-        end
-        def #{attribute.to_s}=(value)
-          value = value.to_mash if value.is_a?(Hash)
-          Halcyon.config[:#{attribute.to_s}] = value
-        end
-      end;
-    end
-    alias_method :configurable_attr, :configurable
     
     # Tests for Windows platform (to compensate for numerous Windows-specific
     # bugs and oddities.)
@@ -72,11 +62,6 @@ module Halcyon
     end
     
   end
-  
-  # Creates <tt>Halcyon.db</tt> to alias <tt>Halcyon.config[:db]</tt>.
-  # Also creates the complementary assignment method, <tt>Halcyon.db=</tt>
-  # that aliases <tt>Halcyon.config[:db]=</tt>.
-  configurable_attr :db
   
 end
 
