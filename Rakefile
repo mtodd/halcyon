@@ -92,6 +92,11 @@ namespace 'spec' do
   task :verb do
     sh "bacon -r~/lib/bacon/output -rlib/halcyon -rspec/spec_helper spec/**/* -o CSpecDox"
   end
+  
+  desc "run single rspec verbosely (specify SPEC)"
+  task :select do
+    sh "bacon -r~/lib/bacon/output -rlib/halcyon -rspec/spec_helper spec/**/#{ENV['SPEC']}_spec.rb -o CSpecDox"
+  end
 end
 
 desc "Do predistribution stuff"
