@@ -95,8 +95,8 @@ module Halcyon
       status, body = http_status
       class_eval <<-"end;"
         class #{body.gsub(/( |\-)/,'')} < Halcyon::Exceptions::Base
-          def initialize(s=#{status}, b='#{body}')
-            super
+          def initialize(body='#{body}')
+            super(#{status}, body)
           end
         end
       end;
