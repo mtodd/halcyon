@@ -180,9 +180,9 @@ module Halcyon
           :type => 'Logger',
           :level => 'debug'
         },
-        :root => nil,
+        :root => Dir.pwd,
         :app => nil,
-        :environment => nil,
+        :environment => :development,
         :paths => Paths.new
       }
       case (env || :development)
