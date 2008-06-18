@@ -169,56 +169,68 @@ module Halcyon
       self.config.to_hash
     end
     
-    # Default configuration values.
-    # 
-    # Defaults to the configuration for <tt>:development</tt>.
+    # Shortcut for Halcyon::Config.defaults.
     # 
     def defaults(env = nil)
-      base = {
-        :allow_from => 'all',
-        :logging => {
-          :type => 'Logger',
-          :level => 'debug'
-        },
-        :root => Dir.pwd,
-        :app => nil,
-        :environment => :development,
-        :paths => Paths.new
-      }
-      case (env || :development)
-      when :development
-        base.merge({
-          :environment => :development
-        })
-      when :test
-        base.merge({
-          :environment => :test,
-          :logging => {
-            :type => 'Logger',
-            :level => 'warn',
-            :file => 'log/test.log'
-          }
-        })
-      when :console
-        base.merge({
-          :environment => :console
-        })
-      when :production
-        base.merge({
-          :environment => :production,
-          :logging => {
-            :type => 'Logger',
-            :level => 'warn',
-            :file => 'log/production.log'
-          }
-        })
-      end
+      Halcyon::Config.defaults(env)
     end
     
     def inspect
       attrs = ""
       self.config.keys.each {|key| attrs << " #{key}=#{self.config[key].inspect}"}
       "#<Halcyon::Config#{attrs}>"
+    end
+    
+    class << self
+      
+      # Default configuration values.
+      # 
+      # Defaults to the configuration for <tt>:development</tt>.
+      # 
+      def defaults(env = nil)
+        base = {
+          :app => nil,
+          :root => Dir.pwd,
+          :environment => :development,
+          :allow_from => 'all',
+          :logging => {
+            :type => 'Logger',
+            :level => 'debug'
+          },
+          :paths => Paths.new,
+          :hooks => Hash.new([])
+        }
+        case (env || :development)
+        when :development
+          base.merge({
+            :environment => :development
+          })
+        when :test
+          base.merge({
+            :app => 'Specs',
+            :environment => :test,
+            :logging => {
+              :type => 'Logger',
+              :level => 'warn',
+              :file => 'log/test.log'
+            }
+          })
+        when :console
+          base.merge({
+            :environment => :console
+          })
+        when :production
+          base.merge({
+            :environment => :production,
+            :logging => {
+              :type => 'Logger',
+              :level => 'warn',
+              :file => 'log/production.log'
+            }
+          })
+        end
+      end
+      
     end
     
   end

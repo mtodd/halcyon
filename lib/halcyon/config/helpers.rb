@@ -82,6 +82,12 @@ module Halcyon
           self.config[:paths]
         end
         
+        # Provides a proxy to the hooks hash.
+        # 
+        def hooks
+          self.config[:hooks]
+        end
+        
       end
       
       # Provides dynamic creation of configuration attribute accessors.

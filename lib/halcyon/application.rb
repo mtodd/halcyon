@@ -7,21 +7,13 @@ module Halcyon
   # Manages shutting down and starting up hooks, routing, dispatching, etc.
   # Also restricts the requests to acceptable clients, defaulting to all.
   # 
-  class Application 
-    include Exceptions
+  class Application
     
+    autoload :Hooks, 'halcyon/application/hooks'
     autoload :Router, 'halcyon/application/router'
     
-    attr_accessor :session
-    
-    DEFAULT_OPTIONS = {
-      :root => Dir.pwd,
-      :logging => {
-        :type => 'Logger',
-        :level => 'info'
-      },
-      :allow_from => :all
-    }.to_mash
+    include Exceptions
+    include Hooks
     
     # Initializes the app:
     # * runs startup hooks
@@ -30,7 +22,7 @@ module Halcyon
     def initialize
       self.logger.info "Starting up..."
       
-      self.hooks[:startup].call(Halcyon.config) if self.hooks[:startup]
+      Halcyon.hooks[:startup].each {|hook| hook.call(Halcyon.config) }
       
       # clean after ourselves and get prepared to start serving things
       self.logger.debug "Starting GC."
@@ -40,7 +32,7 @@ module Halcyon
       
       at_exit do
         self.logger.info "Shutting down #{$$}."
-        self.hooks[:shutdown].call(Halcyon.config) if self.hooks[:shutdown]
+        Halcyon.hooks[:shutdown].each {|hook| hook.call(Halcyon.config) }
         self.logger.info "Done."
       end
     end
@@ -199,21 +191,7 @@ module Halcyon
       request.params.merge(env['halcyon.route'])
     end
     
-    # See the documentation for generated apps in <tt>config/initialze/hooks.rb</tt>
-    # 
-    def hooks
-      self.class.hooks
-    end
-    
     class << self
-      
-      attr_accessor :hooks
-      
-      # See the documentation for generated apps in <tt>config/initialze/hooks.rb</tt>
-      # 
-      def hooks
-        @hooks ||= {}
-      end
       
       # Defines routes for the application.
       # 
@@ -227,23 +205,45 @@ module Halcyon
         end
       end
       
-      # Sets the startup hook to the proc.
+      # Runs through the bootup process. This involves:
+      # * establishing configuration directives
+      # * loading required libraries
       # 
-      # Use this to initialize application-wide resources, such as database
-      # connections.
-      # 
-      # Use initializers where possible.
-      # 
-      def startup &hook
-        self.hooks[:startup] = hook
-      end
-      
-      # Sets the shutdown hook to the proc.
-      # 
-      # Close any resources opened in the +startup+ hook.
-      # 
-      def shutdown &hook
-        self.hooks[:shutdown] = hook
+      def boot
+        Halcyon.config ||= Halcyon::Config.new
+        
+        # Set application name
+        Halcyon.app = Halcyon.config[:app] || Halcyon.root.split('/').last.camel_case
+        
+        # Setup logger
+        if Halcyon.config[:logger]
+          Halcyon.config[:logging] = (Halcyon.config[:logging] || Halcyon::Config.defaults[:logging]).merge({
+            :type => Halcyon.config[:logger].class.to_s,
+            :logger => Halcyon.config[:logger]
+          })
+        end
+        Halcyon::Logging.set(Halcyon.config[:logging][:type])
+        Halcyon.logger = Halcyon::Logger.setup(Halcyon.config[:logging])
+        
+        # Run initializers
+        Dir.glob(%(requires hooks routes *).map{|init|Halcyon.paths[:init]/init+'.rb'}).each do |initializer|
+          self.logger.debug "Init: #{File.basename(initializer).chomp('.rb').camel_case}" if
+          require initializer.chomp('.rb')
+        end
+        
+        # Setup autoloads for Controllers found in Halcyon.root/'app' (by default)
+        Dir.glob([Halcyon.paths[:controller]/'application.rb', Halcyon.paths[:controller]/'*.rb']).each do |controller|
+          self.logger.debug "Load: #{File.basename(controller).chomp('.rb').camel_case} Controller" if
+          require controller.chomp('.rb')
+        end
+        
+        # Setup autoloads for Models found in Halcyon.root/'app'/'models' (by default)
+        Dir.glob(Halcyon.paths[:model]/'*.rb').each do |model|
+          self.logger.debug "Load: #{File.basename(model).chomp('.rb').camel_case} Model" if
+          require model.chomp('.rb')
+        end
+        
+        yield if block_given?
       end
       
     end

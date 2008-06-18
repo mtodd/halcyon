@@ -4,14 +4,7 @@ require 'logger'
 
 # Default Settings
 
-$config = {
-  :allow_from => :all,
-  :environment => :development,
-  :logger => nil,
-  :logging => {
-    :level => 'debug'
-  }
-}
+Halcyon.config = Halcyon::Config.new(:environment => :test)
 
 # Testing Application
 
@@ -22,6 +15,7 @@ class Application < Halcyon::Controller; end
 class Specs < Application
   
   def greeter
+    $hello = params[:name]
     ok("Hello #{params[:name]}")
   end
   

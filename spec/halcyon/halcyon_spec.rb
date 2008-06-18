@@ -3,10 +3,9 @@ describe "Halcyon" do
   before do
     @log = ''
     @logger = Logger.new(StringIO.new(@log))
-    @config = $config.dup
-    @config[:logger] = @logger
-    @config[:app] = 'Specs'
-    Halcyon.config = @config
+    Halcyon.config.use do |c|
+      c[:logger] = @logger
+    end
     @app = Halcyon::Runner.new
   end
   
@@ -15,11 +14,11 @@ describe "Halcyon" do
   end
   
   it "should provide quick access to the configuration hash" do
-    Halcyon.config.is_a?(Hash).should.be.true?
+    Halcyon.config.is_a?(Halcyon::Config).should.be.true?
   end
   
   it "should provide environment label" do
-    Halcyon.environment.should == :development
+    Halcyon.environment.should == :test
     Halcyon.environment.should == Halcyon.config[:environment]
   end
   
@@ -36,11 +35,12 @@ describe "Halcyon" do
   end
   
   it "should provide sane default paths for essential components" do
-    Halcyon.paths.is_a?(Hash).should.be.true?
+    Halcyon.paths.is_a?(Halcyon::Config::Paths).should.be.true?
     Halcyon.paths[:controller].should == Halcyon.root/"app"
+    Halcyon.paths[:model].should == Halcyon.root/"app"/"models"
     Halcyon.paths[:lib].should == Halcyon.root/"lib"
     Halcyon.paths[:config].should == Halcyon.root/"config"
-    Halcyon.paths[:init].should == Halcyon.root/"config"/"{init,initialize}"
+    Halcyon.paths[:init].should == Halcyon.root/"config"/"init"
     Halcyon.paths[:log].should == Halcyon.root/"log"
   end
   

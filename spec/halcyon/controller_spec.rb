@@ -3,10 +3,9 @@ describe "Halcyon::Controller" do
   before do
     @log = ''
     @logger = Logger.new(StringIO.new(@log))
-    @config = $config.dup
-    @config[:logger] = @logger
-    @config[:app] = 'Specs'
-    Halcyon.config = @config
+    Halcyon.config.use do |c|
+      c[:logger] = @logger
+    end
     @app = Halcyon::Runner.new
   end
   

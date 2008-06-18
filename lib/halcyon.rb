@@ -25,23 +25,31 @@ module Halcyon
   autoload :Logging, 'halcyon/logging'
   autoload :Runner, 'halcyon/runner'
   
-  include Halcyon::Config::Helpers
+  include Config::Helpers
   
   class << self
     
     attr_accessor :logger
-    attr_accessor :config
+    attr_writer :config
     
     def version
       VERSION.join('.')
     end
     
-    # The root directory of the current application.
-    # 
-    # Returns String:root_directory
+    # The default <tt>root</tt> setting, overwritten by a configuration helper.
+    # This is so that the paths can be loaded when first booting the app.
+    # This won't be necessary for certain cases where the paths the root is
+    # manually configured, but for all other cases it can cause problems.
     # 
     def root
-      self.config[:root] || Dir.pwd rescue Dir.pwd
+      Dir.pwd
+    end
+    
+    # Configuration accessor which creates a configuration object when
+    # necessary.
+    # 
+    def config
+      @config ||= Halcyon::Config.new
     end
     
     # Tests for Windows platform (to compensate for numerous Windows-specific
