@@ -226,7 +226,7 @@ module Halcyon
         Halcyon.logger = Halcyon::Logger.setup(Halcyon.config[:logging])
         
         # Run initializers
-        Dir.glob(%(requires hooks routes *).map{|init|Halcyon.paths[:init]/init+'.rb'}).each do |initializer|
+        Dir.glob(%w(requires hooks routes *).map{|init|Halcyon.paths[:init]/init+'.rb'}).each do |initializer|
           self.logger.debug "Init: #{File.basename(initializer).chomp('.rb').camel_case}" if
           require initializer.chomp('.rb')
         end
