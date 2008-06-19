@@ -1,3 +1,5 @@
+require 'erb'
+
 module Halcyon
   class Config
     
@@ -14,7 +16,11 @@ module Halcyon
       
       # Creates a profile with the default paths.
       # 
-      def initialize(file)
+      # * +file+ is the path to the file.
+      # * +filter_config+ specifies whether to filter the contents through ERB
+      #   before parsing it.
+      # 
+      def initialize(file, filter_config = true)
         if ::File.exist?(file)
           self.path = file
         elsif ::File.exist?(Halcyon.paths.for(:config)/file)
@@ -22,7 +28,7 @@ module Halcyon
         else
           raise ArgumentError.new("Could not find #{self.path} (it does not exist).")
         end
-        self.content = ::File.read(self.path)
+        self.content = self.filter(::File.read(self.path), filter_config)
       end
       
       # Returns the loaded configuration file's contents parsed by the
@@ -45,6 +51,13 @@ module Halcyon
         when :from_json
           JSON.parse(self.content)
         end
+      end
+      
+      # Filters the contents through ERB.
+      # 
+      def filter(content, filter_through_erb)
+        content =  ERB.new(content).result if filter_through_erb
+        content
       end
       
       def inspect
