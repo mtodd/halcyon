@@ -75,3 +75,11 @@ end
 
 # Include the klass#logger and klass.logger accessor methods into Object.
 Object.send(:include, Halcyon::Logging::Helpers)
+
+# The server-interface framework.
+# 
+module Rack
+  
+  autoload :JSONP, 'rack/jsonp'
+  
+end
