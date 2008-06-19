@@ -1,4 +1,9 @@
 module Rack
+  
+  # A Rack middleware for providing JSON-P support.
+  # 
+  # Full credit to Flinn Mueller (http://actsasflinn.com/) for this contribution.
+  # 
   class JSONP
     
     def initialize(app)

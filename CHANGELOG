@@ -1,7 +1,7 @@
 == 0.5.1 WIP
 * major refectoring of the app configuration system [#38 resolved]
 * new boot process with better flexibility [#41 resolved]
-* JSON-P support incorporated (as Rack middleware) [#47 resolved] (via Flinn)
+* JSON-P support included (as Rack middleware) [#47 resolved] (Flinn Mueller)
 
 == 0.5.0 2008-05-29
 * major refactor, completely incompatible with 0.4.0 applications
