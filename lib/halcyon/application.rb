@@ -215,6 +215,11 @@ module Halcyon
         # Set application name
         Halcyon.app = Halcyon.config[:app] || Halcyon.root.split('/').last.camel_case
         
+        # Load configuration files (when available)
+        Dir.glob(%w(config app).map{|conf|Halcyon.paths[:config]/conf+'.{yml,yaml}'}).each do |config_file|
+          Halcyon.config.load_from(config_file) if File.exist?(config_file)
+        end
+        
         # Setup logger
         if Halcyon.config[:logger]
           Halcyon.config[:logging] = (Halcyon.config[:logging] || Halcyon::Config.defaults[:logging]).merge({
