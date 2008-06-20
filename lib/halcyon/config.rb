@@ -175,6 +175,14 @@ module Halcyon
       Halcyon::Config.defaults(env)
     end
     
+    # Loads the contents of a configuration file found at <tt>path</tt> and
+    # merges it with the current configuration.
+    # 
+    def load_from(path)
+      self.configure(Halcyon::Config::File.load(path))
+      self
+    end
+    
     def inspect
       attrs = ""
       self.config.keys.each {|key| attrs << " #{key}=#{self.config[key].inspect}"}
@@ -229,6 +237,12 @@ module Halcyon
             }
           })
         end
+      end
+      
+      # Loads the contents of a configuration file found at <tt>path</tt>.
+      # 
+      def load_from(path)
+        Halcyon::Config::File.load(path)
       end
       
     end
