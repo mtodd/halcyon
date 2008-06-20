@@ -22,7 +22,7 @@ module Halcyon
     
     # Initializes the application and application resources.
     def initialize(&block)
-      Halcyon::Application.boot(&block)
+      Halcyon::Application.boot(&block) unless Halcyon::Application.booted
       @app = Halcyon::Application.new
     end
     
