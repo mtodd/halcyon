@@ -63,10 +63,9 @@ module Halcyon
           # Set up the application
           Object.instance_eval do
             $log = ''
-            Halcyon::Runner.load_paths if Halcyon.paths.nil?
-            (Halcyon.config = Halcyon::Runner.load_config) || require(Halcyon.root/'app')
-            Halcyon.config[:logger] = Logger.new(StringIO.new($log))
-            $app = Halcyon::Runner.new
+            $app = Halcyon::Runner.new do |c|
+              c[:logger] = Logger.new(StringIO.new($log))
+            end
             $response = nil
           end
           
