@@ -231,7 +231,7 @@ module Halcyon
         end
         
         # Yield to the block to handle boot configuration (and other tasks).
-        Halcyon.config.use(block) if block_given?
+        Halcyon.config.use(&block) if block_given?
         
         # Setup logger
         if Halcyon.config[:logger]
