@@ -4,6 +4,7 @@ module Halcyon
   # * setting up the logger
   # * loading initializers
   # * loading controllers
+  # All of which is done by the call to <tt>Halcyon::Application.boot</tt>.
   # 
   # The Runner is a full-fledged Rack application, and accepts calls to #call.
   # 
@@ -14,7 +15,6 @@ module Halcyon
   #   Halcyon::Runner.run!(['start', '-p', '4647'])
   #   
   #   # load the config file and initialize the app
-  #   Halcyon::Runner.load_config Halcyon.root/'config'/'config.yml'
   #   Halcyon::Runner.new
   class Runner
     
