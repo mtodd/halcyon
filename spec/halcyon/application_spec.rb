@@ -25,13 +25,6 @@ describe "Halcyon::Application" do
     body['body'].should == "Found"
   end
   
-  it "should handle requests with param values in the URL" do
-    body = JSON.parse(Rack::MockRequest.new(@app).get("/hello/Matt?test=value").body)
-    body['status'].should == 200
-    body['body'].should == "Hello Matt"
-    @log.split("\n").last.should =~ /"test"=>"value"/
-  end
-  
   it "should not dispatch private methods" do
     body = JSON.parse(Rack::MockRequest.new(@app).get("/specs/undispatchable_private_method").body)
     body['status'].should == 404
