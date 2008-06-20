@@ -205,11 +205,14 @@ module Halcyon
         end
       end
       
+      # Used to keep track of whether the boot process has been run yet.
+      attr_accessor :booted
+      
       # Runs through the bootup process. This involves:
       # * establishing configuration directives
       # * loading required libraries
       # 
-      def boot
+      def boot(&block)
         Halcyon.config ||= Halcyon::Config.new
         
         # Set application name
@@ -226,6 +229,9 @@ module Halcyon
         Dir.glob(Halcyon.paths[:config]/'*.rb').each do |config_file|
           require config_file
         end
+        
+        # Yield to the block to handle boot configuration (and other tasks).
+        Halcyon.config.use(&block) if block_given?
         
         # Setup logger
         if Halcyon.config[:logger]
@@ -255,7 +261,9 @@ module Halcyon
           require model.chomp('.rb')
         end
         
-        yield if block_given?
+        # Set to loaded so additional calls to boot are ignored (unless
+        # forcefully loaded by ignoring this value).
+        self.booted = true
       end
       
     end
