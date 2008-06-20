@@ -220,6 +220,13 @@ module Halcyon
           Halcyon.config.load_from(config_file) if File.exist?(config_file)
         end
         
+        # Run configuration files (when available)
+        # These are unique in that they are Ruby files that we require so we
+        # can get rid of YAML config files and use Ruby configuration files.
+        Dir.glob(Halcyon.paths[:config]/'*.rb').each do |config_file|
+          require config_file
+        end
+        
         # Setup logger
         if Halcyon.config[:logger]
           Halcyon.config[:logging] = (Halcyon.config[:logging] || Halcyon::Config.defaults[:logging]).merge({
