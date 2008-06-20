@@ -263,7 +263,7 @@ module Halcyon
         
         # Set to loaded so additional calls to boot are ignored (unless
         # forcefully loaded by ignoring this value).
-        self.loaded = true
+        self.booted = true
       end
       
     end
