@@ -51,17 +51,36 @@ describe "Halcyon::Controller" do
     controller = Specs.new(Rack::MockRequest.env_for(""))
     controller.uri.should == '/'
   end
-
-  it 'should provide url accessor for resource index route' do
+  
+  it "should provide url accessor for resource index route" do
     controller = Resources.new(Rack::MockRequest.env_for("/resources"))
     controller.uri.should == controller.url(:resources)
   end
-
-  it 'should provide url accessor for resource show route' do
+  
+  it "should provide url accessor for resource show route" do
     resource = Model.new
     resource.id = 1
     controller = Resources.new(Rack::MockRequest.env_for("/resources/1"))
     controller.uri.should == controller.url(:resource, resource)
+  end
+  
+  it "should run filters before or after actions" do
+    response = Rack::MockRequest.new(@app).get("/hello/Matt")
+    response.body.should =~ %r{Hello Matt}
+    
+    # The Accepted exception is raised if +cause_exception_in_filter+ is set
+    response = Rack::MockRequest.new(@app).get("/hello/Matt?cause_exception_in_filter=true")
+    response.body.should =~ %r{Accepted}
+    
+    response = Rack::MockRequest.new(@app).get("/time")
+    response.body.should =~ Regexp.new(Time.now.to_s.gsub(/[0-9]/, '\d'))
+    
+    # The Created exception is raised if +cause_exception_in_filter+ is set
+    response = Rack::MockRequest.new(@app).get("/time?cause_exception_in_filter=true")
+    response.body.should =~ %r{Created}
+    
+    response = Rack::MockRequest.new(@app).get("/hello/Matt?cause_exception_in_filter=true")
+    response.body.should =~ %r{Hello Matt}
   end
   
 end
