@@ -16,6 +16,9 @@ class Specs < Application
   
   before :before_index, :only => [:index]
   after :after_everything_but_index, :except => [:index]
+  before :greeter do |controller|
+    raise NotFound.new if controller.params[:cause_exception_in_filter_block]
+  end
   
   def greeter
     $hello = params[:name]
@@ -24,6 +27,10 @@ class Specs < Application
   
   def index
     ok('Found')
+  end
+  
+  def foobar
+    ok('fubr')
   end
   
   def cause_exception

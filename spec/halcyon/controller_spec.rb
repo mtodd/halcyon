@@ -65,22 +65,22 @@ describe "Halcyon::Controller" do
   end
   
   it "should run filters before or after actions" do
-    response = Rack::MockRequest.new(@app).get("/hello/Matt")
-    response.body.should =~ %r{Hello Matt}
+    response = Rack::MockRequest.new(@app).get("/index")
+    response.body.should =~ %r{Found}
     
     # The Accepted exception is raised if +cause_exception_in_filter+ is set
-    response = Rack::MockRequest.new(@app).get("/hello/Matt?cause_exception_in_filter=true")
+    response = Rack::MockRequest.new(@app).get("/index?cause_exception_in_filter=true")
     response.body.should =~ %r{Accepted}
     
-    response = Rack::MockRequest.new(@app).get("/time")
-    response.body.should =~ Regexp.new(Time.now.to_s.gsub(/[0-9]/, '\d'))
+    response = Rack::MockRequest.new(@app).get("/foobar")
+    response.body.should =~ %r{fubr}
     
     # The Created exception is raised if +cause_exception_in_filter+ is set
-    response = Rack::MockRequest.new(@app).get("/time?cause_exception_in_filter=true")
+    response = Rack::MockRequest.new(@app).get("/foobar?cause_exception_in_filter=true")
     response.body.should =~ %r{Created}
     
-    response = Rack::MockRequest.new(@app).get("/hello/Matt?cause_exception_in_filter=true")
-    response.body.should =~ %r{Hello Matt}
+    response = Rack::MockRequest.new(@app).get("/hello/Matt?cause_exception_in_filter_block=true")
+    response.body.should =~ %r{Not Found}
   end
   
 end
