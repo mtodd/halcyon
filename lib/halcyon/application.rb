@@ -149,7 +149,7 @@ module Halcyon
       # if no errors have occured up to this point, the route should be fully
       # valid and all exceptions raised should be treated as
       # <tt>500 Internal Server Error</tt>s, which is handled by <tt>call</tt>.
-      controller.send(action)
+      controller._dispatch(action)
     end
     
     # Filters unacceptable requests depending on the configuration of the

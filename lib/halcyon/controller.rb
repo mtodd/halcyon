@@ -17,6 +17,13 @@ module Halcyon
       @request = Rack::Request.new(@env)
     end
     
+    def _dispatch(action)
+      apply_filters(:before, action)
+      response = send(action)
+      apply_filters(:after, action)
+      response
+    end
+    
     class << self
       
       # Not implemented.
