@@ -26,16 +26,82 @@ module Halcyon
     
     class << self
       
-      # Not implemented.
-      def before method, &proc
-        raise NotImplemented.new
+      # Creates +filters+ accessor method and initializes the +@filters+
+      # attribute with the necessary structure.
+      # 
+      def filters
+        @filters ||= {:before => [], :after => []}
       end
       
-      # Not implemented.
-      def after method, &proc
-        raise NotImplemented.new
+      # Sets up filters for the method defined in the controllers.
+      # 
+      # Examples
+      # 
+      #   class Foos < Application
+      #     before :foo do
+      #       #
+      #     end
+      #     after :blah, :only => [:foo]
+      #     def foo
+      #       # the block is called before the method is called
+      #       # and the method is called after the method is called
+      #     end
+      #     private
+      #     def blah
+      #       #
+      #     end
+      #   end
+      # 
+      # Options
+      # * +method_or_filter+ either the method to run before 
+      # 
+      def before method_or_filter, options={}, &block
+        save_filter(:before, method_or_filter, options, block)
       end
       
+      # See documentation for the +before+ method.
+      # 
+      def after method_or_filter, options={}, &block
+        save_filter(:after, method_or_filter, options, block)
+      end
+      
+      # Used internally to save the filters, applied when called.
+      # 
+      def save_filter(where, method_or_filter, options, block)
+        self.filters[where] << [method_or_filter, options, block]
+      end
+      
+    end
+    
+    # Used internally.
+    # 
+    # Applies the filters defined by the +before+ and +after+ class methods.
+    # 
+    # +where+ specifies whether to apply <tt>:before</tt> or <tt>:after</tt>
+    #   filters
+    # +action+ the routed action (for testing filter applicability)
+    # 
+    def apply_filters(where, action)
+      self.class.filters[where].each do |(method_or_filter, options, block)|
+        if block
+          block.call(self) if filter_condition_met?(method_or_filter, options, action)
+        else
+          send(method_or_filter) if filter_condition_met?(method_or_filter, options, action)
+        end
+      end
+    end
+    
+    # Used internally.
+    # 
+    # Tests whether a filter should be run for an action or not.
+    # 
+    def filter_condition_met?(method_or_filter, options, action)
+      (
+        options[:only] and options[:only].include?(action)) or
+        (options[:except] and !options[:except].include?(action)
+      ) or (
+        method_or_filter == action
+      )
     end
     
     # Returns the request params and the route params.
