@@ -87,14 +87,10 @@ module Halcyon
       response.status = result[:status]
       response.write result.to_json
       
-      # There's a weird bug with Windows that usec is only updated every 10
-      # millisecs. This slows things down, but hopefully nobody is deploying to
-      # Windows platforms. This works because it updates the usec time at least
-      # once to prevent division-by-zero and domain errors.
-      sleep 0.01 if Halcyon.windows?
-      
       timing[:finished] = Time.now
-      timing[:total] = (((timing[:finished] - timing[:started])*1e4).round.to_f/1e4)
+      # the rescue is necessary if for some reason the timing is faster than
+      # system timing usec. this actually happens on Windows
+      timing[:total] = ((((timing[:finished] - timing[:started])*1e4).round.to_f/1e4) rescue 0.01)
       timing[:per_sec] = (((1.0/(timing[:total]))*1e2).round.to_f/1e2)
       
       self.logger.info "[#{response.status}] #{URI.parse(env['REQUEST_URI'] || env['PATH_INFO']).path} (#{timing[:total]}s;#{timing[:per_sec]}req/s)"
