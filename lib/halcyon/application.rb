@@ -205,6 +205,10 @@ module Halcyon
         end
       end
       
+      #--
+      # Boot Process
+      #++
+      
       # Used to keep track of whether the boot process has been run yet.
       attr_accessor :booted
       
