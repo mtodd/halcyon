@@ -17,6 +17,10 @@ module Halcyon
       @request = Rack::Request.new(@env)
     end
     
+    # Used internally.
+    # 
+    # Dispatches the action specified, including all filters.
+    # 
     def _dispatch(action)
       apply_filters(:before, action)
       response = send(action)
