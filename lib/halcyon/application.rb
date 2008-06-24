@@ -183,8 +183,33 @@ module Halcyon
       # if no errors have occured up to this point, the route should be fully
       # valid and all exceptions raised should be treated as
       # <tt>500 Internal Server Error</tt>s, which is handled by <tt>call</tt>.
-      controller.send(action)
+      controller._dispatch(action)
     end
+    
+    # def apply_filters(where, controller, action)
+    #   self.logger.debug "Applying #{where.to_s} filters to #{controller.class.to_s}##{action.to_s}"
+    #   if controller.filters[:all].include?(action)
+    #     controller.filters[:all][action].select {|filter| filter[:apply] == where}.each do |filter|
+    #       if filter[:filter_or_block].is_a?(Proc)
+    #         filter[:filter_or_block].call
+    #       else
+    #         controller.send(filter[:filter_or_block])
+    #       end
+    #     end
+    #   end
+    #   if controller.filters[:only].include?(action)
+    #     controller.filters[:only][action].select {|filter| filter[:apply] == where && filter}.each do |filter|
+    #       controller.send(filter[:filter_or_block])
+    #     end
+    #   end
+    #   controller.filters[:except].each do |(filters_not_for_action, filters)|
+    #     unless filters_not_for_action == action
+    #       filters.each do |filter|
+    #         controller.send(filter[:filter_or_block])
+    #       end
+    #     end
+    #   end
+    # end
     
     # Filters unacceptable requests depending on the configuration of the
     # <tt>:allow_from</tt> option.

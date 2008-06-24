@@ -14,6 +14,12 @@ class Application < Halcyon::Controller; end
 # Weird edge-case controller
 class Specs < Application
   
+  before :before_index, :only => [:index]
+  after :after_everything_but_index, :except => [:index]
+  before :greeter do |controller|
+    raise NotFound.new if controller.params[:cause_exception_in_filter_block]
+  end
+  
   def greeter
     $hello = params[:name]
     ok("Hello #{params[:name]}")
@@ -33,6 +39,10 @@ class Specs < Application
     $return_value_for_gaff || ok
   end
   
+  def foobar
+    ok('fubr')
+  end
+  
   def cause_exception
     raise Exception.new("Oops!")
   end
@@ -47,6 +57,14 @@ class Specs < Application
   
   def undispatchable_private_method
     "it's private, so it won't be found by the dispatcher"
+  end
+  
+  def before_index
+    raise Accepted.new if params[:cause_exception_in_filter]
+  end
+  
+  def after_everything_but_index
+    raise Created.new if params[:cause_exception_in_filter]
   end
   
 end
