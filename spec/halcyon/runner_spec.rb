@@ -32,7 +32,7 @@ describe "Halcyon::Runner" do
   it "should proxy calls to Halcyon::Application" do
     status, headers, body = @app.call(Rack::MockRequest.env_for('/'))
     status.should == 200
-    body.body[0].should == Specs.new(Rack::MockRequest.env_for('/')).send(:index).to_json
+    body.body[0].should == Specs.new(Rack::MockRequest.env_for('/')).send(:index).reject{|(k,v)|k == :headers}.to_json
   end
   
 end

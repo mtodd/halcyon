@@ -23,6 +23,16 @@ class Specs < Application
     ok('Found')
   end
   
+  # For testing headers in responses
+  def goob
+    ok "boog", 'Date' => Time.now.strftime("%a, %d %h %Y %H:%I:%S %Z"), 'Content-Language' => 'en'
+  end
+  
+  # For testing various return types
+  def gaff
+    $return_value_for_gaff || ok
+  end
+  
   def cause_exception
     raise Exception.new("Oops!")
   end

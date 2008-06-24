@@ -84,7 +84,45 @@ module Halcyon
         self.logger.error "#{e.message}\n\t" << e.backtrace.join("\n\t")
       end
       
+      # This handles various sorts of response formats.
+      # 
+      # The primary format is <tt>{:status => 200, :body => ...}</tt> which
+      # also supports a <tt>:headers</tt> entity (also a Hash).
+      # 
+      # If this format is not followed, we assume they've just returned data so
+      # we package it up like normal and respond (for the user).
+      # 
+      # The one exception to the previous rule is if the data is in the
+      # standard response structure [200, {}, 'OK'] or some such, we construct
+      # the reply accordingly.
+      # 
+      response.status = 200 # we assume 200, but when specified get updated appropriately
+      result = case result
+      when Hash
+        if result[:status] and result[:body]
+          # {:status => 200, :body => 'OK'}
+          # no coercion necessary
+          result
+        else
+          # {*}
+          {:status => 200, :body => result}
+        end
+      when Array
+        if result[0].is_a?(Integer) and result[1].is_a?(Hash) and result[2]
+          # [200, {}, 'OK'] format followed
+          {:status => result[0], :headers => result[1], :body => result[2]}
+        else
+          # [*]
+          {:status => 200, :body => result}
+        end
+      else
+        # *
+        {:status => 200, :body => result}
+      end
+      # set response data
+      headers = result.delete(:headers) || {}
       response.status = result[:status]
+      headers.each {|(header,val)| response[header] = val }
       response.write result.to_json
       
       timing[:finished] = Time.now

@@ -12,12 +12,15 @@ describe "Halcyon::Controller" do
   it "should provide various shorthand methods for simple responses but take custom response values" do
     controller = Specs.new(Rack::MockRequest.env_for('/'))
     
-    response = {:status => 200, :body => 'OK'}
+    response = {:status => 200, :body => 'OK', :headers => {}}
     controller.ok.should == response
     controller.success.should == response
     
-    controller.ok('').should == {:status => 200, :body => ''}
-    controller.ok(['OK', 'Sure Thang', 'Correcto']).should == {:status => 200, :body => ['OK', 'Sure Thang', 'Correcto']}
+    controller.ok('').should == {:status => 200, :body => '', :headers => {}}
+    controller.ok(['OK', 'Sure Thang', 'Correcto']).should == {:status => 200, :body => ['OK', 'Sure Thang', 'Correcto'], :headers => {}}
+    
+    headers = {'Date' => Time.now.strftime("%a, %d %h %Y %H:%I:%S %Z"), 'Test' => 'FooBar'}
+    controller.ok('OK', headers).should == {:status => 200, :body => 'OK', :headers => headers}
   end
   
   it "should provide a quick way to find out what method the request was performed using" do
@@ -51,17 +54,40 @@ describe "Halcyon::Controller" do
     controller = Specs.new(Rack::MockRequest.env_for(""))
     controller.uri.should == '/'
   end
-
-  it 'should provide url accessor for resource index route' do
+  
+  it "should provide url accessor for resource index route" do
     controller = Resources.new(Rack::MockRequest.env_for("/resources"))
     controller.uri.should == controller.url(:resources)
   end
-
-  it 'should provide url accessor for resource show route' do
+  
+  it "should provide url accessor for resource show route" do
     resource = Model.new
     resource.id = 1
     controller = Resources.new(Rack::MockRequest.env_for("/resources/1"))
     controller.uri.should == controller.url(:resource, resource)
+  end
+  
+  it "should accept response headers" do
+    controller = Specs.new(Rack::MockRequest.env_for(""))
+    headers = {'Date' => Time.now.strftime("%a, %d %h %Y %H:%I:%S %Z"), 'Foo' => 'Bar'}
+    controller.ok('OK', headers).should == {:status => 200, :body => 'OK', :headers => headers}
+    controller.ok('OK').should == {:status => 200, :body => 'OK', :headers => {}}
+    
+    response = Rack::MockRequest.new(@app).get("/goob")
+    response['Date'].should == Time.now.strftime("%a, %d %h %Y %H:%I:%S %Z")
+    response['Content-Language'].should == 'en'
+  end
+  
+  it "should handle return values from actions not from the response helpers" do
+    {
+      'OK' => {'status' => 200, 'body' => 'OK'},
+      [200, {}, 'OK'] => {'status' => 200, 'body' => 'OK'},
+      [1, 2, 3] => {'status' => 200, 'body' => [1, 2, 3]},
+      {'foo' => 'bar'} => {'status' => 200, 'body' => {'foo' => 'bar'}}
+    }.each do |(value, expected)|
+      $return_value_for_gaff = value
+      response = JSON.parse(Rack::MockRequest.new(@app).get("/gaff").body).should == expected
+    end
   end
   
 end

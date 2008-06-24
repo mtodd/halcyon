@@ -93,8 +93,9 @@ module Halcyon
     #   <tt>success</tt>
     # 
     # Returns Hash:{:status=>200, :body=>body}
-    def ok(body='OK')
-      {:status => 200, :body => body}
+    # 
+    def ok(body='OK', headers = {})
+      {:status => 200, :body => body, :headers => headers}
     end
     alias_method :success, :ok
     
@@ -118,21 +119,21 @@ module Halcyon
     #   <tt>missing</tt>
     # 
     # Returns Hash:{:status=>404, :body=>body}
-    def not_found(body='Not Found')
-      {:status => 404, :body => body}
+    def not_found(body='Not Found', headers = {})
+      {:status => 404, :body => body, :headers => headers}
     end
     alias_method :missing, :not_found
-
+    
     # Returns the name of the controller in path form.
     def self.controller_name
       @controller_name ||= self.name.to_const_path
     end
-
+    
     # Returns the name of the controller in path form.
     def controller_name
       self.class.controller_name
     end
-
+    
     # Generates a URL based on the given name and passed
     # options. Used with named routes and resources:
     #
