@@ -1,4 +1,4 @@
-== 0.5.1 WIP
+== 0.5.1 2008-06-26
 * major refectoring of the app configuration system [#38 resolved]
 * new boot process with better flexibility [#41 resolved]
 * hooks system cleaned up (part of [#41])
