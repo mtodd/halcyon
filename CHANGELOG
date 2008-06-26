@@ -5,6 +5,7 @@
 * before/after filters implemented [#42 resolved]
 * standard responders (ok and not_found) accept headers hash [#45 resolved]
 * YAML config files are now filtered through ERB first [#48 resolved]
+* generating apps config files (config/init.rb) instead of YAML [#52 resolved]
 * JSON-P support included (as Rack middleware) [#47 resolved] (Flinn Mueller)
 * fixed major Windows-based bug (FloatDomainError) [#46 resolved]
 
