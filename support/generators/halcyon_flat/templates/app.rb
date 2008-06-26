@@ -4,21 +4,14 @@ require 'halcyon'
 %w().each {|dep|require dep}
 
 # = Configuration
-# Halcyon.config = Halcyon::Runner.load_config
-Halcyon.config = {
-  :allow_from => 'all',
-  :logging => {
+Halcyon.config.use do |c|
+  c[:allow_from] = :all
+  c[:logging] = {
     :type => 'Logger',
-    # :file => nil, # STDOUT
+    # :file => nil, # nil is STDOUT
     :level => 'debug'
   }
-}.to_mash
-
-# = Environment
-# Set the environment if not set above; create the <tt>Halcyon.environment</tt>
-# configurable attribute. Maps to <tt>Halcyon.config[:environment]</tt>.
-Halcyon.configurable_attr(:environment)
-Halcyon.environment = :development unless Halcyon.environment
+end
 
 # = Routes
 Halcyon::Application.route do |r|
