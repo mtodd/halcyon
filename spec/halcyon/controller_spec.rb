@@ -23,6 +23,21 @@ describe "Halcyon::Controller" do
     controller.ok('OK', headers).should == {:status => 200, :body => 'OK', :headers => headers}
   end
   
+  it "should provide extensive responders" do
+    controller = Specs.new(Rack::MockRequest.env_for('/'))
+    
+    should.raise(Halcyon::Exceptions::UnprocessableEntity) { controller.status(:unprocessable_entity) }
+    response = Rack::MockRequest.new(@app).get("/specs/unprocessable_entity_test")
+    response.body.should =~ %r{Unprocessable Entity}
+    
+    should.raise(Halcyon::Exceptions::UnprocessableEntity) { controller.status(:unprocessable_entity) }
+  end
+  
+  it "should indicate service is unavailable if an status specified is not found" do
+    controller = Specs.new(Rack::MockRequest.env_for('/'))
+    should.raise(Halcyon::Exceptions::ServiceUnavailable) { controller.status(:this_state_does_not_exist) }
+  end
+  
   it "should provide a quick way to find out what method the request was performed using" do
     %w(GET POST PUT DELETE).each do |m|
       controller = Specs.new(Rack::MockRequest.env_for('/', :method => m))

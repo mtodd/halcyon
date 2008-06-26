@@ -43,6 +43,10 @@ class Specs < Application
     ok('fubr')
   end
   
+  def unprocessable_entity_test
+    error :unprocessable_entity
+  end
+  
   def cause_exception
     raise Exception.new("Oops!")
   end

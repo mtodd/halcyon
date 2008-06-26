@@ -79,6 +79,72 @@ module Halcyon
       self.env['REQUEST_METHOD'].downcase.to_sym
     end
     
+    # Returns the name of the controller in path form.
+    # 
+    def self.controller_name
+      @controller_name ||= self.name.to_const_path
+    end
+    
+    # Returns the name of the controller in path form.
+    # 
+    def controller_name
+      self.class.controller_name
+    end
+    
+    # Generates a URL based on the given name and passed
+    # options. Used with named routes and resources:
+    #
+    #  url(:users) # => "/users"
+    #  url(:admin_permissons) # => "/admin/permissions"
+    #  url(:user, @user) # => "/users/1"
+    #
+    # Based on the identical method of Merb's controller.
+    # 
+    def url(name, rparams={})
+      Halcyon::Application::Router.generate(name, rparams,
+        { :controller => controller_name,
+          :action => method
+        }
+      )
+    end
+    
+    #--
+    # Responders
+    #++
+    
+    # Responds with the correct status and body specified.
+    # 
+    # * +state+ a snake-case symbol of the status (ie, <tt>:not_found</tt>,
+    #   <tt>:unprocessable_entity</tt>, or <tt>:forbidden</tt>)
+    # * +body+ the response body (if the default is insufficient)
+    # 
+    # Examples:
+    # 
+    #   class Foos < Application
+    #     def show
+    #       if (foo = Foo[params[:id]])
+    #         ok(foo)
+    #       else
+    #         status :not_found
+    #       end
+    #     end
+    #   end
+    # 
+    # The above example is the same as <tt>raise NotFound.new</tt>.
+    # 
+    # If the state specified is not found, it will
+    # <tt>raise ServiceUnavailable.new</tt> (a <tt>503</tt> error). The error
+    # is then logged along with the backtrace.
+    # 
+    def status(state, body = nil)
+      raise Halcyon::Exceptions.const_get(state.to_s.camel_case.to_sym).new(body)
+    rescue NameError => e
+      self.logger.error "Invalid status #{state.inspect} specified."
+      self.logger.error "Backtrace:\n" << e.backtrace.join("\n\t")
+      raise Halcyon::Exceptions::ServiceUnavailable.new
+    end
+    alias_method :error, :status
+    
     # Formats message into the standard success response hash, with a status of
     # 200 (the standard success response).
     #   +body+ the body of the response
@@ -128,35 +194,6 @@ module Halcyon
       {:status => 404, :body => body, :headers => headers}
     end
     alias_method :missing, :not_found
-    
-    # Returns the name of the controller in path form.
-    # 
-    def self.controller_name
-      @controller_name ||= self.name.to_const_path
-    end
-    
-    # Returns the name of the controller in path form.
-    # 
-    def controller_name
-      self.class.controller_name
-    end
-    
-    # Generates a URL based on the given name and passed
-    # options. Used with named routes and resources:
-    #
-    #  url(:users) # => "/users"
-    #  url(:admin_permissons) # => "/admin/permissions"
-    #  url(:user, @user) # => "/users/1"
-    #
-    # Based on the identical method of Merb's controller.
-    # 
-    def url(name, rparams={})
-      Halcyon::Application::Router.generate(name, rparams,
-        { :controller => controller_name,
-          :action => method
-        }
-      )
-    end
     
     #--
     # Filters
