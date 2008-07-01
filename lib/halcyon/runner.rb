@@ -16,11 +16,13 @@ module Halcyon
   #   
   #   # load the config file and initialize the app
   #   Halcyon::Runner.new
+  # 
   class Runner
     
     autoload :Commands, 'halcyon/runner/commands'
     
     # Initializes the application and application resources.
+    # 
     def initialize(&block)
       Halcyon::Application.boot(&block) unless Halcyon::Application.booted
       @app = Halcyon::Application.new
@@ -30,6 +32,7 @@ module Halcyon
     #   +env+ the request environment details
     # 
     # Returns [Fixnum:status, {String:header => String:value}, [String:body]]
+    # 
     def call(env)
       @app.call(env)
     end
@@ -40,6 +43,7 @@ module Halcyon
       #   +argv+ the arguments to pass to the commands
       # 
       # Returns nothing
+      # 
       def run!(argv=ARGV)
         Commands.send(argv.shift, argv)
       end
