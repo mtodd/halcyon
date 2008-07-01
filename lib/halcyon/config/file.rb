@@ -44,7 +44,7 @@ module Halcyon
       #   # load method
       # 
       def to_hash(from = :from_yaml)
-        case from
+        Mash.new case from
         when :from_yaml
           require 'yaml'
           YAML.load(self.content)
