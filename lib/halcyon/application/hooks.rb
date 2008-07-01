@@ -22,7 +22,7 @@ module Halcyon
         def startup &hook
           Halcyon.hooks[:startup] << hook
         end
-      
+        
         # Sets the shutdown hook to the proc.
         # 
         # Close any resources opened in the +startup+ hook.

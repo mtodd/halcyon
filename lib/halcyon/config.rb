@@ -206,7 +206,7 @@ module Halcyon
             :level => 'debug'
           },
           :paths => Paths.new,
-          :hooks => Hash.new([])
+          :hooks => {:startup => [], :shutdown => []}
         }
         case (env || :development)
         when :development
