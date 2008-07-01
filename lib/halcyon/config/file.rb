@@ -43,20 +43,27 @@ module Halcyon
       #   # parsing errors will happen if you try to use the wrong marshal
       #   # load method
       # 
+      # Returns a Mash if the contents parse to a Hash.
+      # 
       def to_hash(from = :from_yaml)
-        Mash.new case from
+        contents = case from
         when :from_yaml
           require 'yaml'
           YAML.load(self.content)
         when :from_json
           JSON.parse(self.content)
         end
+        # return mash instead of hash if result is a hash
+        if contents.is_a?(Hash)
+          contents = Mash.new contents
+        end
+        contents
       end
       
       # Filters the contents through ERB.
       # 
       def filter(content, filter_through_erb)
-        content =  ERB.new(content).result if filter_through_erb
+        content = ERB.new(content).result if filter_through_erb
         content
       end
       
