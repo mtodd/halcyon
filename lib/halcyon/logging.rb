@@ -1,3 +1,5 @@
+require 'logger'
+
 module Halcyon
   module Logging
     
@@ -22,7 +24,7 @@ module Halcyon
       #     Log4r               => specifies Log4r
       def set(logger = 'Logger')
         Halcyon.send(:remove_const, :Logger) if Halcyon.const_defined? :Logger
-        Halcyon.const_set :Logger, Halcyon::Logging.const_get(logger)
+        Halcyon.const_set :Logger, Halcyon::Logging.const_get(logger.to_sym)
       end
       
     end
