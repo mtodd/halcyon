@@ -289,8 +289,8 @@ module Halcyon
         # Run configuration files (when available)
         # These are unique in that they are Ruby files that we require so we
         # can get rid of YAML config files and use Ruby configuration files.
-        Dir.glob(Halcyon.paths[:config]/'*.rb').each do |config_file|
-          require config_file
+        Dir.glob(%w(init config environment).map{|file| Halcyon.paths[:config]/file+'.rb' }).each do |config_file|
+          require config_file if File.exist?(config_file)
         end
         
         # Yield to the block to handle boot configuration (and other tasks).
