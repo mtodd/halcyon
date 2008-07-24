@@ -15,6 +15,7 @@ end
 
 # = Routes
 Halcyon::Application.route do |r|
+  r.match('/returner').to(:controller => 'application', :action => 'returner')
   r.match('/time').to(:controller => 'application', :action => 'time')
   
   r.match('/').to(:controller => 'application', :action => 'index')
@@ -37,6 +38,11 @@ class Application < Halcyon::Controller
   
   def time
     ok(Time.now.to_s)
+  end
+  
+  # Returns exactly what it gets in terms of params
+  def returner
+    ok params
   end
   
 end

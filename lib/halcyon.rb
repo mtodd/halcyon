@@ -11,7 +11,7 @@ $:.unshift File.dirname(__FILE__)
 #   Halcyon.config #=> {:allow_from => :all, :logging => {...}, ...}
 #   Halcyon.paths #=> {:config => Halcyon.root/'config', ...}
 #   Halcyon.logger #=> #<Logger>
-#   Halcyon.version #=> "0.5.1"
+#   Halcyon.version #=> "0.5.2"
 # 
 module Halcyon
   

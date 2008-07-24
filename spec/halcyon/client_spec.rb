@@ -60,4 +60,11 @@ describe "Halcyon::Client" do
     @client.get('/time')[:status].should == 200
   end
   
+  it "should handle ampersands (and others) in POST data correctly" do
+    response = @client.post('/returner', :key => "value1&value2=0")
+    
+    response[:status].should == 200
+    response[:body].should == {'controller' => 'application', 'action' => 'returner', 'key' => "value1&value2=0"}
+  end
+  
 end

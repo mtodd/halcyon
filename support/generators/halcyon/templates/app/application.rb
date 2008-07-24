@@ -40,4 +40,9 @@ class Application < Halcyon::Controller
     end
   end
   
+  # Returns exactly what it gets in terms of params
+  def returner
+    ok params
+  end
+  
 end

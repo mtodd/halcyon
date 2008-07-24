@@ -174,7 +174,8 @@ module Halcyon
       res = Net::HTTP.start(self.uri.host, self.uri.port) {|http|http.request(req)}
       
       # parse response
-      body = JSON.parse(res.body).to_mash
+      # unescape just in case any problematic characters were POSTed through
+      body = JSON.parse(Rack::Utils.unescape(res.body)).to_mash
       
       # handle non-successes
       if self.options[:raise_exceptions] && !res.kind_of?(Net::HTTPSuccess)
@@ -193,8 +194,26 @@ module Halcyon
     def format_body(data)
       data = {:body => data} unless data.is_a? Hash
       data.to_mash
-      # uses the Merb Hash#to_params method defined in merb/core_ext.
-      data.to_params
+      # Hash.to_params (from merb-core/core_ext) doesn't escape keys/values
+      build_query(data)
+    end
+    
+    # Ported over from Rack::Utils.build_query which has not been released yet
+    # as of Halcyon 0.5.2's release.
+    # 
+    # The key difference from this and merb-core/core_ext's Hash.to_params is
+    # that the keys and values are escaped (which cause many problems).
+    # 
+    # TODO: Remove when Rack is released with Rack::Utils.build_query included.
+    # 
+    def build_query(params)
+      params.map { |k, v|
+        if v.class == Array
+          build_query(v.map { |x| [k, x] })
+        else
+          Rack::Utils.escape(k) + "=" + Rack::Utils.escape(v)
+        end
+      }.join("&")
     end
     
   end

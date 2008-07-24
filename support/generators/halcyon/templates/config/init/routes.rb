@@ -30,6 +30,10 @@ Halcyon::Application.route do |r|
   # Safe to remove!
   r.match('/time').to(:controller => 'application', :action => 'time')
   
+  # Used for testing how requests are routed. Used internally but can be used
+  # for personal tests.
+  r.match('/returner').to(:controller => 'application', :action => 'returner')
+  
   # RESTful routes
   # r.resources :posts
 
