@@ -1,7 +1,8 @@
-== 0.5.2 2008-07-24
+== 0.5.2 2008-08-20
 * default configuration didn't load logger correctly [#55 resolved]
 * fixed major bug with (both) hooks running at start and end [#56 resolved]
 * fixed major bug with POSTing data with embedded ampersands [#57 resolved]
+* Merb's core extensions moved to extlib, now added dependency [#58 resolved]
 
 == 0.5.1 2008-06-26
 * major refectoring of the app configuration system [#38 resolved]
