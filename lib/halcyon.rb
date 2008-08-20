@@ -1,6 +1,6 @@
 $:.unshift File.dirname(__FILE__)
 
-%w(rubygems rack merb-core/core_ext merb-core/vendor/facets merb-core/dispatch/router json uri).each {|dep|require dep}
+%w(rubygems rack extlib merb-core/vendor/facets merb-core/dispatch/router json uri).each {|dep|require dep}
 
 # Provides global values, like the root of the current application directory,
 # the current logger, the application name, and the framework version.

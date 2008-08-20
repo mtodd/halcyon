@@ -165,7 +165,7 @@ module Halcyon
         # default to the Application controller
         ::Application.new(env)
       when String
-        # pulled from URL, so camelize (from merb/core_ext) and symbolize first
+        # pulled from URL, so camelize (from extlib) and symbolize first
         begin
           Object.const_get(route[:controller].camel_case.to_sym).new(env)
         rescue NameError => e

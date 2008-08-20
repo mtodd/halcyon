@@ -1,4 +1,4 @@
-%w(rubygems merb-core/core_ext merb-core/dispatch/router uri).each {|dep|require dep}
+%w(rubygems extlib merb-core/dispatch/router uri).each {|dep|require dep}
 
 module Halcyon
   class Application

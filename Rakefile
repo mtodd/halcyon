@@ -28,6 +28,7 @@ project = {
     'json_pure' => '>=1.1.2',
     'rack' => '>=0.3.0',
     'merb' => '>=0.9.2',
+    'extlib' => '>=0.9.2',
     'rubigen' => '>=1.2.4'
   },
   :requirements => 'install the json gem to get faster JSON parsing',

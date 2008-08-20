@@ -194,14 +194,14 @@ module Halcyon
     def format_body(data)
       data = {:body => data} unless data.is_a? Hash
       data.to_mash
-      # Hash.to_params (from merb-core/core_ext) doesn't escape keys/values
+      # Hash.to_params (from extlib) doesn't escape keys/values
       build_query(data)
     end
     
     # Ported over from Rack::Utils.build_query which has not been released yet
     # as of Halcyon 0.5.2's release.
     # 
-    # The key difference from this and merb-core/core_ext's Hash.to_params is
+    # The key difference from this and extlib's Hash.to_params is
     # that the keys and values are escaped (which cause many problems).
     # 
     # TODO: Remove when Rack is released with Rack::Utils.build_query included.
