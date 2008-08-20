@@ -1,3 +1,6 @@
+== 0.5.3 TBA
+* ...
+
 == 0.5.2 2008-08-20
 * default configuration didn't load logger correctly [#55 resolved]
 * fixed major bug with (both) hooks running at start and end [#56 resolved]
