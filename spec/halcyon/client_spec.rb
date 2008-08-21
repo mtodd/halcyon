@@ -62,9 +62,22 @@ describe "Halcyon::Client" do
   
   it "should handle ampersands (and others) in POST data correctly" do
     response = @client.post('/returner', :key => "value1&value2=0")
-    
     response[:status].should == 200
     response[:body].should == {'controller' => 'application', 'action' => 'returner', 'key' => "value1&value2=0"}
+    
+    response = @client.post('/returner', :key => "%todd")
+    response[:status].should == 200
+    response[:body].should == {'controller' => 'application', 'action' => 'returner', 'key' => "%todd"}
+  end
+  
+  it "should not handle percent signs in the URL that are not escaped" do
+    should.raise(EOFError){ @client.post('/returner?key=%todd') }
+  end
+  
+  it "should handle pre-escaped percent signs in the URLs" do
+    response = @client.post('/returner?key=%25todd')
+    response[:status].should == 200
+    response[:body].should == {'controller' => 'application', 'action' => 'returner', 'key' => "%todd"}
   end
   
 end
