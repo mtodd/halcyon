@@ -193,27 +193,7 @@ module Halcyon
     # format according to Net::HTTP for sending through as a Hash.
     def format_body(data)
       data = {:body => data} unless data.is_a? Hash
-      data.to_mash
-      # Hash.to_params (from extlib) doesn't escape keys/values
       Rack::Utils.build_query(data)
-    end
-    
-    # Ported over from Rack::Utils.build_query which has not been released yet
-    # as of Halcyon 0.5.2's release.
-    # 
-    # The key difference from this and extlib's Hash.to_params is
-    # that the keys and values are escaped (which cause many problems).
-    # 
-    # TODO: Remove when Rack is released with Rack::Utils.build_query included.
-    # 
-    def build_query(params)
-      params.map { |k, v|
-        if v.class == Array
-          build_query(v.map { |x| [k, x] })
-        else
-          Rack::Utils.escape(k) + "=" + Rack::Utils.escape(v)
-        end
-      }.join("&")
     end
     
   end
