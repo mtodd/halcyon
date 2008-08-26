@@ -195,7 +195,7 @@ module Halcyon
       data = {:body => data} unless data.is_a? Hash
       data.to_mash
       # Hash.to_params (from extlib) doesn't escape keys/values
-      build_query(data)
+      Rack::Utils.build_query(data)
     end
     
     # Ported over from Rack::Utils.build_query which has not been released yet

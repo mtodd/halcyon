@@ -25,14 +25,14 @@ project = {
     --exclude "^(_darcs|spec|pkg|.svn)/"
   ],
   :dependencies => {
-    'json_pure' => '>=1.1.2',
-    'rack' => '>=0.3.0',
-    'extlib' => '>=0.9.4',
-    'merb' => '>=0.9.4',
-    'rubigen' => '>=1.2.4'
+    'json_pure' => '>= 1.1.2',
+    'rack' => '= 0.3.0',
+    'extlib' => '>= 0.9.4',
+    'merb-core' => '= 0.9.4',
+    'rubigen' => '>= 1.2.4'
   },
   :requirements => 'install the json gem to get faster JSON parsing',
-  :ruby_version_required => '>=1.8.6'
+  :ruby_version_required => '>= 1.8.6'
 }
 
 BASEDIR = File.expand_path(File.dirname(__FILE__))
