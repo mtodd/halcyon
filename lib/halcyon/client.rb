@@ -41,8 +41,8 @@ module Halcyon
   class Client
     include Exceptions
     
-    USER_AGENT = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Client/#{Halcyon.version}"
-    CONTENT_TYPE = 'application/json'
+    USER_AGENT = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Client/#{Halcyon.version}".freeze
+    CONTENT_TYPE = "application/x-www-form-urlencoded".freeze
     DEFAULT_OPTIONS = {
       :raise_exceptions => false
     }
@@ -162,8 +162,9 @@ module Halcyon
     # exceptions specifically.
     def request(req, headers={})
       # set default headers
-      req["Content-Type"] = CONTENT_TYPE
       req["User-Agent"] = USER_AGENT
+      req["Content-Type"] = CONTENT_TYPE unless req.body.nil?
+      req["Content-Length"] = req.body unless req.body.nil?
       
       # apply provided headers
       self.headers.merge(headers).each do |(header, value)|
