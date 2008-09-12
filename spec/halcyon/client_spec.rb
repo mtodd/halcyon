@@ -55,7 +55,7 @@ describe "Halcyon::Client" do
     @client.get('/nonexistent/route')[:status].should == 404
     
     # tell it to raise exceptions
-    @client.raise_exceptions! true
+    @client.raise_exceptions!
     should.raise(Halcyon::Exceptions::NotFound) { @client.get('/nonexistent/route') }
     @client.get('/time')[:status].should == 200
   end
@@ -78,6 +78,27 @@ describe "Halcyon::Client" do
     response = @client.post('/returner?key=%25todd')
     response[:status].should == 200
     response[:body].should == {'controller' => 'application', 'action' => 'returner', 'key' => "%todd"}
+  end
+  
+  it "should render the POST body with the correct content type, allowing application/json is set" do
+    body = {:key => "value"}
+    
+    # default behavior is to set the POST body to application/x-www-form-urlencoded
+    @client.send(:format_body, body) == "key=value"
+    @client.post('/returner', body)[:body][:key].should == "value"
+    
+    # tell it to send as application/json
+    @client.encode_post_body_as_json!
+    @client.send(:format_body, body).should == body.to_json
+    @client.post('/returner', body)[:body][:key].should == nil
+    # The server will not return the values from the POST body because it is
+    # not set to parse application/json values. Like your own apps, you must
+    # set it manually to accept this type of body encoding.
+    
+    # set it back to ensure that the change is reversed
+    @client.encode_post_body_as_json! false
+    @client.send(:format_body, body) == "key=value"
+    @client.post('/returner', body)[:body][:key].should == "value"
   end
   
 end

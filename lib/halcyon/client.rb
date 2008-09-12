@@ -44,7 +44,8 @@ module Halcyon
     USER_AGENT = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Client/#{Halcyon.version}".freeze
     CONTENT_TYPE = "application/x-www-form-urlencoded".freeze
     DEFAULT_OPTIONS = {
-      :raise_exceptions => false
+      :raise_exceptions => false,
+      :encode_post_body_as_json => false
     }
     
     attr_accessor :uri # The server URI
@@ -103,6 +104,7 @@ module Halcyon
     # except that it is not executed in a block.
     # 
     # The differences are purely semantic and of personal taste.
+    # 
     def initialize(uri, headers = {})
       self.uri = URI.parse(uri)
       self.headers = headers
@@ -112,8 +114,21 @@ module Halcyon
       end
     end
     
+    # Sets the option to raise exceptions when the response from the server is
+    # not a +200+ response.
+    # 
     def raise_exceptions!(setting = true)
       self.options[:raise_exceptions] = setting
+    end
+    
+    # Sets the option to encode the POST body as +application/json+ compatible.
+    # 
+    def encode_post_body_as_json!(setting = true)
+      if self.options[:encode_post_body_as_json] = setting
+        set_content_type "application/json"
+      else
+        set_content_type "application/x-www-form-urlencoded"
+      end
     end
     
     #--
@@ -121,12 +136,14 @@ module Halcyon
     #++
     
     # Performs a GET request on the URI specified.
+    # 
     def get(uri, headers={})
       req = Net::HTTP::Get.new(uri)
       request(req, headers)
     end
     
     # Performs a POST request on the URI specified.
+    # 
     def post(uri, data = {}, headers={})
       req = Net::HTTP::Post.new(uri)
       req.body = format_body(data)
@@ -134,19 +151,21 @@ module Halcyon
     end
     
     # Performs a DELETE request on the URI specified.
+    # 
     def delete(uri, headers={})
       req = Net::HTTP::Delete.new(uri)
       request(req, headers)
     end
     
     # Performs a PUT request on the URI specified.
+    # 
     def put(uri, data = {}, headers={})
       req = Net::HTTP::Put.new(uri)
       req.body = format_body(data)
       request(req, headers)
     end
     
-  private
+    private
     
     # Performs an arbitrary HTTP request, receive the response, parse it with
     # JSON, and return it to the caller. This is a private method because the
@@ -160,6 +179,7 @@ module Halcyon
     # (defined in Halcyon::Exceptions) which all inherit from
     # +Halcyon::Exceptions+. It is up to the client to handle these
     # exceptions specifically.
+    # 
     def request(req, headers={})
       # set default headers
       req["User-Agent"] = USER_AGENT
@@ -171,8 +191,10 @@ module Halcyon
         req[header] = value
       end
       
-      # prepare and send HTTP request
-      res = Net::HTTP.start(self.uri.host, self.uri.port) {|http|http.request(req)}
+      # prepare and send HTTP/S request
+      serv = Net::HTTP.new(self.uri.host, self.uri.port)
+      prepare_server(serv) if private_methods.include?('prepare_server')
+      res = serv.start { |http| http.request(req) }
       
       # parse response
       # unescape just in case any problematic characters were POSTed through
@@ -192,9 +214,24 @@ module Halcyon
     
     # Formats the data of a POST or PUT request (the body) into an acceptable
     # format according to Net::HTTP for sending through as a Hash.
+    # 
     def format_body(data)
       data = {:body => data} unless data.is_a? Hash
-      Rack::Utils.build_query(data)
+      case CONTENT_TYPE
+      when "application/x-www-form-urlencoded"
+        Rack::Utils.build_query(data)
+      when "application/json"
+        data.to_json
+      else
+        raise ArgumentError.new("Unsupported Content-Type for POST body: #{CONTENT_TYPE}")
+      end
+    end
+    
+    # Sets the +CONTENT_TYPE+ to the appropriate type.
+    # 
+    def set_content_type(content_type)
+      self.class.send(:remove_const, :CONTENT_TYPE)
+      self.class.const_set(:CONTENT_TYPE, content_type.freeze)
     end
     
   end
