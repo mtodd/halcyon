@@ -1,3 +1,7 @@
+== 0.5.4 TBD
+* added Rack middleware for application/json POST body content–types [#61]
+* allow client to set Content-Type and format body correctly [#61 resolved]
+
 == 0.5.3 2008-08-28
 * added specs for edge cases with malformed URLs [#59 invalid]
 * fixed major bug with incorrect content-type being set [#60 resovled]
