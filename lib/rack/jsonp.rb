@@ -31,7 +31,7 @@ module Rack
     # 
     def pad(callback, response, body = "")
       response.each{ |s| body << s }
-      "#{callback}(#{body})" 
+      "#{callback}(#{body})"
     end
     
   end

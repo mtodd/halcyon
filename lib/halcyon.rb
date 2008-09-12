@@ -81,5 +81,6 @@ Object.send(:include, Halcyon::Logging::Helpers)
 module Rack
   
   autoload :JSONP, 'rack/jsonp'
+  autoload :PostBodyContentTypeParsers, 'rack/post_body_content_type_parsers'
   
 end
