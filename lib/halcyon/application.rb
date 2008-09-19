@@ -167,7 +167,7 @@ module Halcyon
       when String
         # pulled from URL, so camelize (from extlib) and symbolize first
         begin
-          Object.const_get(route[:controller].camel_case.to_sym).new(env)
+          Object.full_const_get(route[:controller].to_const_string).new(env)
         rescue NameError => e
           raise NotFound.new
         end

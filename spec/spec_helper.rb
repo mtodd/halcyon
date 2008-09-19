@@ -87,7 +87,7 @@ end
 
 # Nested controller
 module Nested
-  class Tests
+  class Tests < Application
     
     def index
       ok
