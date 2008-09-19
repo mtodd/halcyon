@@ -15,7 +15,7 @@ $:.unshift File.dirname(__FILE__)
 # 
 module Halcyon
   
-  VERSION = [0,5,4] unless defined?(Halcyon::VERSION)
+  VERSION = [0,5,5] unless defined?(Halcyon::VERSION)
   
   autoload :Application, 'halcyon/application'
   autoload :Client, 'halcyon/client'

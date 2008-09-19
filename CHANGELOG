@@ -1,3 +1,5 @@
+== 0.5.5 TBD
+
 == 0.5.4 2008-09-19
 * added Rack middleware for application/json POST body content–types [#61]
 * allow client to set Content-Type and format body correctly [#61 resolved]
