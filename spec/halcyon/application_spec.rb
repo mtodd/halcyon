@@ -61,4 +61,9 @@ describe "Halcyon::Application" do
     body['body'].should == "Internal Server Error"
   end
   
+  it "should dispatch to controllers inside of modules" do
+    response = Rack::MockRequest.new(@app).get("/nested/tests")
+    response.status.should == 200
+  end
+  
 end

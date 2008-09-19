@@ -85,6 +85,17 @@ class Resources < Application
   end
 end
 
+# Nested controller
+module Nested
+  class Tests
+    
+    def index
+      ok
+    end
+    
+  end
+end
+
 # Models
 
 class Model
@@ -100,6 +111,7 @@ Halcyon.configurable_attr(:environment)
 Halcyon::Application.route do |r|
   r.resources :resources
   
+  r.match('/nested/tests').to(:controller => 'nested/tests', :action => 'index')
   r.match('/hello/:name').to(:controller => 'specs', :action => 'greeter')
   r.match('/:action').to(:controller => 'specs')
   r.match('/:controller/:action').to()
