@@ -43,6 +43,8 @@ module Halcyon
     
     USER_AGENT = "JSON/#{JSON::VERSION} Compatible (en-US) Halcyon::Client/#{Halcyon.version}".freeze
     CONTENT_TYPE = "application/x-www-form-urlencoded".freeze
+    ACCEPT = "application/json, */*".freeze
+    
     DEFAULT_OPTIONS = {
       :raise_exceptions => false,
       :encode_post_body_as_json => false
@@ -183,6 +185,7 @@ module Halcyon
     def request(req, headers={})
       # set default headers
       req["User-Agent"] = USER_AGENT
+      req["Accept"] = ACCEPT
       req["Content-Type"] = CONTENT_TYPE unless req.body.nil?
       req["Content-Length"] = req.body unless req.body.nil?
       

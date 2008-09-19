@@ -31,6 +31,21 @@ end
 # Tests
 #++
 
+module Halcyon
+  class Client
+    private
+    def prepare_server(serv)
+      class << serv
+        alias :request_without_header_inspection :request
+        def request(req, body = nil, &block)
+          $accept = req["Accept"]
+          request_without_header_inspection(req, body, &block)
+        end
+      end
+    end
+  end
+end
+
 describe "Halcyon::Client" do
   
   before do
@@ -99,6 +114,11 @@ describe "Halcyon::Client" do
     @client.encode_post_body_as_json! false
     @client.send(:format_body, body) == "key=value"
     @client.post('/returner', body)[:body][:key].should == "value"
+  end
+  
+  it "should set the Accept header to the appropriate type" do
+    @client.get('/returner')[:status].should == 200
+    $accept.should == Halcyon::Client::ACCEPT
   end
   
 end
