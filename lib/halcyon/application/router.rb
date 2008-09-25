@@ -3,6 +3,8 @@
 module Halcyon
   class Application
     
+    Router = Merb::Router
+    
     # = Routing
     # 
     # Handles routing.
@@ -37,7 +39,7 @@ module Halcyon
     # is.
     # 
     # http://merbivore.com/
-    class Router < Merb::Router
+    class Router
       
       class << self
         
@@ -66,7 +68,7 @@ module Halcyon
           req = Struct.new(:path, :method, :params).new(request.path_info, request.request_method.downcase.to_sym, request.params)
           
           # perform match
-          route = self.match(req)
+          route = Router.match(req)
           
           # make sure a route is returned even if no match is found
           if route[0].nil?
@@ -77,6 +79,9 @@ module Halcyon
             # params (including action and module if set) for the matching route
             route[1]
           end
+        rescue Exception => e
+          puts e.message
+          raise $!
         end
         
       end

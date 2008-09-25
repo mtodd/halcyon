@@ -24,27 +24,27 @@
 # 
 # Stolen directly from generated Merb app. All documentation applies.
 # Read more about the Merb router at http://merbivore.com/.
-Halcyon::Application.route do |r|
+Halcyon::Application.route do
   
   # Sample route for the sample functionality in Application.
   # Safe to remove!
-  r.match('/time').to(:controller => 'application', :action => 'time')
+  match('/time').to(:controller => 'application', :action => 'time')
   
   # Used for testing how requests are routed. Used internally but can be used
   # for personal tests.
-  r.match('/returner').to(:controller => 'application', :action => 'returner')
+  match('/returner').to(:controller => 'application', :action => 'returner')
   
   # RESTful routes
-  # r.resources :posts
+  # resources :posts
 
   # This is the default route for /:controller/:action/:id
   # This is fine for most cases.  If you're heavily using resource-based
   # routes, you may want to comment/remove this line to prevent
   # clients from calling your create or destroy actions with a GET
-  r.default_routes
+  default_routes
   
   # Change this for the default route to be available at /
-  r.match('/').to(:controller => 'application', :action => 'index')
+  match('/').to(:controller => 'application', :action => 'index')
   # It can often be useful to respond with available functionality if the
   # application is a public-facing service.
   

@@ -14,11 +14,11 @@ Halcyon.config.use do |c|
 end
 
 # = Routes
-Halcyon::Application.route do |r|
-  r.match('/returner').to(:controller => 'application', :action => 'returner')
-  r.match('/time').to(:controller => 'application', :action => 'time')
+Halcyon::Application.route do
+  match('/returner').to(:controller => 'application', :action => 'returner')
+  match('/time').to(:controller => 'application', :action => 'time')
   
-  r.match('/').to(:controller => 'application', :action => 'index')
+  match('/').to(:controller => 'application', :action => 'index')
   
   # failover
   {:action => 'not_found'}

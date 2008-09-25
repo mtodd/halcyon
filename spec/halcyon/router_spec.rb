@@ -23,10 +23,10 @@ describe "Halcyon::Application::Router" do
   it "should use the default route if no matching route is found" do
     # missing instead of not_found because we gave a different default route 
     request = Rack::Request.new(Rack::MockRequest.env_for("/erroneous/path/#{rand}/#{rand}"))
-    Halcyon::Application::Router.route(request)[:action].should == 'missing'
+    Halcyon::Application::Router.route(request)[:action].should == 'not_found'
     
     request = Rack::Request.new(Rack::MockRequest.env_for("/random/#{rand}/#{rand}"))
-    Halcyon::Application::Router.route(request)[:action].should == 'missing'
+    Halcyon::Application::Router.route(request)[:action].should == 'not_found'
   end
   
   it "should map params in routes to parameters" do

@@ -108,15 +108,16 @@ Halcyon.configurable_attr(:environment)
 
 # Testing routes
 
-Halcyon::Application.route do |r|
-  r.resources :resources
+Halcyon::Application.route do
+  resources :resources
   
-  r.match('/nested/tests').to(:controller => 'nested/tests', :action => 'index')
-  r.match('/hello/:name').to(:controller => 'specs', :action => 'greeter')
-  r.match('/:action').to(:controller => 'specs')
-  r.match('/:controller/:action').to()
-  r.match('/').to(:controller => 'specs', :action => 'index', :arbitrary => 'random')
-  # r.default_routes
+  match('/nested/tests').to(:controller => 'nested/tests', :action => 'index')
+  match('/hello/:name').to(:controller => 'specs', :action => 'greeter')
+  match('/:action').to(:controller => 'specs')
+  match('/:controller/:action').to()
+  match('/').to(:controller => 'specs', :action => 'index', :arbitrary => 'random')
+  # default_routes
+  
   {:action => 'missing'}
 end
 

@@ -5,12 +5,12 @@
 
 fork do
   dir = Halcyon.root/'support'/'generators'/'halcyon'/'templates'
-  command = "thin start -R runner.ru -p 89981 -c #{dir} > /dev/null 2>&1"
+  command = "thin start -R runner.ru -p 89982 -c #{dir} > /dev/null 2>&1"
   STDOUT.close
   STDERR.close
   exec command
 end
-client = Halcyon::Client.new('http://localhost:89981')
+client = Halcyon::Client.new('http://localhost:89982')
 begin
   sleep 1.5
   client.get('/time')
@@ -49,7 +49,7 @@ end
 describe "Halcyon::Client" do
   
   before do
-    @client = Halcyon::Client.new('http://localhost:89981')
+    @client = Halcyon::Client.new('http://localhost:89982')
   end
   
   it "should perform requests and return the response values" do

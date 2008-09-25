@@ -256,12 +256,8 @@ module Halcyon
       # 
       # Refer to Halcyon::Application::Router for documentation and resources.
       # 
-      def route
-        if block_given?
-          Router.prepare do |router|
-            Router.default_to yield(router) || {:controller => 'application', :action => 'not_found'}
-          end
-        end
+      def route(&block)
+        Router.default_to Router.prepare(&block) || {:controller => 'application', :action => 'not_found'}
       end
       
       #--
