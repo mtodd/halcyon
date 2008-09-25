@@ -98,14 +98,19 @@ module Halcyon
     #  url(:admin_permissons) # => "/admin/permissions"
     #  url(:user, @user) # => "/users/1"
     #
-    # Based on the identical method of Merb's controller.
+    # Based on the +generate_url+ method of Merb's controller.
     # 
-    def url(name, rparams={})
-      Halcyon::Application::Router.generate(name, rparams,
-        { :controller => controller_name,
-          :action => method
-        }
-      )
+    def url(name, *args)
+      unless Symbol === name
+        args.unshift(name)
+        name = :default
+      end
+      
+      unless route = Halcyon::Application::Router.named_routes[name]
+        raise ArgumentError.new("Named route #{name.inspect} not found")
+      end
+      
+      route.generate(args, {:controller => controller_name, :action => method})
     end
     
     #--
