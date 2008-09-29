@@ -1,4 +1,9 @@
-%w(rubygems extlib merb-core/dispatch/router uri).each {|dep|require dep}
+%w(rubygems merb-core/core_ext merb-core/dispatch/router uri).each {|dep|require dep}
+
+# Merb::Router::Route#generate checks Merb::Config[:path_prefix], skipping if
+# it can't find the element in the hash. Here, we've recreated Merb's config
+# to ignore this.
+module Merb; Config = {}; end
 
 module Halcyon
   class Application

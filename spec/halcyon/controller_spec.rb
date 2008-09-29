@@ -79,7 +79,7 @@ describe "Halcyon::Controller" do
     resource = Model.new
     resource.id = 1
     controller = Resources.new(Rack::MockRequest.env_for("/resources/1"))
-    controller.uri.should == controller.url(:resource, resource)
+    controller.uri.should == controller.url(:resource, resource.id)
   end
   
   it "should accept response headers" do
